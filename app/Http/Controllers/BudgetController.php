@@ -5,47 +5,47 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use App\Models\Client;
+use App\Models\Budget;
 
-class ClientController extends Controller
+class BudgetController extends Controller
 {
     /**
-     * Get all clients
+     * Get all budgets
      *
      * @return Response
      */
     public function index(): Response
     {
-        $clients = Client::all();
-        return response($clients, 200);
+        $budgets = Budget::all();
+        return response($budgets, 200);
     }
 
     /**
-     * Create an client
+     * Create an budget
      *
      * @param Request $request
      * @return Response
      */
     public function store(Request $request): Response
     {
-        $client = Client::create($request->all());
-        return response($client, 201);
+        $budget = Budget::create($request->all());
+        return response($budget, 201);
     }
 
     /**
-     * Get an client by id
+     * Get an budget by id
      *
      * @param int $id
      * @return Response
      */
     public function show(int $id): Response
     {
-        $client = Client::find($id);
-        return response($client, 200);
+        $budget = Budget::find($id);
+        return response($budget, 200);
     }
 
     /**
-     * Update an client by id
+     * Update an budget by id
      *
      * @param Request $request
      * @param int $id
@@ -53,21 +53,21 @@ class ClientController extends Controller
      */
     public function update(Request $request, int $id): Response
     {
-        $client = Client::find($id);
-        $client->update($request->all());
-        return response($client, 200);
+        $budget = Budget::find($id);
+        $budget->update($request->all());
+        return response($budget, 200);
     }
 
     /**
-     * Delete an client by id
+     * Delete an budget by id
      *
      * @param int $id
      * @return Response
      */
     public function destroy(int $id): Response
     {
-        $client = Client::find($id);
-        $client->delete();
-        return response(['message' => 'Client deleted'], 200);
+        $budget = Budget::find($id);
+        $budget->delete();
+        return response(['message' => 'Budget deleted'], 200);
     }
 }

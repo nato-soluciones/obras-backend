@@ -18,6 +18,7 @@ class Client extends Model
         'code',
         'image',
         'name',
+        'company',
         'address',
         'department',
         'district',
