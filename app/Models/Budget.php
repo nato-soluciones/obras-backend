@@ -17,6 +17,7 @@ class Budget extends Model
     protected $fillable = [
         'date',
         'client_id',
+        'obra_name',
         'estimated_time',
         'covered_area',
         'semi_covered_area',

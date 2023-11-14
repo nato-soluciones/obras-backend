@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->date('date');
             $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
-            $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');
+            $table->string('obra_name')->nullable();
 
             $table->date('estimated_time');
             $table->string('covered_area');
