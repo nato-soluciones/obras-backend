@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('invoice')->nullable();
 
             $table->string('comments')->nullable();
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

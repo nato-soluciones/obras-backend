@@ -30,6 +30,7 @@ class Client extends Model
         'condition',
         'alicuota',
         'invoice',
-        'comments'
+        'comments',
+        'status'
     ];
 }
