@@ -70,4 +70,18 @@ class BudgetController extends Controller
         $budget->delete();
         return response(['message' => 'Budget deleted'], 200);
     }
+
+    /**
+     * Approve an budget by id
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function approve(int $id): Response
+    {
+        $budget = Budget::find($id);
+        $budget->status = 'APPROVED';
+        $budget->save();
+        return response(['message' => 'Budget approved'], 200);
+    }
 }

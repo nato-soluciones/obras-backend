@@ -37,4 +37,6 @@ Route::prefix('budgets')->middleware('auth:sanctum')->controller(BudgetControlle
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
+
+    Route::post('/{id}', 'approve');
 });
