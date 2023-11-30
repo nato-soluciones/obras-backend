@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\ObrasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,4 +41,13 @@ Route::prefix('budgets')->middleware('auth:sanctum')->controller(BudgetControlle
 
     Route::post('/{id}/approve', 'approve');
     Route::post('/{id}/revert', 'revert');
+});
+
+// Obras endpoints
+Route::prefix('obras')->middleware('auth:sanctum')->controller(ObrasController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
 });
