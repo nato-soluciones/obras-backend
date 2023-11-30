@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str; 
 
 class Obras extends Model
 {
@@ -15,7 +16,23 @@ class Obras extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'code',
-        'lot'
+        'client_id',
+        'name',
+        'address',
+        'start_date',
+        'end_date',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($obra) {
+            do {
+                $randomCode = Str::upper(Str::random(9));
+            } while (self::where('code', $randomCode)->exists());
+
+            $obra->code = $randomCode;
+        });
+    }
 }

@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('obras', function (Blueprint $table) {
             $table->id();
-            $table->integer('code')->unique();
-            $table->integer('lot');
+            $table->string('code')->unique();
+            $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
+            $table->string('name');
+            $table->string('address');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->timestamps();
         });
     }
