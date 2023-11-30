@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('budgets', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('code')->unique();
 
             $table->date('date');
             $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');

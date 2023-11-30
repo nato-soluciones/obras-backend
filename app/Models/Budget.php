@@ -323,4 +323,17 @@ class Budget extends Model
     protected $attributes = [
         'concrete_trotter_extra' => '[]',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($budget) {
+            do {
+                $randomNumber = mt_rand(100000000, 999999999);
+            } while (self::where('code', $randomNumber)->exists());
+
+            $budget->code = $randomNumber;
+        });
+    }
 }
