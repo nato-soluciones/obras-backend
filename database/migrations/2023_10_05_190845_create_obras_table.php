@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('address');
             $table->date('start_date');
             $table->date('end_date');
+            $table->enum('status', ['IN_PROGRESS', 'FINALIZED'])-default('IN_PROGRESS');
             $table->timestamps();
         });
     }

@@ -21,6 +21,7 @@ class Obras extends Model
         'address',
         'start_date',
         'end_date',
+        'status',
     ];
 
     protected static function boot()
