@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str; 
+use Illuminate\Support\Str;
 
 class Obras extends Model
 {
@@ -34,5 +34,10 @@ class Obras extends Model
 
             $obra->code = $randomCode;
         });
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 }

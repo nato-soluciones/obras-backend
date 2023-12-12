@@ -16,7 +16,7 @@ class ObrasController extends Controller
      */
     public function index(): Response
     {
-        $obras = Obras::all();
+        $obras = Obras::with('client')->get();
         return response($obras, 200);
     }
 
