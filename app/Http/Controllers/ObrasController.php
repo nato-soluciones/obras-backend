@@ -28,7 +28,23 @@ class ObrasController extends Controller
      */
     public function store(Request $request): Response
     {
+        $data = $request->all();
+        $image = $request->file('image');
+
         $obra = Obras::create($request->all());
+
+        if ($image) {
+            $directory = 'public/uploads/obras/'.$obra->id;
+            $imageName = 'image.' . $image->extension();
+            $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
+            $obra->image = Storage::url($imagePath);
+
+            $absolutePathToDirectory = storage_path('app/'.$directory);
+            chmod($absolutePathToDirectory, 0755);
+        }
+
+        $obra->save();
+        
         return response($obra, 201);
     }
 

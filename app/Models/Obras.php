@@ -17,6 +17,7 @@ class Obras extends Model
      */
     protected $fillable = [
         'client_id',
+        'image',
         'name',
         'address',
         'start_date',

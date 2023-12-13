@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
+            $table->string('image')->nullable();
             $table->string('name');
             $table->string('address');
             $table->date('start_date');
