@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ObrasController;
+use App\Http\Controllers\IncomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,15 @@ Route::prefix('budgets')->middleware('auth:sanctum')->controller(BudgetControlle
 
 // Obras endpoints
 Route::prefix('obras')->middleware('auth:sanctum')->controller(ObrasController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
+
+// Incomes endpoints
+Route::prefix('incomes')->middleware('auth:sanctum')->controller(IncomeController::class)->group(function() {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
