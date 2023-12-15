@@ -42,4 +42,8 @@ class Obras extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function incomes() {
+        return $this->hasMany(Income::class);
+    }
 }
