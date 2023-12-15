@@ -44,6 +44,6 @@ class Obras extends Model
     }
 
     public function incomes() {
-        return $this->hasMany(Income::class);
+        return $this->hasMany(Income::class, 'obra_id');
     }
 }
