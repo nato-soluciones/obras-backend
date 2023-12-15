@@ -56,7 +56,7 @@ class ObrasController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obra::with(['client', 'incomes'])->find($id);
+        $obra = Obras::with(['client', 'incomes'])->find($id);
         return response($obra, 200);
     }
 
