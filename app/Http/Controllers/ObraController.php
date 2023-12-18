@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 
 use App\Models\Obra;
 
-class ObrasController extends Controller
+class ObraController extends Controller
 {
     /**
      * Get all obras
