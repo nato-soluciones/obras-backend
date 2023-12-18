@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Obras extends Model
+class Obra extends Model
 {
     use HasFactory;
 
@@ -23,6 +23,16 @@ class Obras extends Model
         'start_date',
         'end_date',
         'status',
+        'queries'
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'queries' => 'array',
     ];
 
     protected static function boot()
@@ -44,6 +54,6 @@ class Obras extends Model
     }
 
     public function incomes() {
-        return $this->hasMany(Income::class, 'obra_id');
+        return $this->hasMany(Income::class);
     }
 }

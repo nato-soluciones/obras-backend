@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use App\Models\Obras;
+use App\Models\Obra;
 
 class ObrasController extends Controller
 {

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('client_id')->nullable()->references('id')->on('clients')->onDelete('cascade');
             $table->string('firstname');
             $table->string('lastname');
             $table->enum('role', ['OWNER', 'ARCHITECT', 'CONSTRUCTION_MANAGER', 'ADMINISTRATIVE', 'CLIENT', 'CONTRACTOR'])->default('CLIENT');

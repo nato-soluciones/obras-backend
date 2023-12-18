@@ -33,4 +33,8 @@ class Client extends Model
         'comments',
         'status'
     ];
+
+    public function users() {
+        return $this->hasMany(User::class);
+    }
 }

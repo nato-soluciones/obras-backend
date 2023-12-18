@@ -16,10 +16,8 @@ return new class extends Migration
             $table->bigInteger('code')->unique();
 
             $table->date('date');
-            $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
-            $table->string('obra_name')->nullable();
-
             $table->date('estimated_time');
+            $table->string('obra_name');            
             $table->string('covered_area');
             $table->string('semi_covered_area');
             $table->enum('status', ['PENDING', 'APPROVED', 'DESAPPROVED', 'REQUOTE'])->default('PENDING');
@@ -28,6 +26,7 @@ return new class extends Migration
             $table->integer('guilds')->nullable();
             $table->integer('final_budget')->nullable();
 
+            $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->timestamps();
         });
     }

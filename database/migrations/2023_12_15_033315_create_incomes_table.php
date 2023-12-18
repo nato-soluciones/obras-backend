@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('payment_concept');
             $table->string('comments')->nullable();
 
-            $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');            
+            $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');
             $table->timestamps();
         });
     }

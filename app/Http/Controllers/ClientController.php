@@ -40,7 +40,7 @@ class ClientController extends Controller
      */
     public function show(int $id): Response
     {
-        $client = Client::find($id);
+        $client = Client::with('users')->find($id);
         return response($client, 200);
     }
 
