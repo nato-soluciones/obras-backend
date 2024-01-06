@@ -22,9 +22,19 @@ class Budget extends Model
         'covered_area',
         'semi_covered_area',
         'status',
+        'fields',
         'guilds_administrative',
         'guilds',
         'final_budget',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'fields' => 'object',
     ];
 
     protected static function boot()

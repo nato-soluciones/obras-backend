@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('contractors', function (Blueprint $table) {
             $table->id();
             $table->string('business_name');
-            $table->string('industry');
-            $table->string('address');
-            $table->string('zip');
-            $table->string('city');
+            $table->string('industry')->nullable();
+            $table->string('address')->nullable();
+            $table->string('zip')->nullable();
+            $table->string('city')->nullable();
             $table->string('web')->nullable();
             $table->string('email')->nullable();
             $table->string('referral')->nullable();
@@ -25,7 +25,17 @@ return new class extends Migration
             $table->string('phone')->nullable();
 
             $table->string('cuit')->nullable();
+            $table->string('condition')->nullable();
+            $table->string('alicuota')->nullable();
 
+            $table->string('bank')->nullable();
+            $table->string('bank_name')->nullable();
+            $table->string('bank_type')->nullable();
+            $table->string('bank_account')->nullable();
+            $table->string('bank_cbu')->nullable();
+            $table->string('bank_alias')->nullable();
+
+            $table->string('comments')->nullable();
             $table->timestamps();
         });
     }

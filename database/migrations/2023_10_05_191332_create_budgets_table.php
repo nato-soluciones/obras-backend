@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('semi_covered_area');
             $table->enum('status', ['PENDING', 'APPROVED', 'DESAPPROVED', 'REQUOTE'])->default('PENDING');
 
+            $table->json('fields')->nullable();
+
             $table->integer('guilds_administrative')->nullable();
             $table->integer('guilds')->nullable();
             $table->integer('final_budget')->nullable();

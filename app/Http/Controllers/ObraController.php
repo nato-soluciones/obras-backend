@@ -16,7 +16,7 @@ class ObraController extends Controller
      */
     public function index(): Response
     {
-        $obras = Obras::with('client')->get();
+        $obras = Obra::with('client')->get();
         return response($obras, 200);
     }
 
@@ -31,7 +31,7 @@ class ObraController extends Controller
         $data = $request->all();
         $image = $request->file('image');
 
-        $obra = Obras::create($request->all());
+        $obra = Obra::create($request->all());
 
         if ($image) {
             $directory = 'public/uploads/obras/'.$obra->id;
@@ -56,7 +56,7 @@ class ObraController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obras::with(['client', 'incomes'])->find($id);
+        $obra = Obra::with(['client', 'incomes'])->find($id);
         return response($obra, 200);
     }
 
@@ -69,7 +69,7 @@ class ObraController extends Controller
      */
     public function update(Request $request, int $id): Response
     {
-        $obra = Obras::find($id);
+        $obra = Obra::find($id);
         $obra->update($request->all());
         return response($obra, 200);
     }
@@ -82,7 +82,7 @@ class ObraController extends Controller
      */
     public function destroy(int $id): Response
     {
-        $obra = Obras::find($id);
+        $obra = Obra::find($id);
         $obra->delete();
         return response(['message' => 'Obra deleted'], 204);
     }

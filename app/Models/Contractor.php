@@ -21,5 +21,14 @@ class Contractor extends Model
         'position',
         'phone',
         'cuit',
+        'condition',
+        'alicuota',
+        'bank',
+        'bank_name',
+        'bank_type',
+        'bank_account',
+        'bank_cbu',
+        'bank_alias',
+        'comments',
     ];
 }
