@@ -25,6 +25,7 @@ use App\Http\Controllers\ContractorController;
 // Authentications endpoint
 Route::prefix('auth')->controller(AuthController::class)->group(function() {
     Route::post('/login', 'login');
+    Route::get('/user', 'user');
 });
 
 
