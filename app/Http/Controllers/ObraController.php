@@ -29,24 +29,29 @@ class ObraController extends Controller
      */
     public function store(Request $request): Response
     {
-        $data = $request->all();
-        $image = $request->file('image');
+        try {
+            $data = $request->all();
+            $image = $request->file('image');
 
-        $obra = Obra::create($request->all());
+            $obra = Obra::create($request->all());
 
-        if ($image) {
-            $directory = 'public/uploads/obras/'.$obra->id;
-            $imageName = 'image.' . $image->extension();
-            $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
-            $obra->image = Storage::url($imagePath);
+            if ($image) {
+                $directory = 'public/uploads/obras/'.$obra->id;
+                $imageName = 'image.' . $image->extension();
+                $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
+                $obra->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
-            chmod($absolutePathToDirectory, 0755);
+                $absolutePathToDirectory = storage_path('app/'.$directory);
+                chmod($absolutePathToDirectory, 0755);
+            }
+
+            $obra->save();
+            
+            return response($obra, 201);
+        } catch (\Exception $e) {
+            Log::error('Error on store: '.$e->getMessage());
+            return response()->json(['message' => 'Internal error'], 500);
         }
-
-        $obra->save();
-        
-        return response($obra, 201);
     }
 
     /**
