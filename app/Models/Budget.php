@@ -49,4 +49,9 @@ class Budget extends Model
             $budget->code = $randomNumber;
         });
     }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 }

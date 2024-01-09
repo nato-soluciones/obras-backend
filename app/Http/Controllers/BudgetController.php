@@ -16,7 +16,7 @@ class BudgetController extends Controller
      */
     public function index(): Response
     {
-        $budgets = Budget::all();
+        $budgets = Budget::with('client')->get();
         return response($budgets, 200);
     }
 
