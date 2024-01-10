@@ -14,21 +14,16 @@ return new class extends Migration
         Schema::create('budgets', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('code')->unique();
-
             $table->date('date');
             $table->date('estimated_time');
             $table->string('obra_name');            
             $table->string('covered_area');
             $table->string('semi_covered_area');
             $table->enum('status', ['PENDING', 'APPROVED', 'DESAPPROVED', 'REQUOTE'])->default('PENDING');
-
             $table->json('fields')->nullable();
 
-            $table->integer('guilds_administrative')->nullable();
-            $table->integer('guilds')->nullable();
-            $table->integer('final_budget')->nullable();
-
             $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

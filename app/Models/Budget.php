@@ -23,9 +23,7 @@ class Budget extends Model
         'semi_covered_area',
         'status',
         'fields',
-        'guilds_administrative',
-        'guilds',
-        'final_budget',
+        'user_id',
     ];
 
     /**
@@ -53,5 +51,10 @@ class Budget extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Budget;
 
@@ -16,7 +17,7 @@ class BudgetController extends Controller
      */
     public function index(): Response
     {
-        $budgets = Budget::with('client')->get();
+        $budgets = Budget::with(['client', 'user'])->get();
         return response($budgets, 200);
     }
 
@@ -28,7 +29,10 @@ class BudgetController extends Controller
      */
     public function store(Request $request): Response
     {
-        $budget = Budget::create($request->all());
+
+        $data = $request->all();
+        $data['user_id'] = Auth::user()->id;
+        $budget = Budget::create($data);
         return response($budget, 201);
     }
 
