@@ -102,4 +102,18 @@ class BudgetController extends Controller
         $budget->save();
         return response(['message' => 'Budget reverted', 'data' => $budget], 200);
     }
+
+    /**
+     * Finish an approved budget by id
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function finish(int $id): Response
+    {
+        $budget = Budget::find($id);
+        $budget->status = 'FINISHED';
+        $budget->save();
+        return response(['message' => 'Budget finished', 'data' => $budget], 200);
+    }
 }
