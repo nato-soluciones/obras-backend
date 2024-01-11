@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('obras', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->string('image')->nullable();
             $table->string('name');
             $table->string('address');
             $table->date('start_date');
             $table->date('end_date');
             $table->enum('status', ['IN_PROGRESS', 'FINALIZED'])->default('IN_PROGRESS');
+            $table->integer('total_budget');
+
+            $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
+            $table->foreignId('budget_id')->references('id')->on('budgets')->onDelete('cascade');
             $table->timestamps();
         });
     }

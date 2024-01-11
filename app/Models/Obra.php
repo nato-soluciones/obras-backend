@@ -16,6 +16,7 @@ class Obra extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'budget_id',
         'client_id',
         'image',
         'name',
@@ -23,16 +24,7 @@ class Obra extends Model
         'start_date',
         'end_date',
         'status',
-        'queries'
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'queries' => 'array',
+        'total_budget',
     ];
 
     protected static function boot()
@@ -55,5 +47,9 @@ class Obra extends Model
 
     public function incomes() {
         return $this->hasMany(Income::class);
+    }
+
+    public function budget() {
+        return $this->belongsTo(Budget::class);
     }
 }
