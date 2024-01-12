@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\OutcomeController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
 
@@ -66,6 +67,15 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
 
 // Incomes endpoints
 Route::prefix('incomes')->middleware('auth:sanctum')->controller(IncomeController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
+
+// Outcomes endpoints
+Route::prefix('outcomes')->middleware('auth:sanctum')->controller(OutcomeController::class)->group(function() {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
