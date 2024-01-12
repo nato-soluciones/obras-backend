@@ -25,6 +25,7 @@ class Outcome extends Model
         'payment_method',
         'comments',
         'contractor_id',
+        'obra_id'
     ];
 
     protected $casts = [
