@@ -93,6 +93,6 @@ class OutcomeController extends Controller
             return response()->json(['message' => 'Outcome not found'], 404);
         }
         $outcome->delete();
-        return response()->json(['message'] => 'Outcome deleted', 204);
+        return response()->json(['message' => 'Outcome deleted'], 204);
     }
 }
