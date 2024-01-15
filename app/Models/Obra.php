@@ -21,6 +21,7 @@ class Obra extends Model
         'image',
         'name',
         'address',
+        'phone',
         'start_date',
         'end_date',
         'status',

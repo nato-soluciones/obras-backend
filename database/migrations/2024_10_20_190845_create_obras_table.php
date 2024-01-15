@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->string('name');
             $table->string('address');
+            $table->string('phone');
             $table->date('start_date');
             $table->date('end_date');
             $table->enum('status', ['IN_PROGRESS', 'FINALIZED'])->default('IN_PROGRESS');
