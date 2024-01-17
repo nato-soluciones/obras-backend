@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Notifications\AnonymousNotifiable;
 
 use App\Models\Income;
+use App\Notifications\IncomeCreated;
 
 class IncomeController extends Controller
 {
@@ -30,6 +33,9 @@ class IncomeController extends Controller
     public function store(Request $request): Response
     {
         $income = Income::create($request->all());
+        Notification::route('mail', $income->email)
+                    ->notify(new IncomeCreated($income));        
+
         return response($income, 201);
     }
 

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('amount_ars');
             $table->string('amount_ars_text');
             $table->string('payment_concept');
-            $table->string('comments')->nullable();
+            $table->text('comments')->nullable();
 
             $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');
             $table->timestamps();
