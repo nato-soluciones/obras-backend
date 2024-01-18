@@ -50,6 +50,10 @@ class Obra extends Model
         return $this->hasMany(Income::class);
     }
 
+    public function outcomes() {
+        return $this->hasMany(Outcome::class);
+    }
+
     public function budget() {
         return $this->belongsTo(Budget::class);
     }
