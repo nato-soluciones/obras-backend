@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\Obra;
+use App\Models\Outcome;
 use App\Models\Document;
 
 class ObraController extends Controller
@@ -58,17 +59,15 @@ class ObraController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obra::with(['client', 'budget', 'incomes', 'documents'])
-                    ->with(['outcomes' => function($query) {
-                        $query->whereNotNull('contractor_id')
-                            ->with('contractor')
-                            ->get();
-                    }])
-                    ->find($id);
+        $obra = Obra::with(['client', 'budget', 'incomes', 'outcomes', 'documents'])->find($id);
 
-        $contractors = collect($obra->outcomes)->pluck('contractor')->unique('id');
-
-        $obra->contractors = $contractors;        
+        $outcomes = Outcome::where('obra_id', $id)
+                        ->whereNotNull('contractor_id')
+                        ->with('contractor')
+                        ->get();
+        $contractors = $outcomes->pluck('contractor')->unique('id');
+        $obra->contractors = $contractors;
+        
         return response($obra, 200);
     }
 
