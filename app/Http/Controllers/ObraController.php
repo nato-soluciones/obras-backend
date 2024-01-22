@@ -99,6 +99,7 @@ class ObraController extends Controller
     public function documents(Request $request, int $id): Response
     {
         $obra = Obra::find($id);
+        $name = $request->input('name');
         $document = $request->file('file');
 
         $directory = 'public/uploads/obras/'.$obra->id;
@@ -106,7 +107,7 @@ class ObraController extends Controller
         $documentPath = Storage::putFileAs($directory, $document, $documentName, 'public');
 
         $obra->documents()->create([
-            'name' => $documentName,
+            'name' => $name,
             'path' => Storage::url($documentPath),
         ]);
 
