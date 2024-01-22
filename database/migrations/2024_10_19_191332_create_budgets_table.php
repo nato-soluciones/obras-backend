@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('obra_name');            
             $table->string('covered_area');
             $table->string('semi_covered_area');
-            $table->enum('status', ['PENDING', 'APPROVED', 'DISAPPROVED', 'FINISHED'])->default('PENDING');
+            $table->enum('status', ['PENDING', 'APPROVED', 'DISAPPROVED', 'REQUOTE', 'FINISHED'])->default('PENDING');
             $table->longtext('comments')->nullable();
             $table->json('fields')->nullable();
 
