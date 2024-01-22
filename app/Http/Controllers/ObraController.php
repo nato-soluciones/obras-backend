@@ -58,7 +58,17 @@ class ObraController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obra::with(['client', 'budget', 'incomes', 'outcomes.contractor', 'documents'])->find($id);
+        $obra = Obra::with(['client', 'budget', 'incomes', 'documents'])
+                    ->with(['outcomes' => function($query) {
+                        $query->whereNotNull('contractor_id')
+                            ->with('contractor')
+                            ->get();
+                    }])
+                    ->find($id);
+
+        $contractors = collect($obra->outcomes)->pluck('contractor')->unique('id');
+
+        $obra->contractors = $contractors;        
         return response($obra, 200);
     }
 
