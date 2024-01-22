@@ -99,7 +99,7 @@ class ObraController extends Controller
     public function documents(Request $request, int $id): Response
     {
         $obra = Obra::find($id);
-        $document = $request->file('document');
+        $document = $request->file('file');
 
         $directory = 'public/uploads/obras/'.$obra->id;
         $documentName = $document->getClientOriginalName();
