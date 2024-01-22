@@ -22,6 +22,7 @@ class Budget extends Model
         'covered_area',
         'semi_covered_area',
         'status',
+        'comments',
         'fields',
         'user_id',
     ];

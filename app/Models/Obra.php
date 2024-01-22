@@ -57,4 +57,8 @@ class Obra extends Model
     public function budget() {
         return $this->belongsTo(Budget::class);
     }
+
+    public function documents() {
+        return $this->hasMany(Document::class);
+    }
 }

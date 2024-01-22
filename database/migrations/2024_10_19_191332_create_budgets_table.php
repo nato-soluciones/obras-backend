@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('covered_area');
             $table->string('semi_covered_area');
             $table->enum('status', ['PENDING', 'APPROVED', 'DISAPPROVED', 'FINISHED'])->default('PENDING');
+            $table->longtext('comments')->nullable();
             $table->json('fields')->nullable();
 
             $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
