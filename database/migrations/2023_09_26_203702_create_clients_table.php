@@ -28,11 +28,12 @@ return new class extends Migration
             $table->string('phone')->nullable();
 
             $table->string('cuit')->nullable();
+            $table->string('business_name')->nullable();
             $table->string('condition')->nullable();
             $table->string('alicuota')->nullable();
             $table->string('invoice')->nullable();
 
-            $table->string('comments')->nullable();
+            $table->longtext('comments')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

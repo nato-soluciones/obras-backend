@@ -28,6 +28,7 @@ class Client extends Model
         'email',
         'phone',
         'cuit',
+        'business_name',
         'condition',
         'alicuota',
         'invoice',
