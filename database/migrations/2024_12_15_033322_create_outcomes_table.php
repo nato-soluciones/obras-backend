@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('outcomes', function (Blueprint $table) {
             $table->id();
             $table->enum('type', ['MATERIALS', 'CONTRACTORS', 'MANAGEMENT', 'OTHERS']);
-            $table->string('cuit');
-            $table->string('iva');
-            $table->string('condition');
+ 
+            $table->string('provider_cuit')->nullable();
+            $table->string('provider_name')->nullable();
+            $table->string('provider_iva')->nullable();
+            $table->string('provider_condition')->nullable();
 
             $table->date('date');
             $table->date('due_date');
@@ -31,9 +33,8 @@ return new class extends Migration
             $table->string('file')->nullable(); 
             $table->string('comments')->nullable();
 
-
             $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');
-            $table->foreignId('contractor_id')->references('id')->on('contractors')->nullable();
+            $table->foreignId('contractor_id')->nullable()->references('id')->on('contractors');
             $table->timestamps();
         });
     }

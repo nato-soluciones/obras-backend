@@ -11,9 +11,10 @@ class Outcome extends Model
 
     protected $fillable = [
         'type',
-        'cuit',
-        'iva',
-        'condition',
+        'provider_cuit',
+        'provider_name',
+        'provider_iva',
+        'provider_condition',
         'date',
         'due_date',
         'document_type',
