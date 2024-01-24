@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('contractors', function (Blueprint $table) {
             $table->id();
             $table->string('business_name');
-            $table->string('industry')->nullable();
+            $table->string('industry');
             $table->string('address')->nullable();
             $table->string('zip')->nullable();
             $table->string('city')->nullable();
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('bank_cbu')->nullable();
             $table->string('bank_alias')->nullable();
 
-            $table->string('comments')->nullable();
+            $table->longtext('comments')->nullable();
             $table->timestamps();
         });
     }
