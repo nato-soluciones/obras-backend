@@ -20,9 +20,13 @@ return new class extends Migration
             $table->string('covered_area');
             $table->string('semi_covered_area');
             $table->enum('status', ['PENDING', 'APPROVED', 'DISAPPROVED', 'REQUOTE', 'FINISHED'])->default('PENDING');
+            $table->enum('currency', ['ARS', 'USD'])->default('ARS');
             $table->longtext('comments')->nullable();
-            $table->json('fields')->nullable();
 
+            $table->json('fields')->nullable();
+            $table->integer('total')->default(0);
+            $table->integer('total_cost')->default(0);
+            
             $table->foreignId('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

@@ -25,7 +25,6 @@ class Obra extends Model
         'start_date',
         'end_date',
         'status',
-        'total_budget',
     ];
 
     protected static function boot()
