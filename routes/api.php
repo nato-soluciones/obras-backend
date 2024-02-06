@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ObraController;
@@ -32,6 +33,15 @@ Route::prefix('auth')->controller(AuthController::class)->group(function() {
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Users endpoints
+Route::prefix('users')->middleware('auth:sanctum')->controller(UserController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
 });
 
 // Clients endpoints
