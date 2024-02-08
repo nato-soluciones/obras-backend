@@ -31,7 +31,7 @@ class UserController extends Controller
     {
         $data = $request->all();
         $user = User::create($data);
-        $user->verifyEmail();
+        $user->markEmailAsVerified();
         return response($user, 201);
     }
 
