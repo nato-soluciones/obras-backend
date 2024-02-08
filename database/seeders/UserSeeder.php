@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
               "firstname" => "Pablo",
               "lastname" => "Carnevale",
               "role" => "OWNER",
-              "email" => "pablo@gmail.com",
+              "email" => "pablo.carnevale7@gmail.com",
               "password" => bcrypt("CCian2023"),
               'email_verified_at' => now(),
           ],
