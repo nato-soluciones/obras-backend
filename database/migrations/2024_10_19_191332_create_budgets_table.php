@@ -16,7 +16,7 @@ return new class extends Migration
             $table->bigInteger('code')->unique();
             $table->date('date');
             $table->date('estimated_time');
-            $table->string('obra_name');            
+            $table->string('obra_name');
             $table->string('covered_area');
             $table->string('semi_covered_area');
             $table->enum('status', ['PENDING', 'APPROVED', 'DISAPPROVED', 'REQUOTE', 'FINISHED'])->default('PENDING');

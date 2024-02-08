@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
 
@@ -30,6 +31,8 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
+        $data['password'] = Hash::make($data['password']);
+        
         $user = User::create($data);
         $user->markEmailAsVerified();
         return response($user, 201);
