@@ -39,6 +39,11 @@ class Budget extends Model
         'fields' => 'object',
     ];
 
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();

@@ -60,4 +60,8 @@ class Obra extends Model
     public function documents() {
         return $this->hasMany(Document::class);
     }
+
+    public function additionals() {
+        return $this->hasMany(Additional::class);
+    }
 }
