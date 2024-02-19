@@ -59,7 +59,7 @@ class ObraController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obra::with(['client', 'budget', 'incomes', 'outcomes', 'documents', 'additionals'])->find($id);
+        $obra = Obra::with(['client', 'budget', 'incomes', 'outcomes', 'documents', 'additionals.user'])->find($id);
 
         $outcomes = Outcome::where('obra_id', $id)
                         ->whereNotNull('contractor_id')

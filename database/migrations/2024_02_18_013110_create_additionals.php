@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('total_cost')->default(0);
 
             $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');
+            $table->foreignId('created_by')->references('id')->on('users');
             $table->timestamps();
         });
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Additional extends Model
 {
@@ -20,7 +21,8 @@ class Additional extends Model
         'fields',
         'total',
         'total_cost',
-        'obra_id'
+        'obra_id',
+        'created_by'
     ];
 
     /**
@@ -32,9 +34,22 @@ class Additional extends Model
         'fields' => 'object'
     ];
 
-    
+    protected static function booted()
+    {
+      static::creating(function($post) {
+        if (empty($post->created_by)) {
+          $post->created_by = Auth::id();
+        }
+      });
+    }
+
     public function obra()
     {
         return $this->belongsTo(Obra::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
