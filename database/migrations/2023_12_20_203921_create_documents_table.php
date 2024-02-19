@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->enum('category', ['BLUEPRINTS', 'MEDIA', 'DOCUMENTS', 'RENDERS', 'OTHERS'])->default('BLUEPRINTS');
             $table->string('path');
             $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');
             $table->timestamps();
