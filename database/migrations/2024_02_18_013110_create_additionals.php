@@ -11,11 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documents', function (Blueprint $table) {
+        Schema::create('additionals', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('path');
+            $table->date('date');
+            $table->longtext('comments')->nullable();
+            
+            $table->json('fields')->nullable();
+            $table->integer('total')->default(0);
+            $table->integer('total_cost')->default(0);
+
             $table->foreignId('obra_id')->references('id')->on('obras')->onDelete('cascade');
+            $table->foreignId('created_by')->references('id')->on('users');
             $table->timestamps();
         });
     }
@@ -25,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documents');
+        Schema::dropIfExists('obras_additionals');
     }
 };

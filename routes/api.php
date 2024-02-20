@@ -74,6 +74,7 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
     Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
     Route::post('/{id}/documents', 'documents');
+    Route::post('/{id}/additionals', 'additionals');
 });
 
 // Incomes endpoints

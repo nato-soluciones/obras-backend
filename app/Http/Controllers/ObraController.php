@@ -59,7 +59,7 @@ class ObraController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obra::with(['client', 'budget', 'incomes', 'outcomes', 'documents'])->find($id);
+        $obra = Obra::with(['client', 'budget', 'incomes', 'outcomes', 'documents', 'additionals.user'])->find($id);
 
         $outcomes = Outcome::where('obra_id', $id)
                         ->whereNotNull('contractor_id')
@@ -143,5 +143,19 @@ class ObraController extends Controller
         unlink($absolutePathToFile);
 
         return response(['message' => 'Document deleted'], 204);
+    }
+
+    /**
+     * Create a additional for an obra
+     *
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     */
+    public function additionals(Request $request, int $id): Response
+    {
+        $obra = Obra::find($id);
+        $obra->additionals()->create($request->all());
+        return response(['message' => 'Additional created'], 201);
     }
 }
