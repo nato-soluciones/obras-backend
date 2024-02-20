@@ -56,6 +56,7 @@ Route::prefix('clients')->middleware('auth:sanctum')->controller(ClientControlle
 // Budgets endpoints
 Route::prefix('budgets')->middleware('auth:sanctum')->controller(BudgetController::class)->group(function() {
     Route::get('/', 'index');
+    Route::get('/export', 'exportList');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
     Route::post('/{id}', 'update');

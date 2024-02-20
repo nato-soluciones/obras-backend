@@ -116,4 +116,43 @@ class BudgetController extends Controller
         $budget->save();
         return response(['message' => 'Budget finished', 'data' => $budget], 200);
     }
+
+    public function exportList()
+    {
+        $budgets = Budget::all();
+        $f = fopen('php://memory', 'r+');
+
+        $csvTitles = [
+            'Presupuesto',
+            'Fecha',
+            'Cliente',
+            'Obra',
+            'Area cubierta',
+            'Area semi cubierta',
+            'Presupuesto Final',
+            'Estado',
+        ];
+            
+        fputcsv($f, $csvTitles, ',');
+
+        foreach ($budgets as $item) {
+            $csvRow = [
+                $item->code,
+                $item->date,
+                $item->client->name,
+                $item->obra_name,
+                $item->covered_area,
+                $item->semi_covered_area,
+                $item->total,
+                $item->status,
+            ];
+            fputcsv($f, $csvRow, ',');
+        }
+
+        rewind($f);
+        $csv = stream_get_contents($f);
+        fclose($f);
+
+        return response(['datos' =>  $csv], 200);
+    }
 }

@@ -89,7 +89,7 @@ class IncomeController extends Controller
 
     public function exportList()
     {
-        $Incomes = Income::all();
+        $incomes = Income::all();
         $f = fopen('php://memory', 'r+');
 
         $csvTitles = [
@@ -104,7 +104,7 @@ class IncomeController extends Controller
         ];
         fputcsv($f, $csvTitles, ',');
 
-        foreach ($Incomes as $item) {
+        foreach ($incomes as $item) {
             $csvRow = [
                 $item->date,
                 $item->receipt_number,
