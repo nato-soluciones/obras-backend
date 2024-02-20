@@ -86,4 +86,42 @@ class IncomeController extends Controller
         $income->delete();
         return response()->json(['message' => 'Income deleted'], 204);
     }
+
+    public function exportList()
+    {
+        $Incomes = Income::all();
+        $f = fopen('php://memory', 'r+');
+
+        $csvTitles = [
+            'Fecha',
+            'Recibo',
+            'Cliente',
+            'Obra',
+            'Concepto',
+            'Importe USD',
+            'Importe ARS',
+            'Tipo de Cambio',
+        ];
+        fputcsv($f, $csvTitles, ',');
+
+        foreach ($Incomes as $item) {
+            $csvRow = [
+                $item->date,
+                $item->receipt_number,
+                $item->obra->client->name,
+                $item->obra->name,
+                $item->payment_concept,
+                $item->amount_usd,
+                $item->amount_ars,
+                $item->exchange_rate,
+            ];
+            fputcsv($f, $csvRow, ',');
+        }
+
+        rewind($f);
+        $csv = stream_get_contents($f);
+        fclose($f);
+
+        return response(['datos' =>  $csv], 200);
+    }
 }
