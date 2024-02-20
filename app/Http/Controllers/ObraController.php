@@ -109,6 +109,7 @@ class ObraController extends Controller
     {
         $obra = Obra::find($id);
         $name = $request->input('name');
+        $category = $request->input('category');
         $document = $request->file('file');
 
         $directory = 'public/uploads/obras/'.$obra->id;
@@ -117,6 +118,7 @@ class ObraController extends Controller
 
         $obra->documents()->create([
             'name' => $name,
+            'category' => $category,
             'path' => Storage::url($documentPath),
         ]);
 
