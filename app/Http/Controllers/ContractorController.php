@@ -78,4 +78,48 @@ class ContractorController extends Controller
 
         return response(['message' => 'Contractor deleted'], 204);
     }
+
+    /**
+     * Export all users in a CSV file format
+     *
+     * @return Response
+     */
+    public function exportList()
+    {
+        $contractors = Contractor::all();
+        $f = fopen('php://memory', 'r+');
+
+        $csvTitles = ['Razón Social', 
+                      'Condición de IVA', 
+                      'CUIT', 
+                      'Contacto de Referencia', 
+                      'Email', 
+                      'Teléfono',
+                      'Ciudad', 
+                      'Dirección', 
+                      'CP', 
+                    ];
+        fputcsv($f, $csvTitles, ',');
+
+        foreach ($contractors as $item) {
+            $csvRow = [
+                $item->business_name,
+                $item->condition,
+                $item->cuit,
+                $item->referral,
+                $item->email,
+                $item->phone,
+                $item->city,
+                $item->address,
+                $item->zip,
+            ];
+            fputcsv($f, $csvRow, ',');
+        }
+        
+        rewind($f);
+        $csv = stream_get_contents($f);
+        fclose($f);
+
+        return response(['datos' =>  $csv], 200);
+    }
 }

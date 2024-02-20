@@ -95,4 +95,40 @@ class OutcomeController extends Controller
         $outcome->delete();
         return response()->json(['message' => 'Outcome deleted'], 204);
     }
+
+    public function exportList()
+    {
+        $outcomes = Outcome::all();
+        $f = fopen('php://memory', 'r+');
+
+        $csvTitles = [
+            'Fecha',
+            'Tipo',
+            'Contratista',
+            'Categoria',
+            'Metodo de pago',
+            'Fecha de pago',
+            'Total',
+        ];
+        fputcsv($f, $csvTitles, ',');
+
+        foreach ($outcomes as $item) {
+            $csvRow = [
+                $item->date,
+                $item->type,
+                $item->contractor->business_name,
+                '',
+                $item->payment_method,
+                $item->payment_date,
+                $item->total,
+            ];
+            fputcsv($f, $csvRow, ',');
+        }
+
+        rewind($f);
+        $csv = stream_get_contents($f);
+        fclose($f);
+
+        return response(['datos' =>  $csv], 200);
+    }
 }

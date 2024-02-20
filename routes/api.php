@@ -79,6 +79,7 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
 // Incomes endpoints
 Route::prefix('incomes')->middleware('auth:sanctum')->controller(IncomeController::class)->group(function() {
     Route::get('/', 'index');
+    Route::get('/export', 'exportList');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
@@ -88,6 +89,7 @@ Route::prefix('incomes')->middleware('auth:sanctum')->controller(IncomeControlle
 // Outcomes endpoints
 Route::prefix('outcomes')->middleware('auth:sanctum')->controller(OutcomeController::class)->group(function() {
     Route::get('/', 'index');
+    Route::get('/export', 'exportList');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
@@ -106,6 +108,7 @@ Route::prefix('notes')->middleware('auth:sanctum')->controller(NoteController::c
 // Contractors endpoints
 Route::prefix('contractors')->middleware('auth:sanctum')->controller(ContractorController::class)->group(function() {
     Route::get('/', 'index');
+    Route::get('/export', 'exportList');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
