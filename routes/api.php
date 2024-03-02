@@ -10,6 +10,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\OutcomeController;
+use App\Http\Controllers\AdditionalController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
 
@@ -96,6 +97,12 @@ Route::prefix('outcomes')->middleware('auth:sanctum')->controller(OutcomeControl
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
+});
+
+// Additionals endpoints
+Route::prefix('additionals')->middleware('auth:sanctum')->controller(AdditionalController::class)->group(function() {
+    Route::get('/{id}', 'show');
+    Route::post('/{id}', 'update');
 });
 
 // Notes endpoints

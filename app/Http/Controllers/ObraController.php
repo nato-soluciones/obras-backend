@@ -81,7 +81,21 @@ class ObraController extends Controller
     public function update(Request $request, int $id): Response
     {
         $obra = Obra::find($id);
-        $obra->update($request->all());
+        $data = $request->except('image');
+        $obra->update($data);
+        
+        if ($request->hasFile('new_image')) {
+            $image = $request->file('new_image');
+            $directory = 'public/uploads/obras/'.$obra->id;
+            $imageName = 'image.' . $image->extension();
+            $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
+            $obra->image = Storage::url($imagePath);
+
+            $absolutePathToDirectory = storage_path('app/'.$directory);
+            chmod($absolutePathToDirectory, 0755);
+            $obra->save();
+        }
+
         return response($obra, 200);
     }
 
