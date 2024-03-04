@@ -44,7 +44,9 @@ class BudgetController extends Controller
      */
     public function show(int $id): Response
     {
-        $budget = Budget::find($id);
+        $budget = Budget::with(['client' => function ($q) {
+            $q->select('id', 'name'); 
+        }])->find($id);
         return response($budget, 200);
     }
 
