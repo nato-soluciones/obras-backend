@@ -13,6 +13,7 @@ use App\Http\Controllers\OutcomeController;
 use App\Http\Controllers\AdditionalController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
+use App\Http\Controllers\ContactController;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,6 +119,15 @@ Route::prefix('notes')->middleware('auth:sanctum')->controller(NoteController::c
 Route::prefix('contractors')->middleware('auth:sanctum')->controller(ContractorController::class)->group(function() {
     Route::get('/', 'index');
     Route::get('/export', 'exportList');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
+
+// Contacts endpoints
+Route::prefix('contacts')->middleware('auth:sanctum')->controller(ContactController::class)->group(function() {
+    Route::get('/', 'index');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
