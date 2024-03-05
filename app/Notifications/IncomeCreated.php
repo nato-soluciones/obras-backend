@@ -40,6 +40,7 @@ class IncomeCreated extends Notification
     {
         return (new MailMessage)
             ->subject('Nuevo recibo de cobro | ' . $this->income->obra->name)
+            ->greeting('Hola,')
             ->line('Se ha creado un nuevo recibo de cobro para la obra ' . $this->income->obra->name . '.')
             ->line('Número de Recibo: ' . $this->income->receipt_number)
             ->line('Lugar: ' . $this->income->location)
@@ -48,7 +49,8 @@ class IncomeCreated extends Notification
             ->line('Valor Total (ARS): ' . $this->income->amount_ars)
             ->line('Cantidad: ' . $this->income->amount_ars_text)
             ->line('En concepto de: ' . $this->income->payment_concept)
-            ->line('Observaciones: ' . $this->income->comments);
+            ->line('Observaciones: ' . $this->income->comments)
+            ->salutation('Saludos');
     }
 
     /**
