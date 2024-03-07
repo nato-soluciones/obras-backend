@@ -15,13 +15,15 @@ class Note extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'color',
         'title',
         'content',
         'expire_at',
+        'created_by',
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

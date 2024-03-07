@@ -10,13 +10,27 @@ use App\Models\Note;
 class NoteController extends Controller
 {
     /**
+     * Get all notes
+     *
+     * @return Response
+     */
+    public function index(): Response
+    {
+        // return all notes created by the authenticated user
+        $notes = Note::where('created_by', auth()->user()->id)->get();
+        return response($notes, 200);
+    }
+
+    /**
      * Create an note
      *
      * @param Request $request
      * @return Response
      */
-    public function create(Request $request): Response
+    public function store(Request $request): Response
     {
+        $request->merge(['created_by' => auth()->user()->id]);
+
         $note = Note::create($request->all());
 
         return response($note, 201);
@@ -55,7 +69,7 @@ class NoteController extends Controller
      * @param int $id
      * @return Response
      */
-    public function delete(int $id): Response
+    public function destroy(int $id): Response
     {
         $note = Note::find($id);
         $note->delete();
