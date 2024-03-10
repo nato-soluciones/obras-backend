@@ -7,6 +7,8 @@ use Illuminate\Http\Response;
 
 use App\Models\Note;
 
+use App\Http\Requests\CreateNoteRequest;
+
 class NoteController extends Controller
 {
     /**
@@ -27,7 +29,7 @@ class NoteController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(CreateNoteRequest $request): Response
     {
         $request->merge(['created_by' => auth()->user()->id]);
 
