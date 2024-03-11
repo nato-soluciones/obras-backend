@@ -13,16 +13,17 @@ return new class extends Migration
     {
         Schema::create('tools', function (Blueprint $table) {
             $table->id();
-            $table->enum('category', ['OTHER'])->default('OTHER');
-            $table->enum('status', ['IN_USE', 'UNDER_REPAIR', 'DAMAGED', 'LOST'])->default('IN_USE');
-
-            $table->string('image')->nullable();
             $table->string('name');
             $table->string('brand');
-            $table->string('description')->nullable();
-            $table->integer('value')->default(0);
-            $table->text('comments')->nullable();
+            $table->integer('value')->nullable();
+            $table->enum('category', ['OTHER'])->default('OTHER');
             $table->date('purchase_date')->nullable();
+            $table->enum('status', ['IN_USE', 'UNDER_REPAIR', 'DAMAGED', 'LOST'])->default('IN_USE');
+            $table->date('last_maintenance')->nullable();
+            
+            $table->string('description')->nullable();
+            $table->string('image')->nullable();
+            
             $table->timestamps();
         });
     }

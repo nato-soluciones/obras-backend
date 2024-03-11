@@ -14,6 +14,7 @@ use App\Http\Controllers\AdditionalController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ToolController;
 
 /*
 |--------------------------------------------------------------------------
@@ -127,6 +128,15 @@ Route::prefix('contractors')->middleware('auth:sanctum')->controller(ContractorC
 
 // Contacts endpoints
 Route::prefix('contacts')->middleware('auth:sanctum')->controller(ContactController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
+
+// Tools endpoints
+Route::prefix('tools')->middleware('auth:sanctum')->controller(ToolController::class)->group(function() {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');

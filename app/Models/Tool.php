@@ -8,4 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Tool extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'brand',
+        'value',
+        'category',
+        'purchase_date',
+        'status',
+        'last_maintenance',
+        'description',
+        'image',
+    ];
 }
