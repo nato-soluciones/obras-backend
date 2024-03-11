@@ -7,6 +7,8 @@ use Illuminate\Http\Response;
 
 use App\Models\Contractor;
 
+use App\Http\Requests\Contractor\CreateContractorRequest;
+
 class ContractorController extends Controller
 {
     /**
@@ -38,7 +40,7 @@ class ContractorController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(CreateContractorRequest $request): Response
     {
         $contractor = Contractor::create($request->all());
         return response([
@@ -54,7 +56,7 @@ class ContractorController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(CreateContractorRequest $request, int $id): Response
     {
         $contractor = Contractor::find($id);
         $contractor->update($request->all());
