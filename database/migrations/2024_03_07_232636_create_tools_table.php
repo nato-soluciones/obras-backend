@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('tools', function (Blueprint $table) {
             $table->id();
-            $table->enum('category')->values(['OTHER'])->default('OTHER');
-            $table->enum('status')->values(['IN_USE', 'UNDER_REPAIR', 'DAMAGED', 'LOST'])->default('IN_USE');
+            $table->enum('category', ['OTHER'])->default('OTHER');
+            $table->enum('status', ['IN_USE', 'UNDER_REPAIR', 'DAMAGED', 'LOST'])->default('IN_USE');
 
             $table->string('image')->nullable();
             $table->string('name');
