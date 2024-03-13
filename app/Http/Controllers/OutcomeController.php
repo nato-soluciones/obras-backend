@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Outcome;
+use Illuminate\Support\Facades\Storage;
 
 class OutcomeController extends Controller
 {
@@ -34,17 +35,17 @@ class OutcomeController extends Controller
         $outcome = Outcome::create($request->all());
 
         if ($file) {
-            $directory = 'public/uploads/outcomes/'.$outcome->id;
+            $directory = 'public/uploads/outcomes/' . $outcome->id;
             $fileName = 'file.' . $file->extension();
             $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
             $outcome->file = Storage::url($filePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
 
         $outcome->save();
-        
+
         return response($outcome, 201);
     }
 
@@ -116,7 +117,7 @@ class OutcomeController extends Controller
             $csvRow = [
                 $item->date,
                 $item->type,
-                $item->contractor->business_name,
+                optional($item->contractor)->business_name,
                 '',
                 $item->payment_method,
                 $item->payment_date,
