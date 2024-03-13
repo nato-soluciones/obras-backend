@@ -33,9 +33,12 @@ class IncomeController extends Controller
     public function store(Request $request): Response
     {
         $income = Income::create($request->all());
-        Notification::route('mail', $income->email)
-                    ->notify(new IncomeCreated($income));        
-
+        if (!empty($income->email)) {
+            if (filter_var($income->email, FILTER_VALIDATE_EMAIL)) {
+                Notification::route('mail', $income->email)
+                    ->notify(new IncomeCreated($income));
+            }
+        }
         return response($income, 201);
     }
 
