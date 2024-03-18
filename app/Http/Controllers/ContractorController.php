@@ -91,7 +91,8 @@ class ContractorController extends Controller
         $contractors = Contractor::all();
         $f = fopen('php://memory', 'r+');
 
-        $csvTitles = ['Razón Social', 
+        $csvTitles = ['Razón Social',
+                      'Nombre de Fantasía', 
                       'Condición de IVA', 
                       'CUIT', 
                       'Contacto de Referencia', 
@@ -106,6 +107,7 @@ class ContractorController extends Controller
         foreach ($contractors as $item) {
             $csvRow = [
                 $item->business_name,
+                $item->trade_name,
                 $item->condition,
                 $item->cuit,
                 $item->referral,
