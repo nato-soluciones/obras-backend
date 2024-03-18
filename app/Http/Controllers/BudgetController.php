@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-
+use App\Services\BudgetService;
 use App\Models\Budget;
+use App\Models\Contractor;
+use Illuminate\Support\Facades\Validator;
+
 
 class BudgetController extends Controller
 {
@@ -29,10 +31,91 @@ class BudgetController extends Controller
      */
     public function store(Request $request): Response
     {
+        $rulesValidate = [
+                            'date'              => 'required|date_format:Y-m-d',
+                            'estimated_time'    => 'required|date_format:Y-m-d',
+                            'obra_name'         => 'required|string|max:255',
+                            'covered_area'      => 'required|numeric',
+                            'semi_covered_area' => 'required|numeric',
+                            'status'            => 'required|string',
+                            'currency'          => 'required|string',
+                            'total'             => 'required|numeric',
+                            'total_cost'        => 'required|numeric',
+                            'client_id'         => 'required|numeric',
+                            'user_id'           => 'required|numeric',
 
-        $data = $request->all();
-        $data['user_id'] = Auth::user()->id;
-        $budget = Budget::create($data);
+                            'categories'        => 'required|array',
+                            'categories.*.name' => 'required|string',
+                            'categories.*.total' => 'required|numeric',
+
+                            'categories.*.activities'        => 'required|array',
+                            'categories.*.activities.*.name' => 'required|string',
+                            'categories.*.activities.*.unit' => 'required|string',
+                            'categories.*.activities.*.unit_price' => 'required|numeric',
+                            'categories.*.activities.*.quantity'   => 'required|numeric',
+                            'categories.*.activities.*.subtotal'   => 'required|numeric',
+                        ];
+
+        $messagesValidate = [
+                                'date.required' => 'La fecha es obligatoria.',
+                                'date.date_format' => 'La fecha debe estar en formato YYYY-MM-DD.',
+                                'estimated_time.required' => 'La fecha estimada es obligatoria.',
+                                'estimated_time.date_format' => 'La fecha estimada debe estar en formato YYYY-MM-DD.',
+                                'obra_name.required' => 'El nombre de la obra es obligatorio.',
+                                'obra_name.string' => 'El nombre de la obra debe ser un texto.',
+                                'obra_name.max' => 'El nombre de la obra no puede superar los 255 caracteres.',
+                                'covered_area.required' => 'El área cubierta es obligatoria.',
+                                'covered_area.numeric' => 'El área cubierta debe ser un número.',
+                                'semi_covered_area.required' => 'El área semicubierta es obligatoria.',
+                                'semi_covered_area.numeric' => 'El área semicubierta debe ser un número.',
+                                'status.required' => 'El estado es obligatorio.',
+                                'status.string' => 'El estado debe ser un texto.',
+                                'currency.required' => 'La moneda es obligatoria.',
+                                'currency.string' => 'La moneda debe ser un texto.',
+                                'total.required' => 'El total es obligatorio.',
+                                'total.numeric' => 'El total debe ser un número.',
+                                'total_cost.required' => 'El costo total es obligatorio.',
+                                'total_cost.numeric' => 'El costo total debe ser un número.',
+                                'client_id.required' => 'El ID del cliente es obligatorio.',
+                                'client_id.numeric' => 'El ID del cliente debe ser un número.',
+                                'user_id.required' => 'El ID del usuario es obligatorio.',
+                                'user_id.numeric' => 'El ID del usuario debe ser un número.',
+
+                                'categories.required' => 'Las categorías son obligatorias.',
+                                'categories.array' => 'Las categorías deben ser un array.',
+                                'categories.*.name.required' => 'El nombre de la categoría es obligatorio.',
+                                'categories.*.name.string' => 'El nombre de la categoría debe ser un texto.',
+                                'categories.*.total.required' => 'El total de la categoría es obligatorio.',
+                                'categories.*.total.numeric' => 'El total de la categoría debe ser un número.',
+
+                                'categories.*.activities.required' => 'Las actividades de la categoría son obligatorias.',
+                                'categories.*.activities.array' => 'Las actividades de la categoría deben ser un array.',
+                                'categories.*.activities.*.name.required' => 'El nombre de la actividad es obligatorio.',
+                                'categories.*.activities.*.name.string' => 'El nombre de la actividad debe ser un texto.',
+                                'categories.*.activities.*.unit.required' => 'La unidad de la actividad es obligatoria.',
+                                'categories.*.activities.*.unit.string' => 'La unidad de la actividad debe ser un texto.',
+                                'categories.*.activities.*.unit_price.required' => 'El precio unitario de la actividad es obligatorio.',
+                                'categories.*.activities.*.unit_price.numeric' => 'El precio unitario de la actividad debe ser un número.',
+                                'categories.*.activities.*.quantity.required' => 'La cantidad de la actividad es obligatoria.',
+                                'categories.*.activities.*.quantity.numeric' => 'La cantidad de la actividad debe ser un número.',
+                                'categories.*.activities.*.subtotal.required' => 'El subtotal de la actividad es obligatorio.',
+                                'categories.*.activities.*.subtotal.numeric' => 'El subtotal de la actividad debe ser un número.',
+                            ];
+
+        $validator = Validator::make($request->all(), $rulesValidate, $messagesValidate);
+        
+        // Si la validación falla, devuelve los errores
+        if ($validator->fails()) {
+            return response($validator->errors(), 422);
+        }
+
+        // Obtiene una instancia del servicio BudgetService
+        $budgetService = app(BudgetService::class);
+
+        // Si la validación pasa, procede con la creación del presupuesto
+        $budgetData = $request->all();
+        $budget = $budgetService->createBudgetWithCategories($budgetData);
+
         return response($budget, 201);
     }
 
@@ -45,8 +128,19 @@ class BudgetController extends Controller
     public function show(int $id): Response
     {
         $budget = Budget::with(['client' => function ($q) {
-            $q->select('id', 'name'); 
-        }])->find($id);
+            $q->select('id', 'name');
+        }, 'categories.activities'])->find($id);
+
+        // Carga manualmente el proveedor (contratista) para cada actividad si el campo provider_id no es nulo
+        foreach ($budget->categories as $category) {
+            foreach ($category->activities as $activity) {
+                if ($activity->provider_id !== null) {
+                    $constractorBusinessName = Contractor::where('id', $activity->provider_id)->value('business_name');
+                    $activity->provider_name = $constractorBusinessName;
+                }
+            }
+        }
+
         return response($budget, 200);
     }
 
@@ -58,9 +152,12 @@ class BudgetController extends Controller
      * @return Response
      */
     public function update(Request $request, int $id): Response
-    {
-        $budget = Budget::find($id);
-        $budget->update($request->all());
+    { 
+        // Obtiene una instancia del servicio BudgetService
+        $budgetService = app(BudgetService::class);
+
+        // Si la validación pasa, procede con la actualización del presupuesto
+        $budget = $budgetService->updateBudget($id, $request->all());
         return response($budget, 200);
     }
 
@@ -134,7 +231,7 @@ class BudgetController extends Controller
             'Presupuesto Final',
             'Estado',
         ];
-            
+
         fputcsv($f, $csvTitles, ',');
 
         foreach ($budgets as $item) {

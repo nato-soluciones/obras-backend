@@ -32,7 +32,7 @@ class CreateContractorRequest extends FormRequest
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'zip' => 'El campo :attribute tiene que ser de 4 números o 1 letra, 4 números y 3 letras.',
