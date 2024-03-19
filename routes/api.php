@@ -15,6 +15,7 @@ use App\Http\Controllers\BudgetTemplateController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ContractorIndustryController;
 use App\Http\Controllers\ToolController;
 
 /*
@@ -152,4 +153,10 @@ Route::prefix('budget_templates')->middleware('auth:sanctum')->controller(Budget
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
+});
+
+// ContractorIndustry endpoints
+Route::prefix('contractor_industries')->middleware('auth:sanctum')->controller(ContractorIndustryController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{code}', 'show');
 });
