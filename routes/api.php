@@ -11,6 +11,7 @@ use App\Http\Controllers\ObraController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\OutcomeController;
 use App\Http\Controllers\AdditionalController;
+use App\Http\Controllers\BudgetTemplateController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\ContactController;
@@ -137,6 +138,15 @@ Route::prefix('contacts')->middleware('auth:sanctum')->controller(ContactControl
 
 // Tools endpoints
 Route::prefix('tools')->middleware('auth:sanctum')->controller(ToolController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
+
+// BudgetTemplate endpoints
+Route::prefix('budget_templates')->middleware('auth:sanctum')->controller(BudgetTemplateController::class)->group(function () {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
