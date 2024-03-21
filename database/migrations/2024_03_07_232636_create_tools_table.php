@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('brand');
-            $table->integer('value')->nullable();
+            $table->decimal('value', 18, 2)->nullable();
             $table->enum('category', ['OTHER'])->default('OTHER');
             $table->date('purchase_date')->nullable();
             $table->enum('status', ['IN_USE', 'UNDER_REPAIR', 'DAMAGED', 'LOST'])->default('IN_USE');

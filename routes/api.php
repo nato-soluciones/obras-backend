@@ -17,6 +17,7 @@ use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContractorIndustryController;
 use App\Http\Controllers\ToolController;
+use App\Http\Controllers\ToolCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -138,12 +139,16 @@ Route::prefix('contacts')->middleware('auth:sanctum')->controller(ContactControl
 });
 
 // Tools endpoints
-Route::prefix('tools')->middleware('auth:sanctum')->controller(ToolController::class)->group(function() {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
-    Route::post('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
+    Route::get('/categories', [ToolCategoryController::class, 'index']);
+    Route::post('/categories', [ToolCategoryController::class, 'store']);
+    Route::post('/categories/{id}', [ToolCategoryController::class, 'destroy']);
+
+    Route::get('/', [ToolController::class, 'index']);
+    Route::get('/{id}', [ToolController::class, 'show']);
+    Route::post('/', [ToolController::class, 'store']);
+    Route::post('/{id}', [ToolController::class, 'update']);
+    Route::delete('/{id}', [ToolController::class, 'destroy']);
 });
 
 // BudgetTemplate endpoints

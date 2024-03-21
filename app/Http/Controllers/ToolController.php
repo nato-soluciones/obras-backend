@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\Tool;
+use App\Models\ToolCategory;
 
 use App\Http\Requests\CreateToolRequest;
 
