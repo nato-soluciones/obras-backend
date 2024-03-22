@@ -20,8 +20,7 @@ class ToolController extends Controller
      */
     public function index(): Response
     {
-        // tool with category
-        $tools = Tool::with('category')->get();
+        $tools = Tool::with('category', 'last_location')->get();
         return response($tools, 200);
     }
 

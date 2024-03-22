@@ -30,4 +30,9 @@ class Tool extends Model
     {
         return $this->hasMany(ToolLocation::class);
     }
+
+    public function last_location()
+    {
+        return $this->hasOne(ToolLocation::class)->latest();
+    }
 }
