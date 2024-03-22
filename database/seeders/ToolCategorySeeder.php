@@ -14,16 +14,25 @@ class ToolCategorySeeder extends Seeder
      */
     public function run(): void
     {
+        // TODO: Esto tiene sentido para todos los clientes? No parecen categorías muy específicas?
         $categories = [
-            'Carpintaria',
-            'Marcenaria',
-            'Elétrica',
-            'Hidráulica',
-            'Pintura',
-            'Alvenaria',
-            'Jardinagem',
-            'Limpeza',
-            'Outros',
+            'Martillos',
+            'Llaves',
+            'Destornilladores',
+            'Cinceles',
+            'Sierras manuales',
+            'Taladros',
+            'Sierras eléctricas',
+            'Lijadoras',
+            'Amoladoras',
+            'Mezcladoras de concreto',
+            'Niveles',
+            'Cintas métricas y reglas',
+            'Teodolitos y estaciones totales',
+            'Excavadoras',
+            'Bulldozers',
+            'Grúas',
+            'Compactadoras',
         ];
 
         foreach ($categories as $category) {

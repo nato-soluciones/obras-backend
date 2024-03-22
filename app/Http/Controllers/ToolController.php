@@ -72,7 +72,20 @@ class ToolController extends Controller
     public function update(Request $request, int $id): Response
     {
         $tool = Tool::find($id);
+        
+        $new_image = $request->file('new_image');
         $tool->update($request->all());
+
+        if ($new_image) {
+            $directory = 'public/uploads/tools/'.$tool->id;
+            $imageName = 'image.' . $new_image->extension();
+            $imagePath = Storage::putFileAs($directory, $new_image, $imageName, 'public');
+            $tool->image = Storage::url($imagePath);
+
+            $absolutePathToDirectory = storage_path('app/'.$directory);
+            chmod($absolutePathToDirectory, 0755);
+        }
+        $tool->save();
 
         return response($tool, 200);
     }
