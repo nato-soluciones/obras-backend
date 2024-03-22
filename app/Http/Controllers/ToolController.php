@@ -20,7 +20,8 @@ class ToolController extends Controller
      */
     public function index(): Response
     {
-        $tools = Tool::all();
+        // tool with category
+        $tools = Tool::with('category')->get();
         return response($tools, 200);
     }
 
@@ -58,7 +59,7 @@ class ToolController extends Controller
      */
     public function show(int $id): Response
     {
-        $tool = Tool::find($id);
+        $tool = Tool::with('locations')->find($id);
         return response($tool, 200);
     }
 

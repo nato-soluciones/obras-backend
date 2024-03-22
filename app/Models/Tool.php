@@ -20,4 +20,14 @@ class Tool extends Model
         'description',
         'image',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(ToolCategory::class);
+    }
+
+    public function locations()
+    {
+        return $this->hasMany(ToolLocation::class);
+    }
 }

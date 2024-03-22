@@ -18,6 +18,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContractorIndustryController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\ToolCategoryController;
+use App\Http\Controllers\ToolLocationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -143,6 +144,7 @@ Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
     Route::get('/categories', [ToolCategoryController::class, 'index']);
     Route::post('/categories', [ToolCategoryController::class, 'store']);
     Route::post('/categories/{id}', [ToolCategoryController::class, 'destroy']);
+    Route::post('/locations', [ToolLocationController::class, 'store']);
 
     Route::get('/', [ToolController::class, 'index']);
     Route::get('/{id}', [ToolController::class, 'show']);
