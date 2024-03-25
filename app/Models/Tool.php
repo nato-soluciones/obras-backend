@@ -13,11 +13,26 @@ class Tool extends Model
         'name',
         'brand',
         'value',
-        'category',
+        'category_id',
         'purchase_date',
         'status',
         'last_maintenance',
         'description',
         'image',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(ToolCategory::class);
+    }
+
+    public function locations()
+    {
+        return $this->hasMany(ToolLocation::class);
+    }
+
+    public function last_location()
+    {
+        return $this->hasOne(ToolLocation::class)->latest();
+    }
 }

@@ -11,7 +11,7 @@ class CreateToolRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,14 +24,14 @@ class CreateToolRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'brand' => ['required', 'string', 'max:255'],
-            'value' => ['numeric', 'min:0'],
-            'category' => ['required', 'enum:OTHER'],
+            'value' => ['nullable', 'numeric', 'min:0'],
+            'category_id' => ['required', 'exists:tools_categories,id'],
             'purchase_date' => ['nullable', 'date'],
-            'status' => ['required', 'enum:IN_USE,UNDER_REPAIR,DAMAGED,LOST'],
+            'status' => ['required', 'in:IN_USE,UNDER_REPAIR,DAMAGED,LOST'],
             'last_maintenance' => ['nullable', 'date'],
 
             'description' => ['nullable', 'string'],
-            'image' => ['required', 'image', 'mimes:jpeg,png,jpg'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg'],
         ];
     }
 }

@@ -11,19 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tools', function (Blueprint $table) {
+        Schema::create('tools_locations', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('brand');
-            $table->decimal('value', 18, 2)->nullable();
-            $table->date('purchase_date')->nullable();
+            $table->date('date');
+            $table->string('location');
             $table->enum('status', ['IN_USE', 'UNDER_REPAIR', 'DAMAGED', 'LOST'])->default('IN_USE');
-            $table->date('last_maintenance')->nullable();
-            
-            $table->string('description')->nullable();
             $table->string('image')->nullable();
+            $table->string('responsible');
+            $table->text('comments')->nullable();
             
-            $table->foreignId('category_id')->references('id')->on('tools_categories')->onDelete('set null');
+            $table->foreignId('created_by')->constrained('users')->onDelete('set null');
+            $table->foreignId('tool_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -33,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tools');
+        Schema::dropIfExists('tools_locations');
     }
 };
