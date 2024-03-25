@@ -31,7 +31,6 @@ class ObraController extends Controller
      */
     public function store(Request $request): Response
     {
-        $data = $request->all();
         $image = $request->file('image');
 
         $obra = Obra::create($request->all());

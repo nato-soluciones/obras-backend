@@ -64,4 +64,8 @@ class Obra extends Model
     public function additionals() {
         return $this->hasMany(Additional::class);
     }
+
+    public function dailyLogs() {
+        return $this->hasMany(ObraDailyLog::class);
+    }
 }

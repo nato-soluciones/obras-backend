@@ -16,6 +16,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContractorIndustryController;
+use App\Http\Controllers\ObraDailyLogController;
 use App\Http\Controllers\ToolController;
 
 /*
@@ -81,6 +82,13 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
     Route::delete('/{id}', 'destroy');
     Route::post('/{id}/documents', 'documents');
     Route::post('/{id}/additionals', 'additionals');
+});
+
+Route::prefix('obras/{obraId}/daily_logs')->middleware('auth:sanctum')->controller(ObraDailyLogController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{dailyLogId}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{dailyLogId}', 'update');
 });
 
 // Incomes endpoints
