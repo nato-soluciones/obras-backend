@@ -42,7 +42,6 @@ class BudgetController extends Controller
                             'total'             => 'required|numeric',
                             'total_cost'        => 'required|numeric',
                             'client_id'         => 'required|numeric',
-                            'user_id'           => 'required|numeric',
 
                             'categories'        => 'required|array',
                             'categories.*.name' => 'required|string',
@@ -78,8 +77,6 @@ class BudgetController extends Controller
                                 'total_cost.numeric' => 'El costo total debe ser un número.',
                                 'client_id.required' => 'El ID del cliente es obligatorio.',
                                 'client_id.numeric' => 'El ID del cliente debe ser un número.',
-                                'user_id.required' => 'El ID del usuario es obligatorio.',
-                                'user_id.numeric' => 'El ID del usuario debe ser un número.',
 
                                 'categories.required' => 'Las categorías son obligatorias.',
                                 'categories.array' => 'Las categorías deben ser un array.',
