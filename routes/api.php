@@ -49,6 +49,7 @@ Route::prefix('users')->middleware('auth:sanctum')->controller(UserController::c
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
+    Route::post('/{id}/password', 'password');
 });
 
 // Clients endpoints

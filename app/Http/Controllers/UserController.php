@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
 
+use App\Http\Requests\User\UpdateUserRequest;
+
 class UserController extends Controller
 {
     /**
@@ -60,6 +62,23 @@ class UserController extends Controller
     public function update(Request $request, int $id)
     {
         $data = $request->all();
+        $user = User::find($id);
+        $user->update($data);
+        return response($user, 200);
+    }
+
+    /**
+     * Update a user password by id
+     *
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     */
+    public function password(UpdateUserRequest $request, int $id)
+    {
+        $data = $request->all();
+        $data['password'] = Hash::make($data['password']);
+        
         $user = User::find($id);
         $user->update($data);
         return response($user, 200);
