@@ -17,6 +17,7 @@ use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContractorIndustryController;
 use App\Http\Controllers\ObraDailyLogController;
+use App\Http\Controllers\ObraDailyLogTagController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\ToolCategoryController;
 use App\Http\Controllers\ToolLocationController;
@@ -89,8 +90,9 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
 Route::prefix('obras/{obraId}/daily_logs')->middleware('auth:sanctum')->controller(ObraDailyLogController::class)->group(function() {
     Route::get('/', 'index');
     Route::get('/{dailyLogId}', 'show');
+    Route::get('/{dailyLogId}/file', 'fileDownload');
     Route::post('/', 'store');
-    Route::post('/{dailyLogId}', 'update');
+    Route::put('/{dailyLogId}', 'update');
 });
 
 // Incomes endpoints
@@ -174,4 +176,10 @@ Route::prefix('budget_templates')->middleware('auth:sanctum')->controller(Budget
 Route::prefix('contractor_industries')->middleware('auth:sanctum')->controller(ContractorIndustryController::class)->group(function () {
     Route::get('/', 'index');
     Route::get('/{code}', 'show');
+});
+
+// ObraDailyLogTag endpoints
+Route::prefix('obra_daily_log_tags')->middleware('auth:sanctum')->controller(ObraDailyLogTagController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
 });
