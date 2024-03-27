@@ -27,6 +27,19 @@ class BudgetCategoryActivity extends Model
         'subtotal',
         'budget_category_id',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'unit_cost' => 'float',
+        'unit_price' => 'float',
+        'subtotal' => 'float',
+        'quantity' => 'float',
+    ];
+
     public function category(){
         return $this->belongsTo(BudgetCategory::class);
     }

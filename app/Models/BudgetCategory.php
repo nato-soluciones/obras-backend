@@ -22,6 +22,15 @@ class BudgetCategory extends Model
         'budget_id',
     ];
 
+     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'total' => 'float',
+    ];
+
     public function budget(){
         return $this->belongsTo(Budget::class);
     }
