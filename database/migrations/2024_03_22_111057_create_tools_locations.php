@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('responsible');
             $table->text('comments')->nullable();
             
-            $table->foreignId('created_by')->constrained('users')->onDelete('set null');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('tool_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

@@ -93,7 +93,7 @@ Route::prefix('obras/{obraId}/daily_logs')->middleware('auth:sanctum')->controll
     Route::get('/{dailyLogId}', 'show');
     Route::get('/{dailyLogId}/file', 'fileDownload');
     Route::post('/', 'store');
-    Route::put('/{dailyLogId}', 'update');
+    Route::post('/{dailyLogId}', 'update');
 });
 
 // Incomes endpoints
