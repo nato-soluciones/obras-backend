@@ -21,6 +21,9 @@ use App\Http\Controllers\ObraDailyLogTagController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\ToolCategoryController;
 use App\Http\Controllers\ToolLocationController;
+use App\Http\Controllers\ManufacturerController;
+use App\Http\Controllers\ManufacturerCategoryController;
+use App\Http\Controllers\ManufacturerFileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -162,6 +165,22 @@ Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
     Route::post('/', [ToolController::class, 'store']);
     Route::post('/{id}', [ToolController::class, 'update']);
     Route::delete('/{id}', [ToolController::class, 'destroy']);
+});
+
+// Manufacturies endpoints
+Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {
+    Route::get('/categories', [ManufacturerCategoryController::class, 'index']);
+    Route::post('/categories', [ManufacturerCategoryController::class, 'store']);
+    Route::post('/categories/{id}', [ManufacturerCategoryController::class, 'destroy']);
+    
+    Route::post('/files', [ManufacturerFileController::class, 'store']);
+    Route::delete('/files/{id}', [ManufacturerFileController::class, 'destroy']);
+
+    Route::get('/', [ManufacturerController::class, 'index']);
+    Route::get('/{id}', [ManufacturerController::class, 'show']);
+    Route::post('/', [ManufacturerController::class, 'store']);
+    Route::post('/{id}', [ManufacturerController::class, 'update']);
+    Route::delete('/{id}', [ManufacturerController::class, 'destroy']);
 });
 
 // BudgetTemplate endpoints
