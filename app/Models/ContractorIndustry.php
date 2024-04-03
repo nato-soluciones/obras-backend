@@ -9,5 +9,5 @@ class ContractorIndustry extends Model
 {
     use HasFactory;
 
-    // protected $primaryKey = 'code';
+    protected $primaryKey = 'code';
 }
