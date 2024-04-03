@@ -82,9 +82,18 @@ class ObraDailyLogController extends Controller
      */
     public function update(Request $request, int $obraId, int $dailyLogId): Response
     {
+        $obraDailyLog = ObraDailyLog::find($dailyLogId);
+        if (!$obraDailyLog) {
+            return response()->json(['error' => 'Registro no encontrado'], 404);
+        }
+
         $requestData = $request->all();
 
         if ($request->hasFile('file')) {
+            if ($obraDailyLog->file_name) {
+                Storage::delete('public/uploads/dailyLogs/obra_' . $obraDailyLog->obra_id . '/' . $obraDailyLog->file_name);
+            }
+
             $file = $request->file('file');
             $directory =
                 'public/uploads/dailyLogs/obra_' . $obraId;
@@ -100,12 +109,15 @@ class ObraDailyLogController extends Controller
 
             $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
-        } else {
-            if ($requestData['file_name'] === "null") {
-                $requestData['file_name'] = null;
+
+        } else if ($requestData['file_name'] === "null") {
+            if ($obraDailyLog->file_name) {
+                Storage::delete('public/uploads/dailyLogs/obra_' . $obraDailyLog->obra_id . '/' . $obraDailyLog->file_name);
             }
+            $requestData['file_name'] = null;
+            
         }
-        $obraDailyLog = ObraDailyLog::find($dailyLogId);
+        
         $obraDailyLog->update($requestData);
 
         return response($obraDailyLog, 200);
