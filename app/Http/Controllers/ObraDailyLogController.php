@@ -49,7 +49,7 @@ class ObraDailyLogController extends Controller
             $file = $request->file('file');
             $directory =
                 'public/uploads/dailyLogs/obra_' . $obraDailyLog->obra_id;
-            $fileName = $file->getClientOriginalName();
+            $fileName = $obraDailyLog->id . '_' . $file->getClientOriginalName();
             $obraDailyLog->file_name = $fileName;
 
             $saveFile = $file->storeAs($directory, $fileName);
@@ -58,7 +58,6 @@ class ObraDailyLogController extends Controller
                 Log::error('File upload failed (dailylogs store)');
                 Log::error($file->getError());
             }
-            // Storage::putFileAs($directory, $file, $imageName, 'public');
 
             $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
@@ -89,7 +88,7 @@ class ObraDailyLogController extends Controller
             $file = $request->file('file');
             $directory =
                 'public/uploads/dailyLogs/obra_' . $obraId;
-            $fileName = $file->getClientOriginalName();
+            $fileName = $requestData['id'] . '_' . $file->getClientOriginalName();
             $requestData['file_name'] = $fileName;
 
             $saveFile = $file->storeAs($directory, $fileName);
@@ -115,7 +114,15 @@ class ObraDailyLogController extends Controller
     public function fileDownload(int $obraId, int $dailyLogId)
     {
         $obraDailyLog = ObraDailyLog::find($dailyLogId);
+        if (!$obraDailyLog) {
+            return response()->json(['error' => 'Registro no encontrado'], 404);
+        }
+
         $filePath = 'public/uploads/dailyLogs/obra_' . $obraDailyLog->obra_id . '/' . $obraDailyLog->file_name;
+        if (!Storage::exists($filePath)) {
+            return response()->json(['error' => 'Archivo no encontrado'], 404);
+        }
+        
         $fileName = $obraDailyLog->file_name;
 
         return response()->download(storage_path('app/' . $filePath), $fileName);
