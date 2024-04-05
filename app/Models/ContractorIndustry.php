@@ -10,4 +10,5 @@ class ContractorIndustry extends Model
     use HasFactory;
 
     protected $primaryKey = 'code';
+    protected $keyType = 'string';
 }

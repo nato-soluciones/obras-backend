@@ -26,21 +26,21 @@ class CreateContractorRequest extends FormRequest
             'phone' => ['regex:/^(|^[0-9\+]{1,20})$/'],
             'email' => 'nullable|email',
             'cuit' => ['regex:/^(|[0-9]{11})$/'],
-            'bank_account' => ['regex:/^(|[0-9]{10})$/'],
-            'bank_cbu' => ['regex:/^(|[0-9]{22})$/'],
-            'bank_alias' => ['regex:/^[a-zA-Z0-9.-]{6,20}$/'],
+            'bank_account' => ['nullable', 'regex:/^[0-9]{0,22}$/'],
+            'bank_cbu' => ['nullable', 'regex:/^[0-9]{22}$/'],
+            'bank_alias' => ['nullable', 'regex:/^(|[a-zA-Z0-9.-]{6,20})$/'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'zip' => 'El campo :attribute tiene que ser de 4 números o 1 letra, 4 números y 3 letras.',
-            'phone' => 'El campo :attribute no tiene el formato correcto',
-            'cuit' => 'El campo :attribute tiene que ser de 11 números.',
-            'bank_account' => 'El campo :attribute tiene que ser de 10 números.',
-            'bank_cbu' => 'El campo :attribute tiene que ser de 22 números.',
-            'bank_alias' => 'El campo :attribute tiene que ser de 6 a 20 caracteres alfanuméricos.',
+            'zip' => 'El campo Código Postal tiene que ser de 4 números o 1 letra, 4 números y 3 letras.',
+            'phone' => 'El campo Teléfono no tiene el formato correcto',
+            'cuit' => 'El campo CUIT tiene que ser de 11 números.',
+            'bank_account' => 'El campo Nro de Cuenta tiene que ser de 22 números máximo.',
+            'bank_cbu' => 'El campo CBU/CVU tiene que ser de 22 números.',
+            'bank_alias' => 'El campo Alias tiene que ser de 6 a 20 números y/o letras.',
         ];
     }
 }
