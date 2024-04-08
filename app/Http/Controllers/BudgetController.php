@@ -200,20 +200,11 @@ class BudgetController extends Controller
     }
 
     /**
-     * Finish an approved budget by id
+     * Export all budgets to CSV
      *
-     * @param int $id
      * @return Response
      */
-    public function finish(int $id): Response
-    {
-        $budget = Budget::find($id);
-        $budget->status = 'FINISHED';
-        $budget->save();
-        return response(['message' => 'Budget finished', 'data' => $budget], 200);
-    }
-
-    public function exportList()
+    public function exportList(): Response
     {
         $budgets = Budget::all();
         $f = fopen('php://memory', 'r+');

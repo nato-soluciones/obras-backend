@@ -77,7 +77,6 @@ Route::prefix('budgets')->middleware('auth:sanctum')->controller(BudgetControlle
 
     Route::post('/{id}/approve', 'approve');
     Route::post('/{id}/revert', 'revert');
-    Route::post('/{id}/finish', 'finish');
 });
 
 // Obras endpoints

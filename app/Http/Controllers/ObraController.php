@@ -32,7 +32,6 @@ class ObraController extends Controller
     public function store(Request $request): Response
     {
         $image = $request->file('image');
-
         $obra = Obra::create($request->all());
 
         if ($image) {
@@ -46,6 +45,10 @@ class ObraController extends Controller
         }
 
         $obra->save();
+
+        $budget = $obra->budget;
+        $budget->status = 'FINISHED';
+        $budget->save();
         
         return response($obra, 201);
     }
