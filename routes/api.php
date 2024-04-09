@@ -11,6 +11,7 @@ use App\Http\Controllers\ObraController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\OutcomeController;
 use App\Http\Controllers\AdditionalController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\BudgetTemplateController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContractorController;
@@ -201,4 +202,9 @@ Route::prefix('contractor_industries')->middleware('auth:sanctum')->controller(C
 Route::prefix('obra_daily_log_tags')->middleware('auth:sanctum')->controller(ObraDailyLogTagController::class)->group(function () {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
+});
+
+Route::prefix('banks')->middleware('auth:sanctum')->controller(BankController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{code}', 'show');
 });
