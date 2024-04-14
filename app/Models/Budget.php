@@ -37,6 +37,8 @@ class Budget extends Model
      */
     protected $casts = [
         'fields' => 'object',
+        'total' => 'float',
+        'total_cost' => 'float',
     ];
 
     /**

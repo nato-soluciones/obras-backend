@@ -31,7 +31,9 @@ class Additional extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'fields' => 'object'
+        'fields' => 'object',
+        'total' => 'float',
+        'total_cost' => 'float',
     ];
 
     protected static function booted()
