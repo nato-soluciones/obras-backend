@@ -14,6 +14,7 @@ use App\Http\Controllers\ToolLocationController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\ManufacturerCategoryController;
 use App\Http\Controllers\ManufacturerFileController;
+use App\Http\Controllers\CacController;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,4 +108,11 @@ Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {
     Route::post('/', [ManufacturerController::class, 'store']);
     Route::post('/{id}', [ManufacturerController::class, 'update']);
     Route::delete('/{id}', [ManufacturerController::class, 'destroy']);
+});
+
+// CAC endpoints
+Route::prefix('cac')->middleware('auth:sanctum')->controller(CacController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::delete('/{id}', 'destroy');
 });
