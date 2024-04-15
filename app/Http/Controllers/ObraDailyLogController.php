@@ -97,7 +97,7 @@ class ObraDailyLogController extends Controller
             $file = $request->file('file');
             $directory =
                 'public/uploads/dailyLogs/obra_' . $obraId;
-            $fileName = $requestData['id'] . '_' . $file->getClientOriginalName();
+            $fileName = $dailyLogId . '_' . $file->getClientOriginalName();
             $requestData['file_name'] = $fileName;
 
             $saveFile = $file->storeAs($directory, $fileName);
