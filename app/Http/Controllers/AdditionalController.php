@@ -19,7 +19,18 @@ class AdditionalController extends Controller
      */
     public function show(int $id): Response
     {
-        $additional = Additional::find($id);
+        $additional = Additional::with('categories.activities')->find($id);
+
+        // Carga manualmente el proveedor (contratista) para cada actividad si el campo provider_id no es nulo
+        foreach ($additional->categories as $category) {
+            foreach ($category->activities as $activity) {
+                if ($activity->provider_id !== null) {
+                    $constractorBusinessName = Contractor::where('id', $activity->provider_id)->value('business_name');
+                    $activity->provider_name = $constractorBusinessName;
+                }
+            }
+        }
+
         return response($additional, 200);
     }
 

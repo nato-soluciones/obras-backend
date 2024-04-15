@@ -10,6 +10,8 @@ use App\Models\Obra;
 use App\Models\Outcome;
 use App\Models\Document;
 
+use App\Services\AdditionalService;
+
 class ObraController extends Controller
 {
     /**
@@ -173,7 +175,11 @@ class ObraController extends Controller
     public function additionals(Request $request, int $id): Response
     {
         $obra = Obra::find($id);
-        $obra->additionals()->create($request->all());
-        return response(['message' => 'Additional created'], 201);
+
+        $additionalService = app(AdditionalService::class);
+        $additionalData = $request->all();
+        $additional = $additionalService->createAdditionalWithCategories($additionalData);
+
+        return response(['message' => 'Additional created', 'data' => $additional], 201);
     }
 }
