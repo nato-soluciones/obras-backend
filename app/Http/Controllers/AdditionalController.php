@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Additional;
-
+use App\Models\Contractor;
 
 class AdditionalController extends Controller
 {
