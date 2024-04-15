@@ -16,7 +16,7 @@ class CacController extends Controller
      */
     public function index(): Response
     {
-        $cacs = Cac::all();
+        $cacs = Cac::orderBy('period', 'desc')->get();
         return response($cacs);
     }
 
@@ -29,6 +29,7 @@ class CacController extends Controller
     public function store(Request $request): Response
     {
         $last = Cac::where('state', $request->state)
+            ->where('period', '<', $request->period)
             ->orderBy('period', 'desc')
             ->first();
 
@@ -36,7 +37,7 @@ class CacController extends Controller
             $previousValue = $last->value;
             $newValue = $request->value;
 
-            $variation = $previousValue != 0 ? (($newValue - $previousValue) / $previousValue) * 100 : 0;
+            $variation = $previousValue != 0 ? intval((($newValue - $previousValue) / $previousValue) * 100) : 0;
             $request->merge(['inter_month_variation' => $variation]);
         }
 
