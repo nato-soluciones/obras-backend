@@ -42,6 +42,7 @@ class ManufacturerController extends Controller
             $absolutePathToDirectory = storage_path('app/'.$directory);
             chmod($absolutePathToDirectory, 0755);
         }
+        $manufacturer->save();
 
         return response($manufacturer, 201);
     }
