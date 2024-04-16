@@ -7,6 +7,7 @@ use App\Models\Obra;
 
 use App\Notifications\ObraCreated;
 use App\Notifications\ObraFinalized;
+use Illuminate\Support\Facades\Log;
 
 class ObraObserver
 {
@@ -15,11 +16,16 @@ class ObraObserver
      */
     public function created(Obra $obra): void
     {
-        $users = User::whereIn('role', ['OWNER', 'ARCHITECT'])->get();
-        $notification = new ObraCreated($obra);
+        try {
+            $users = User::whereIn('role', ['OWNER', 'ARCHITECT'])->whereNotNull('email')->get();
+            $notification = new ObraCreated($obra);
 
-        foreach ($users as $user) {
-            $user->notify($notification);
+            foreach ($users as $user) {
+                $user->notify($notification);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al enviar la notificación de obra creada: ' . $e->getMessage());
+            Log::error($e);
         }
     }
 
@@ -29,11 +35,16 @@ class ObraObserver
     public function updated(Obra $obra): void
     {
         if ($obra->status === 'FINALIZED') {
-            $users = User::whereIn('role', ['OWNER', 'ARCHITECT'])->get();
-            $notification = new ObraFinalized($obra);
+            try {
+                $users = User::whereIn('role', ['OWNER', 'ARCHITECT'])->whereNotNull('email')->get();
+                $notification = new ObraFinalized($obra);
 
-            foreach ($users as $user) {
-                $user->notify($notification);
+                foreach ($users as $user) {
+                    $user->notify($notification);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error al enviar la notificación de obra actualizada: ' . $e->getMessage());
+                Log::error($e);
             }
         }
     }
