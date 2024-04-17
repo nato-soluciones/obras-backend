@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Client\CreateClientRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -26,7 +27,7 @@ class ClientController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(CreateClientRequest $request): Response
     {
         $client = Client::create($request->all());
         return response($client, 201);
@@ -51,7 +52,7 @@ class ClientController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(CreateClientRequest $request, int $id): Response
     {
         $client = Client::find($id);
         $client->update($request->all());
