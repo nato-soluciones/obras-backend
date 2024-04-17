@@ -13,9 +13,9 @@ class ObraStageController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(int $obraId)
     {
-        $incomes = ObraStage::all();
+        $incomes = ObraStage::where('obra_id', $obraId)->get();
         return response($incomes, 200);
     }
 
