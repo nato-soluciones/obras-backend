@@ -83,11 +83,9 @@ class IncomeController extends Controller
     public function destroy(int $id): Response
     {
         $income = Income::find($id);
-        if (is_null($income)) {
-            return response()->json(['message' => 'Income not found'], 404);
-        }
         $income->delete();
-        return response()->json(['message' => 'Income deleted'], 204);
+
+        return response(['message' => 'Income deleted'], 200);
     }
 
     public function exportList()
