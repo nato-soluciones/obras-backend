@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use App\Models\Contractor;
 
 use App\Http\Requests\Contractor\CreateContractorRequest;
+use App\Http\Requests\Contractor\UpdateContractorRequest;
 
 class ContractorController extends Controller
 {
@@ -42,6 +43,11 @@ class ContractorController extends Controller
      */
     public function store(CreateContractorRequest $request): Response
     {
+        // Ckeck cuit is unique
+        if (Contractor::where('cuit', $request->cuit)->exists()) {
+            return response(['message' => 'El CUIT ya está en uso'], 409);
+        }
+
         $contractor = Contractor::create($request->all());
         return response([
             'message' => 'Contractor created',
@@ -56,8 +62,13 @@ class ContractorController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(CreateContractorRequest $request, int $id): Response
+    public function update(UpdateContractorRequest $request, int $id): Response
     {
+        // Ckeck cuit is unique
+        if (Contractor::where('cuit', $request->cuit)->where('id', '!=', $id)->exists()) {
+            return response(['message' => 'El CUIT ya está en uso'], 409);
+        }
+        
         $contractor = Contractor::find($id);
         $contractor->update($request->all());
 

@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\CreateUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\User\UpdatePassUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
 
-use App\Http\Requests\User\UpdateUserRequest;
 
 class UserController extends Controller
 {
@@ -30,9 +32,14 @@ class UserController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request)
+    public function store(CreateUserRequest $request)
     {
         $data = $request->all();
+        // Check email is unique
+        if (User::where('email', $data['email'])->exists()) {
+            return response(['message' => 'MSG:Ya existe un usuario con el E-mail ingresado.'], 409);
+        }
+
         $data['password'] = Hash::make($data['password']);
         
         $user = User::create($data);
@@ -59,7 +66,7 @@ class UserController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id)
+    public function update(UpdateUserRequest $request, int $id)
     {
         $data = $request->all();
         $user = User::find($id);
@@ -74,7 +81,7 @@ class UserController extends Controller
      * @param int $id
      * @return Response
      */
-    public function password(UpdateUserRequest $request, int $id)
+    public function password(UpdatePassUserRequest $request, int $id)
     {
         $data = $request->all();
         $data['password'] = Hash::make($data['password']);

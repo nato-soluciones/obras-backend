@@ -5,7 +5,7 @@ namespace App\Http\Requests\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateUserRequest extends FormRequest
+class CreateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +22,8 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->input('id');
-
         return [
-            'email' => ['email', Rule::unique('users', 'email')->ignore($userId)],
+            'email' => ['nullable', 'email', Rule::unique('users', 'email')],
         ];
     }
 

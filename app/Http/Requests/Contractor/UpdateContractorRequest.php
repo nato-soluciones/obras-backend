@@ -5,7 +5,7 @@ namespace App\Http\Requests\Contractor;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CreateContractorRequest extends FormRequest
+class UpdateContractorRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,13 @@ class CreateContractorRequest extends FormRequest
      */
     public function rules(): array
     {
+        $contractorId = $this->input('id');
+
         return [
             'zip' => ['regex:/^([0-9]{4}|[a-zA-Z]{1}[0-9]{4}[a-zA-Z]{3})$/'],
             'phone' => ['regex:/^(|^[0-9\+]{1,20})$/'],
             'email' => 'nullable|email',
-            'cuit' => ['regex:/^(|[0-9]{11})$/', Rule::unique('contractors', 'cuit')],
+            'cuit' => ['regex:/^(|[0-9]{11})$/', Rule::unique('contractors', 'cuit')->ignore($contractorId)],
             'bank_account' => ['nullable', 'regex:/^[0-9]{0,22}$/'],
             'bank_cbu' => ['nullable', 'regex:/^[0-9]{22}$/'],
             'bank_alias' => ['nullable', 'regex:/^(|[a-zA-Z0-9.-]{6,20})$/'],
