@@ -61,6 +61,9 @@ class ObraDailyLogController extends Controller
 
             $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
+
+        } else {
+            $obraDailyLog->file_name = null;
         }
         $obraDailyLog->save();
 
