@@ -53,7 +53,7 @@ class ObraStageController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($stageId)
+    public function update($obraId, $stageId)
     {
         $obraStage = ObraStage::find($stageId);
         if (!$obraStage) {
