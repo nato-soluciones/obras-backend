@@ -118,4 +118,31 @@ class ObraStageTaskController extends Controller
 
         return response($response, 200);
     }
+
+    /**
+     * Delete a user by id
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function destroy(int $obraId, int $stageId, int $taskId)
+    {
+        $obraStageTask = ObraStageTask::find($taskId);
+        $obraStageTask->delete();
+
+        // Obtiene una instancia del servicio ObraStageService
+        $obraStageService = app(ObraStageService::class);
+        $obraStageService->updateStageProgress($obraStageTask->obraStage);
+
+        // Actualiza el porcentaje de la obra
+        $obraService = app(ObraService::class);
+        $obraService->updateObraProgress($obraStageTask->obraStage->obra);
+
+        $response = [
+            'obraStageTask' => 'deleted',
+            'stageProgress' => $obraStageTask->obraStage->progress
+        ];
+
+        return response($response, 200);
+    }
 }

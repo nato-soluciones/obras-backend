@@ -69,6 +69,7 @@ Route::prefix('obras/{obraId}/stages/{stageId}/tasks')->middleware('auth:sanctum
   Route::post('/', 'store');
   Route::post('/{taskId}', 'update');
   Route::post('/{taskId}/completed', 'checkCompleted');
+  Route::delete('/{id}', 'destroy');
 });
 
 // Stages endpoints
@@ -77,4 +78,5 @@ Route::prefix('obras/{obraId}/stages')->middleware('auth:sanctum')->controller(O
   Route::get('/{stageId}', 'show');
   Route::post('/', 'store');
   Route::post('/{stageId}', 'update');
+  Route::delete('/{id}', 'destroy');
 });
