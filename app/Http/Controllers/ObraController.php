@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Obra;
 use App\Models\Outcome;
 use App\Models\Document;
-
+use App\Models\ObraStage;
 use App\Services\AdditionalService;
 
 class ObraController extends Controller
@@ -22,6 +22,16 @@ class ObraController extends Controller
     public function index(): Response
     {
         $obras = Obra::with('client')->get();
+
+        $obras->each(function ($obra) {
+            $activeStage = ObraStage::select('id', 'name', 'progress', 'end_date')
+                ->where('obra_id', $obra->id)
+                ->whereDate('start_date', '<=', now())
+                ->whereDate('end_date', '>=', now())
+                ->first();
+
+            $obra->active_stage = $activeStage;
+        });
         return response($obras, 200);
     }
 
@@ -37,12 +47,12 @@ class ObraController extends Controller
         $obra = Obra::create($request->all());
 
         if ($image) {
-            $directory = 'public/uploads/obras/'.$obra->id;
+            $directory = 'public/uploads/obras/' . $obra->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $obra->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
 
@@ -51,7 +61,7 @@ class ObraController extends Controller
         $budget = $obra->budget;
         $budget->status = 'FINISHED';
         $budget->save();
-        
+
         return response($obra, 201);
     }
 
@@ -66,12 +76,12 @@ class ObraController extends Controller
         $obra = Obra::with(['client', 'budget', 'incomes', 'outcomes.contractor', 'documents', 'additionals.user'])->find($id);
 
         $outcomes = Outcome::where('obra_id', $id)
-                        ->whereNotNull('contractor_id')
-                        ->with('contractor')
-                        ->get();
+            ->whereNotNull('contractor_id')
+            ->with('contractor')
+            ->get();
         $contractors = $outcomes->pluck('contractor')->unique('id');
         $obra->contractors = $contractors;
-        
+
         return response($obra, 200);
     }
 
@@ -87,15 +97,15 @@ class ObraController extends Controller
         $obra = Obra::find($id);
         $data = $request->except('image');
         $obra->update($data);
-        
+
         if ($request->hasFile('new_image')) {
             $image = $request->file('new_image');
-            $directory = 'public/uploads/obras/'.$obra->id;
+            $directory = 'public/uploads/obras/' . $obra->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $obra->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
             $obra->save();
         }
@@ -130,7 +140,7 @@ class ObraController extends Controller
         $category = $request->input('category');
         $document = $request->file('file');
 
-        $directory = 'public/uploads/obras/'.$obra->id;
+        $directory = 'public/uploads/obras/' . $obra->id;
         $documentName = $document->getClientOriginalName();
         $documentPath = Storage::putFileAs($directory, $document, $documentName, 'public');
 
@@ -140,7 +150,7 @@ class ObraController extends Controller
             'path' => Storage::url($documentPath),
         ]);
 
-        $absolutePathToDirectory = storage_path('app/'.$directory);
+        $absolutePathToDirectory = storage_path('app/' . $directory);
         chmod($absolutePathToDirectory, 0755);
 
         return response(['message' => 'Document uploaded'], 201);
@@ -159,7 +169,7 @@ class ObraController extends Controller
         $document = $obra->documents()->find($documentId);
         $document->delete();
 
-        $absolutePathToFile = storage_path('app/'.$document->path);
+        $absolutePathToFile = storage_path('app/' . $document->path);
         unlink($absolutePathToFile);
 
         return response(['message' => 'Document deleted'], 204);
