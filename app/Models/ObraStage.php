@@ -15,6 +15,7 @@ class ObraStage extends Model
         'end_date',
         'description',
         'progress',
+        'obra_percentage',
         'obra_id',
         'created_by_id',
     ];

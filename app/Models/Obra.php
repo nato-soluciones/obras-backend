@@ -24,6 +24,7 @@ class Obra extends Model
         'phone',
         'start_date',
         'end_date',
+        'initial_cac_index',
         'status',
     ];
 

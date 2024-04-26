@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ObraStageTask;
+use App\Services\ObraService;
 use App\Services\ObraStageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ class ObraStageTaskController extends Controller
      */
     public function index(Request $request, int $obraId, int $stageId)
     {
-        $obraStageTasks = ObraStageTask::with(['responsible' => function($query){
+        $obraStageTasks = ObraStageTask::with(['responsible' => function ($query) {
             $query->select('id', 'firstname', 'lastname');
         }])->where('obra_stage_id', $stageId)->orderBy('start_date', 'asc')->orderBy('id', 'asc')->get();
         return response($obraStageTasks, 200);
@@ -29,10 +30,23 @@ class ObraStageTaskController extends Controller
      */
     public function store(Request $request)
     {
- 
+
         $request->merge(['created_by_id' => auth()->user()->id]);
         $obraStageTask = ObraStageTask::create($request->all());
-        return response($obraStageTask, 201);
+
+        // Obtiene una instancia del servicio ObraStageService
+        $obraStageService = app(ObraStageService::class);
+        $obraStageService->updateStageProgress($obraStageTask->obraStage);
+
+        // Actualiza el porcentaje de la obra
+        $obraService = app(ObraService::class);
+        $obraService->updateObraProgress($obraStageTask->obraStage->obra);
+
+        $response = [
+            'obraStageTask' => $obraStageTask,
+            'stageProgress' => $obraStageTask->obraStage->progress
+        ];
+        return response($response, 201);
     }
 
     /**
@@ -62,6 +76,7 @@ class ObraStageTaskController extends Controller
         }
 
         $obraStageTask->update($request->all());
+
         return response($obraStageTask, 200);
     }
 
@@ -77,7 +92,24 @@ class ObraStageTaskController extends Controller
 
         // Obtiene una instancia del servicio ObraStageService
         $obraStageService = app(ObraStageService::class);
-        $obraStageService->updateStageProgress($obraStageTask->obraStage);
+        $respObraStage = $obraStageService->updateStageProgress($obraStageTask->obraStage);
+
+        // Si no se pudo actualizar la etapa, cambia el estado de la tarea al anterior y devuelve el error
+        if ($respObraStage['status'] === 'error') {
+            $obraStageTask->update(['is_completed' => !$request->is_completed]);
+            return response(['error' => $respObraStage['message']], 500);
+        }
+
+        // Actualiza el porcentaje de la obra
+        $obraService = app(ObraService::class);
+        $respObra = $obraService->updateObraProgress($obraStageTask->obraStage->obra);
+
+        // Si no se pudo actualizar la obra, cambia el estado de la tarea al anterior, actualiza la etapa y devuelve el error
+        if ($respObra['status'] === 'error') {
+            $obraStageTask->update(['is_completed' => !$request->is_completed]);
+            $obraStageService->updateStageProgress($obraStageTask->obraStage);
+            return response(['error' => $respObra['message']], 500);
+        }
 
         $response = [
             'taskIsCompleted' => $obraStageTask->is_completed,
