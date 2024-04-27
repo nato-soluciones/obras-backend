@@ -10,6 +10,7 @@ use App\Models\Obra;
 use App\Models\Outcome;
 use App\Models\ObraStage;
 use App\Services\AdditionalService;
+use Illuminate\Support\Facades\Log;
 
 class ObraController extends Controller
 {
@@ -196,6 +197,7 @@ class ObraController extends Controller
     {
         $obra = Obra::findOrFail($id);
 
+        // Recupera los proveedores y el monto presupuestado de cada uno
         $resultBudget = $obra->budget->categories()
             ->join('budgets_categories_activities as bca', 'budgets_categories.id', '=', 'bca.budget_category_id')
             ->join('contractors as c', 'bca.provider_id', '=', 'c.id')
@@ -203,29 +205,71 @@ class ObraController extends Controller
             ->groupBy('bca.provider_id', 'c.business_name')
             ->get();
 
+        // Recupera los proveedores de adicionales y el monto presupuestado de cada uno
+        $resultAdditional = $obra->additionals()
+            ->join('additionals_categories as ac', 'ac.additional_id', '=', 'additionals.id')
+            ->join('additionals_categories_activities as aca', 'aca.additional_category_id', '=', 'ac.id')
+            ->join('contractors as c', 'aca.provider_id', '=', 'c.id')
+            ->selectRaw('aca.provider_id as contractor_id, c.business_name, ROUND(SUM(aca.unit_cost * aca.quantity), 2) as budgeted_price')
+            ->groupBy('aca.provider_id', 'c.business_name')
+            ->get();
+
+        // Recupera los proveedor y el monto pagado de cada uno
         $resultOutcomes = $obra->outcomes()
             ->where('type', 'CONTRACTORS')
             ->selectRaw('outcomes.contractor_id, ROUND(SUM(outcomes.gross_total), 2) as paid_total')
             ->groupBy('outcomes.contractor_id')
             ->get();
 
-
-        $result = $resultBudget->map(function ($budgetItem) use ($resultOutcomes) {
+        // Calcula el porcentaje de avance de cada proveedor (en base a los proveedores que estan en el presupuesto)
+        $result = $resultBudget->map(function ($budgetItem) use ($resultOutcomes, $resultAdditional) {
             $outcomeItem = $resultOutcomes->where('contractor_id', $budgetItem->contractor_id)->first();
+            $additionalItem = $resultAdditional->where('contractor_id', $budgetItem->contractor_id)->first();
             $paidTotal = $outcomeItem ? $outcomeItem->paid_total : 0;
-            $progressPaymentPercentage = $budgetItem->budgeted_price > 0 ? ($paidTotal / $budgetItem->budgeted_price) * 100 : 0;
+            $additionalBudgetedPrice = $additionalItem ? $additionalItem->budgeted_price : 0;
+            $totalBudgetedPrice = $budgetItem->budgeted_price + $additionalBudgetedPrice;
+            $progressPaymentPercentage = $totalBudgetedPrice > 0 ? ($paidTotal / $totalBudgetedPrice) * 100 : 0;
 
             return [
                 'contractor_id' => $budgetItem->contractor_id,
                 'business_name' => $budgetItem->business_name,
-                'budgeted_price' => $budgetItem->budgeted_price,
+                'budgeted_price' => $totalBudgetedPrice,
                 'paid_total' => $paidTotal,
-                'balance' => $budgetItem->budgeted_price - $paidTotal,
+                'balance' => $totalBudgetedPrice - $paidTotal,
                 'progress_payment_percentage' => round($progressPaymentPercentage, 2),
             ];
         })->values();
 
 
-        return response($result, 200);
+        // Recupera los proveedores que estan en adicionales pero no en presupuesto
+
+        // Obtener todos los contractor_id de $result
+        $resultContractorIds = $result->pluck('contractor_id');
+        // Filtrar $resultAdditional para obtener los contractor_id que no están en $result
+        $missingContractors = $resultAdditional->filter(function ($item) use ($resultContractorIds) {
+            return !$resultContractorIds->contains($item->contractor_id);
+        });
+
+        // Crear un array con la misma estructura que $result para los contratistas faltantes
+        $missingAdditionalsData = $missingContractors->map(function ($additionalItem) use ($resultOutcomes) {
+            $outcomeItem = $resultOutcomes->where('contractor_id', $additionalItem->contractor_id)->first();
+            $paidTotal = $outcomeItem ? $outcomeItem->paid_total : 0;
+            $additionalBudgetedPrice = $additionalItem->budgeted_price;
+            $progressPaymentPercentage = $additionalBudgetedPrice > 0 ? ($paidTotal / $additionalBudgetedPrice) * 100 : 0;
+
+            return [
+                'contractor_id' => $additionalItem->contractor_id,
+                'business_name' => $additionalItem->business_name,
+                'budgeted_price' => $additionalBudgetedPrice,
+                'paid_total' => $paidTotal,
+                'balance' => $additionalBudgetedPrice - $paidTotal,
+                'progress_payment_percentage' => round($progressPaymentPercentage, 2),
+            ];
+        })->values();
+
+        // Combinar $result y $missingAdditionalsData
+        $finalResult = $result->merge($missingAdditionalsData);
+
+        return response($finalResult, 200);
     }
 }
