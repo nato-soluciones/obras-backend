@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Models\Obra;
 use App\Models\Outcome;
-use App\Models\Document;
 use App\Models\ObraStage;
 use App\Services\AdditionalService;
 
@@ -191,5 +190,42 @@ class ObraController extends Controller
         $additional = $additionalService->createAdditionalWithCategories($additionalData);
 
         return response(['message' => 'Additional created', 'data' => $additional], 201);
+    }
+
+    public function contractors(int $id): Response
+    {
+        $obra = Obra::findOrFail($id);
+
+        $resultBudget = $obra->budget->categories()
+            ->join('budgets_categories_activities as bca', 'budgets_categories.id', '=', 'bca.budget_category_id')
+            ->join('contractors as c', 'bca.provider_id', '=', 'c.id')
+            ->selectRaw('bca.provider_id as contractor_id, c.business_name, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
+            ->groupBy('bca.provider_id', 'c.business_name')
+            ->get();
+
+        $resultOutcomes = $obra->outcomes()
+            ->where('type', 'CONTRACTORS')
+            ->selectRaw('outcomes.contractor_id, ROUND(SUM(outcomes.gross_total), 2) as paid_total')
+            ->groupBy('outcomes.contractor_id')
+            ->get();
+
+
+        $result = $resultBudget->map(function ($budgetItem) use ($resultOutcomes) {
+            $outcomeItem = $resultOutcomes->where('contractor_id', $budgetItem->contractor_id)->first();
+            $paidTotal = $outcomeItem ? $outcomeItem->paid_total : 0;
+            $progressPaymentPercentage = $budgetItem->budgeted_price > 0 ? ($paidTotal / $budgetItem->budgeted_price) * 100 : 0;
+
+            return [
+                'contractor_id' => $budgetItem->contractor_id,
+                'business_name' => $budgetItem->business_name,
+                'budgeted_price' => $budgetItem->budgeted_price,
+                'paid_total' => $paidTotal,
+                'balance' => $budgetItem->budgeted_price - $paidTotal,
+                'progress_payment_percentage' => round($progressPaymentPercentage, 2),
+            ];
+        })->values();
+
+
+        return response($result, 200);
     }
 }
