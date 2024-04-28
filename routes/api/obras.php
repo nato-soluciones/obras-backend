@@ -47,6 +47,7 @@ Route::prefix('outcomes')->middleware('auth:sanctum')->controller(OutcomeControl
 Route::prefix('additionals')->middleware('auth:sanctum')->controller(AdditionalController::class)->group(function () {
   Route::get('/{id}', 'show');
   Route::post('/{id}', 'update');
+  Route::delete('/{id}', 'destroy');
 });
 
 // ObraDailyLog endpoints
