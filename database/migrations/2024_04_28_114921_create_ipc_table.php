@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cac', function (Blueprint $table) {
+        Schema::create('ipc', function (Blueprint $table) {
             $table->id();
             $table->string('period');
-            $table->decimal('general', 18, 2);
-            $table->decimal('materials', 18, 2);
-            $table->decimal('labour', 18, 2);
+            $table->decimal('value', 18, 2);
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cac');
+        Schema::dropIfExists('ipc');
     }
 };

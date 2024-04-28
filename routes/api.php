@@ -15,6 +15,7 @@ use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\ManufacturerCategoryController;
 use App\Http\Controllers\ManufacturerFileController;
 use App\Http\Controllers\CacController;
+use App\Http\Controllers\IpcController;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +113,12 @@ Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {
 
 // CAC endpoints
 Route::prefix('cac')->middleware('auth:sanctum')->controller(CacController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::delete('/{id}', 'destroy');
+});
+
+Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::class)->group(function() {
     Route::get('/', 'index');
     Route::post('/', 'store');
     Route::delete('/{id}', 'destroy');

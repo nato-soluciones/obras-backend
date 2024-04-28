@@ -5,22 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cac extends Model
+class Ipc extends Model
 {
     use HasFactory;
 
-    protected $table = 'cac';
+    protected $table = 'ipc';
 
     protected $fillable = [
         'period',
-        'general',
-        'materials',
-        'labour',
+        'value',
     ];
 
     protected $casts = [
-        'general' => 'float',
-        'materials' => 'float',
-        'labour' => 'float',
+        'value' => 'float',
     ];
 }

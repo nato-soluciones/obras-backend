@@ -5,44 +5,44 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use App\Models\Cac;
+use App\Models\Ipc;
 
-class CacController extends Controller
+class IpcController extends Controller
 {
     /**
-     * List all cacs
+     * List all ipcs
      *
      * @return Response
      */
     public function index(): Response
     {
-        $cacs = Cac::orderBy('period', 'desc')->get();
-        return response($cacs);
+        $ipcs = Ipc::orderBy('period', 'desc')->get();
+        return response($ipcs);
     }
 
     /**
-     * Creates an cac
+     * Creates an ipc
      *
      * @param Request $request
      * @return Response
      */
     public function store(Request $request): Response
     {
-        $cac = Cac::create($request->all());        
-        return response($cac, 201);
+        $ipc = Ipc::create($request->all());        
+        return response($ipc, 201);
     }
 
     /**
-     * Delete an cac by id
+     * Delete an ipc by id
      *
      * @param int $id
      * @return Response
      */
     public function destroy(int $id): Response
     {
-        $cac = Cac::find($id);
-        $cac->delete();
+        $ipc = Ipc::find($id);
+        $ipc->delete();
 
-        return response(['message' => 'CAC deleted'], 204);;
+        return response(['message' => 'IPC deleted'], 204);;
     }
 }
