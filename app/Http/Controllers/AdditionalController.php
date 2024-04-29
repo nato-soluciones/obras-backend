@@ -8,6 +8,8 @@ use Illuminate\Http\Response;
 use App\Models\Additional;
 use App\Models\Contractor;
 
+use App\Services\AdditionalService;
+
 class AdditionalController extends Controller
 {
 
@@ -44,8 +46,11 @@ class AdditionalController extends Controller
      */
     public function update(Request $request, int $id): Response
     {
-        $additional = Additional::find($id);
-        $additional->update($request->all());
+        // Obtiene una instancia del servicio BudgetService
+        $additionalService = app(AdditionalService::class);
+
+        // Si la validación pasa, procede con la actualización del presupuesto
+        $additional = $additionalService->updateAdditional($id, $request->all());
         
         return response([
             'message' => 'Additional edited',
