@@ -115,11 +115,13 @@ Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {
 Route::prefix('cac')->middleware('auth:sanctum')->controller(CacController::class)->group(function() {
     Route::get('/', 'index');
     Route::post('/', 'store');
+    Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
 });
 
 Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::class)->group(function() {
     Route::get('/', 'index');
     Route::post('/', 'store');
+    Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
 });

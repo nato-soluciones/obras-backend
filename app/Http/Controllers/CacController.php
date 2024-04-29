@@ -33,6 +33,20 @@ class CacController extends Controller
     }
 
     /**
+     * Update an cac by id
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function update(Request $request, int $id): Response
+    {
+        $cac = Cac::find($id);
+        $cac->update($request->all());
+
+        return response($cac, 200);
+    }
+
+    /**
      * Delete an cac by id
      *
      * @param int $id

@@ -33,6 +33,20 @@ class IpcController extends Controller
     }
 
     /**
+     * Update an ipc by id
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function update(Request $request, int $id): Response
+    {
+        $ipc = Ipc::find($id);
+        $ipc->update($request->all());
+
+        return response($ipc, 200);
+    }
+
+    /**
      * Delete an ipc by id
      *
      * @param int $id
