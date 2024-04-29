@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Additional;
+use App\Models\Contractor;
 
+use App\Services\AdditionalService;
 
 class AdditionalController extends Controller
 {
@@ -19,7 +21,18 @@ class AdditionalController extends Controller
      */
     public function show(int $id): Response
     {
-        $additional = Additional::find($id);
+        $additional = Additional::with('categories.activities')->find($id);
+
+        // Carga manualmente el proveedor (contratista) para cada actividad si el campo provider_id no es nulo
+        foreach ($additional->categories as $category) {
+            foreach ($category->activities as $activity) {
+                if ($activity->provider_id !== null) {
+                    $constractorBusinessName = Contractor::where('id', $activity->provider_id)->value('business_name');
+                    $activity->provider_name = $constractorBusinessName;
+                }
+            }
+        }
+
         return response($additional, 200);
     }
 
@@ -33,8 +46,11 @@ class AdditionalController extends Controller
      */
     public function update(Request $request, int $id): Response
     {
-        $additional = Additional::find($id);
-        $additional->update($request->all());
+        // Obtiene una instancia del servicio BudgetService
+        $additionalService = app(AdditionalService::class);
+
+        // Si la validación pasa, procede con la actualización del presupuesto
+        $additional = $additionalService->updateAdditional($id, $request->all());
         
         return response([
             'message' => 'Additional edited',

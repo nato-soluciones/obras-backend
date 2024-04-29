@@ -40,7 +40,7 @@ class IncomeCreated extends Notification
     {
         return (new MailMessage)
             ->subject('Nuevo recibo de cobro | ' . $this->income->obra->name)
-            ->greeting('Hola,')
+            ->greeting('Nuevo Recibo de cobro para la obra “' . $this->income->obra->name . '”.')
             ->line('Se ha creado un nuevo recibo de cobro para la obra ' . $this->income->obra->name . '.')
             ->line('Número de Recibo: ' . $this->income->receipt_number)
             ->line('Lugar: ' . $this->income->location)

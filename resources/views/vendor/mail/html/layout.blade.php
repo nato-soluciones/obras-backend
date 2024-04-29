@@ -8,50 +8,59 @@
 <meta name="supported-color-schemes" content="light">
 <style>
 @media only screen and (max-width: 600px) {
-.inner-body {
-width: 100% !important;
-}
+  .inner-body {
+    width: 100% !important;
+  }
 
-.footer {
-width: 100% !important;
-}
+  .footer {
+  width: 100% !important;
+  }
 }
 
 @media only screen and (max-width: 500px) {
-.button {
-width: 100% !important;
-}
+  .button {
+    width: 100% !important;
+  }
 }
 </style>
 </head>
 <body>
+  <table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center">
+        <table class="content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+          <!-- Email Body -->
+          <tr>
+            <td class="body" width="100%" cellpadding="0" cellspacing="0" style="border: hidden !important;">
+              <table class="inner-body" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
+                {{ $header ?? '' }}
 
-<table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
-<tr>
-<td align="center">
-<table class="content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
-{{ $header ?? '' }}
+                <!-- Body content -->
+                <tr>
+                  <td class="content-cell">
+                  {{ Illuminate\Mail\Markdown::parse($slot) }}
 
-<!-- Email Body -->
-<tr>
-<td class="body" width="100%" cellpadding="0" cellspacing="0" style="border: hidden !important;">
-<table class="inner-body" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
-<!-- Body content -->
-<tr>
-<td class="content-cell">
-{{ Illuminate\Mail\Markdown::parse($slot) }}
+                  {{ $subcopy ?? '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p style="color: #66708; text-align: center; font-size: 14px; max-width: 400px; margin: 0px auto 20px auto;">
+                      Por favor desestima este correo si ya has visto esta información, o si crees que no es importante.
+                    </p>
+                    <p style="text-align: center; margin: 0 auto 40px auto;">
+                      <a href="{{ config('app.frontend_url') }}" style="color: #667085; font-size: 14px; font-weight: bold;">{{ config('app.frontend_url') }}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-{{ $subcopy ?? '' }}
-</td>
-</tr>
-</table>
-</td>
-</tr>
-
-{{ $footer ?? '' }}
-</table>
-</td>
-</tr>
-</table>
+          {{ $footer ?? '' }}
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

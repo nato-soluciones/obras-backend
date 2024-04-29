@@ -37,6 +37,8 @@ class Budget extends Model
      */
     protected $casts = [
         'fields' => 'object',
+        'total' => 'float',
+        'total_cost' => 'float',
     ];
 
     /**
@@ -65,5 +67,9 @@ class Budget extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function categories()
+    {
+        return $this->hasMany(BudgetCategory::class);
     }
 }

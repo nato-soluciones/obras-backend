@@ -7,6 +7,9 @@ use Illuminate\Http\Response;
 
 use App\Models\Contractor;
 
+use App\Http\Requests\Contractor\CreateContractorRequest;
+use App\Http\Requests\Contractor\UpdateContractorRequest;
+
 class ContractorController extends Controller
 {
     /**
@@ -16,7 +19,7 @@ class ContractorController extends Controller
      */
     public function index(): Response
     {
-        $contractors = Contractor::all();
+        $contractors = Contractor::orderBy('business_name')->get();
         return response($contractors, 200);
     }
 
@@ -38,8 +41,13 @@ class ContractorController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(CreateContractorRequest $request): Response
     {
+        // Ckeck cuit is unique
+        if (Contractor::where('cuit', $request->cuit)->exists()) {
+            return response(['message' => 'El CUIT ya está en uso'], 409);
+        }
+
         $contractor = Contractor::create($request->all());
         return response([
             'message' => 'Contractor created',
@@ -54,8 +62,13 @@ class ContractorController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(UpdateContractorRequest $request, int $id): Response
     {
+        // Ckeck cuit is unique
+        if (Contractor::where('cuit', $request->cuit)->where('id', '!=', $id)->exists()) {
+            return response(['message' => 'El CUIT ya está en uso'], 409);
+        }
+        
         $contractor = Contractor::find($id);
         $contractor->update($request->all());
 
@@ -89,7 +102,8 @@ class ContractorController extends Controller
         $contractors = Contractor::all();
         $f = fopen('php://memory', 'r+');
 
-        $csvTitles = ['Razón Social', 
+        $csvTitles = ['Razón Social',
+                      'Nombre de Fantasía', 
                       'Condición de IVA', 
                       'CUIT', 
                       'Contacto de Referencia', 
@@ -104,6 +118,7 @@ class ContractorController extends Controller
         foreach ($contractors as $item) {
             $csvRow = [
                 $item->business_name,
+                $item->trade_name,
                 $item->condition,
                 $item->cuit,
                 $item->referral,

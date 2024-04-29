@@ -33,9 +33,12 @@ class IncomeController extends Controller
     public function store(Request $request): Response
     {
         $income = Income::create($request->all());
-        Notification::route('mail', $income->email)
-                    ->notify(new IncomeCreated($income));        
-
+        if (!empty($income->email)) {
+            if (filter_var($income->email, FILTER_VALIDATE_EMAIL)) {
+                Notification::route('mail', $income->email)
+                    ->notify(new IncomeCreated($income));
+            }
+        }
         return response($income, 201);
     }
 
@@ -80,11 +83,9 @@ class IncomeController extends Controller
     public function destroy(int $id): Response
     {
         $income = Income::find($id);
-        if (is_null($income)) {
-            return response()->json(['message' => 'Income not found'], 404);
-        }
         $income->delete();
-        return response()->json(['message' => 'Income deleted'], 204);
+
+        return response(['message' => 'Income deleted'], 200);
     }
 
     public function exportList()

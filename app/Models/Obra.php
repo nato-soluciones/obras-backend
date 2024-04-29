@@ -24,6 +24,7 @@ class Obra extends Model
         'phone',
         'start_date',
         'end_date',
+        'initial_cac_index',
         'status',
     ];
 
@@ -63,5 +64,9 @@ class Obra extends Model
 
     public function additionals() {
         return $this->hasMany(Additional::class);
+    }
+
+    public function dailyLogs() {
+        return $this->hasMany(ObraDailyLog::class);
     }
 }

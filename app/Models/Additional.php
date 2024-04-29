@@ -31,7 +31,9 @@ class Additional extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'fields' => 'object'
+        'fields' => 'object',
+        'total' => 'float',
+        'total_cost' => 'float',
     ];
 
     protected static function booted()
@@ -51,5 +53,9 @@ class Additional extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+    public function categories()
+    {
+        return $this->hasMany(AdditionalCategory::class);
     }
 }

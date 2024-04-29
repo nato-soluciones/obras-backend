@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Outcome;
+use Illuminate\Support\Facades\Storage;
 
 class OutcomeController extends Controller
 {
@@ -28,23 +29,22 @@ class OutcomeController extends Controller
      */
     public function store(Request $request): Response
     {
-        $data = $request->all();
         $file = $request->file('file');
 
         $outcome = Outcome::create($request->all());
 
         if ($file) {
-            $directory = 'public/uploads/outcomes/'.$outcome->id;
+            $directory = 'public/uploads/outcomes/' . $outcome->id;
             $fileName = 'file.' . $file->extension();
             $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
             $outcome->file = Storage::url($filePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
 
         $outcome->save();
-        
+
         return response($outcome, 201);
     }
 
@@ -76,7 +76,21 @@ class OutcomeController extends Controller
         if (is_null($outcome)) {
             return response()->json(['message' => 'Outcome not found'], 404);
         }
-        $outcome->update($request->all());
+        $outcome->fill($request->all());
+
+        $file = $request->file('file');
+        if ($file) {
+            $directory = 'public/uploads/outcomes/' . $outcome->id;
+            $fileName = 'file.' . $file->extension();
+            $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
+            $outcome->file = Storage::url($filePath);
+
+            $absolutePathToDirectory = storage_path('app/' . $directory);
+            chmod($absolutePathToDirectory, 0755);
+        }
+
+
+        $outcome->save();
         return response($outcome, 200);
     }
 
@@ -86,7 +100,7 @@ class OutcomeController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy(int $id): Response
+    public function destroy(int $id)
     {
         $outcome = Outcome::find($id);
         if (is_null($outcome)) {
@@ -116,7 +130,7 @@ class OutcomeController extends Controller
             $csvRow = [
                 $item->date,
                 $item->type,
-                $item->contractor->business_name,
+                optional($item->contractor)->business_name,
                 '',
                 $item->payment_method,
                 $item->payment_date,

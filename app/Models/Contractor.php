@@ -11,6 +11,8 @@ class Contractor extends Model
     
     protected $fillable = [
         'business_name',
+        'trade_name',
+        'person_type',
         'industry',
         'address',
         'zip',
