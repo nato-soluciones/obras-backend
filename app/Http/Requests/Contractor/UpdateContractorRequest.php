@@ -29,7 +29,7 @@ class UpdateContractorRequest extends FormRequest
             'phone' => ['regex:/^(|^[0-9\+]{1,20})$/'],
             'email' => 'nullable|email',
             'cuit' => ['regex:/^(|[0-9]{11})$/', Rule::unique('contractors', 'cuit')->ignore($contractorId)],
-            'bank_account' => ['nullable', 'regex:/^[0-9]{0,22}$/'],
+            'bank_account' => ['nullable', 'regex:/^[0-9\/ -]{0,22}$/'],
             'bank_cbu' => ['nullable', 'regex:/^[0-9]{22}$/'],
             'bank_alias' => ['nullable', 'regex:/^(|[a-zA-Z0-9.-]{6,20})$/'],
         ];
