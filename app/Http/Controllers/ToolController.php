@@ -20,7 +20,7 @@ class ToolController extends Controller
      */
     public function index(): Response
     {
-        $tools = Tool::with('category', 'last_location')->get();
+        $tools = Tool::with(['category', 'last_location'])->get();
         return response($tools, 200);
     }
 
@@ -58,7 +58,9 @@ class ToolController extends Controller
      */
     public function show(int $id): Response
     {
-        $tool = Tool::with('locations')->find($id);
+        $tool = Tool::with(['locations' => function($query){
+            $query->orderBy('date', 'asc');
+        }])->find($id);
         return response($tool, 200);
     }
 
