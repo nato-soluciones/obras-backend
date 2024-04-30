@@ -42,7 +42,7 @@ class UpdateContractorRequest extends FormRequest
             'phone' => 'El campo Teléfono no tiene el formato correcto',
             'cuit' => 'El campo CUIT tiene que ser de 11 números.',
             'cuit.unique'  => 'El CUIT ya está en uso, ingrese otro.',
-            'bank_account' => 'El campo Nro de Cuenta tiene que ser de 22 números máximo.',
+            'bank_account' => 'El campo Nro de Cuenta puede contener solo números, /, - y espacios en blanco, y debe tener un máximo de 22 caracteres.',
             'bank_cbu' => 'El campo CBU/CVU tiene que ser de 22 números.',
             'bank_alias' => 'El campo Alias tiene que ser de 6 a 20 números y/o letras.',
         ];
