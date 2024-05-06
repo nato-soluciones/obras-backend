@@ -26,8 +26,8 @@ class ObraController extends Controller
         $obras->each(function ($obra) {
             $activeStage = ObraStage::select('id', 'name', 'progress', 'end_date')
                 ->where('obra_id', $obra->id)
-                ->whereDate('start_date', '<=', now())
-                ->whereDate('end_date', '>=', now())
+                ->whereDate('start_date', '<=', date('Y-m-d'))
+                ->whereDate('end_date', '>=', date('Y-m-d'))
                 ->first();
 
             $obra->active_stage = $activeStage;
