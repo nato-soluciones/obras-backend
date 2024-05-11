@@ -33,7 +33,7 @@ class BanksSeeder extends Seeder
 
         // Insertar datos en la tabla banks
         foreach ($banks as $bank) {
-            Bank::create($bank);
+            Bank::firstOrCreate($bank);
         }
     }
 }

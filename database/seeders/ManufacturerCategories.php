@@ -19,7 +19,7 @@ class ManufacturerCategories extends Seeder
         ];
 
         foreach ($categories as $category) {
-            ManufacturerCategory::create([
+            ManufacturerCategory::firstOrCreate([
                 'name' => $category,
             ]);
         }

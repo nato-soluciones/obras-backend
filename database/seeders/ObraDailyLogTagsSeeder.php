@@ -21,7 +21,7 @@ class ObraDailyLogTagsSeeder extends Seeder
         ];
 
         foreach ($datos as $dato) {
-            ObraDailyLogTag::create($dato);
+            ObraDailyLogTag::firstOrCreate($dato);
         }
     }
 }
