@@ -50,17 +50,7 @@ Listado de acciones iniciales: list, insert, update, delete, display, export
 
 El navbar tendrá un listado de permisos distinto, el mismo tendrá el siguiente formato: el prefijo "navbar\_" + la entidad a mostrar. Ejemplo: navbar_tools, navbar_budget, etc.
 
-### Ejemplos (ACTUALIZAR con nuevo campo description)
-
--   _Usuarios_: Juan, Pedro, Maria, etc.
--   _Roles de Usuario_: Administrador, Arquitecto, Gerente, Obrero, Cliente, etc.
--   _Roles Funcionales_: "acceso total herramientas", "ver herramientas", obra-ingresos-ver, "borrar avance obra"
--   _Permisos_: herramientas_insert, obras_list, obraAvanceObra_insert
-
 # Instalación
-
-1. (DUDA) Seguir los pasos indicados en la documentación de spatie. ([Instalación en laravel](https://spatie.be/docs/laravel-permission/v6/installation-laravel))
-   <br>IMPORTANTE: Antes de realizar la migración (permission_tables), agregar a la misma la siguiente linea **$table->string('description');** debajo de **$table->string('guard_name')** a los Schemas de permissions y roles. Este campo seria el nombre que se va a mostrar en la configuración o interface de usuario.
 
 1. Instalar todas las dependencias, **composer install**
 
@@ -74,8 +64,6 @@ El navbar tendrá un listado de permisos distinto, el mismo tendrá el siguiente
         - **php artisan db:seed --class=RolesAndPermissionsSeeder**
     3. Crea las relaciones iniciales entre los usuarios genéricos y roles de usuario, los roles funcionales y permisos, y le asigna al rol de usuario "dueño" todos los permisos.
         - **php artisan db:seed --class=RelationalRolesPermissionsSeeder**
-
-1. Ejecutar el seed (RelationalRolesPermissionsSeeder) el cual crea las relaciones iniciales entre los roles funcionales y permisos, y le asigna a los roles de usuario "dueño" todos los permisos.
 
 ## Comandos Útiles
 
