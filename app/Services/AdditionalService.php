@@ -6,8 +6,6 @@ use App\Models\Additional;
 use App\Models\AdditionalCategory;
 use App\Models\AdditionalCategoryActivity;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use PgSql\Lob;
 
 class AdditionalService
 {

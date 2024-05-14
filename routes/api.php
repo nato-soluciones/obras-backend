@@ -1,10 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContactController;
@@ -16,6 +12,7 @@ use App\Http\Controllers\ManufacturerCategoryController;
 use App\Http\Controllers\ManufacturerFileController;
 use App\Http\Controllers\CacController;
 use App\Http\Controllers\IpcController;
+use App\Http\Controllers\permission_dev;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,57 +25,37 @@ use App\Http\Controllers\IpcController;
 |
 */
 
-// Authentications endpoint
-Route::prefix('auth')->controller(AuthController::class)->group(function() {
-    Route::post('/login', 'login');
-    Route::get('/user', 'user');
-});
-
-
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 include_once __DIR__ . '/api/auxiliaries.php';
 include_once __DIR__ . '/api/budgets.php';
 include_once __DIR__ . '/api/contractors.php';
 include_once __DIR__ . '/api/obras.php';
-
-// Users endpoints
-Route::prefix('users')->middleware('auth:sanctum')->controller(UserController::class)->group(function() {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
-    Route::post('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-    Route::post('/{id}/password', 'password');
-});
+include_once __DIR__ . '/api/permissions.php';
 
 // Clients endpoints
 Route::prefix('clients')->middleware('auth:sanctum')->controller(ClientController::class)->group(function() {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
-    Route::post('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+    Route::get('/', 'index')->middleware('permission:clients_list');
+    Route::get('/{id}', 'show')->middleware('permission:clients_display');
+    Route::post('/', 'store')->middleware('permission:clients_insert');
+    Route::post('/{id}', 'update')->middleware('permission:clients_update');
+    Route::delete('/{id}', 'destroy')->middleware('permission:clients_delete');
 });
 
 // Notes endpoints
 Route::prefix('notes')->middleware('auth:sanctum')->controller(NoteController::class)->group(function() {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
-    Route::post('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+    Route::get('/', 'index')->middleware('permission:notes_list');
+    Route::get('/{id}', 'show')->middleware('permission:notes_display');
+    Route::post('/', 'store')->middleware('permission:notes_insert');
+    Route::post('/{id}', 'update')->middleware('permission:notes_update');
+    Route::delete('/{id}', 'destroy')->middleware('permission:notes_delete');
 });
 
 // Contacts endpoints
 Route::prefix('contacts')->middleware('auth:sanctum')->controller(ContactController::class)->group(function() {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
-    Route::post('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+    Route::get('/', 'index')->middleware('permission:contacts_list');
+    Route::get('/{id}', 'show')->middleware('permission:contacts_display');
+    Route::post('/', 'store')->middleware('permission:contacts_insert');
+    Route::post('/{id}', 'update')->middleware('permission:contacts_update');
+    Route::delete('/{id}', 'destroy')->middleware('permission:contacts_delete');
 });
 
 // Tools endpoints
@@ -88,11 +65,11 @@ Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
     Route::post('/categories/{id}', [ToolCategoryController::class, 'destroy']);
     Route::post('/locations', [ToolLocationController::class, 'store']);
 
-    Route::get('/', [ToolController::class, 'index']);
-    Route::get('/{id}', [ToolController::class, 'show']);
-    Route::post('/', [ToolController::class, 'store']);
-    Route::post('/{id}', [ToolController::class, 'update']);
-    Route::delete('/{id}', [ToolController::class, 'destroy']);
+    Route::get('/', [ToolController::class, 'index'])->middleware('permission:tools_list');
+    Route::get('/{id}', [ToolController::class, 'show'])->middleware('permission:tools_display');
+    Route::post('/', [ToolController::class, 'store'])->middleware('permission:tools_insert');
+    Route::post('/{id}', [ToolController::class, 'update'])->middleware('permission:tools_update');
+    Route::delete('/{id}', [ToolController::class, 'destroy'])->middleware('permission:tools_delete');
 });
 
 // Manufacturies endpoints
@@ -104,22 +81,29 @@ Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {
     Route::post('/files', [ManufacturerFileController::class, 'store']);
     Route::delete('/files/{id}', [ManufacturerFileController::class, 'destroy']);
 
-    Route::get('/', [ManufacturerController::class, 'index']);
-    Route::get('/{id}', [ManufacturerController::class, 'show']);
-    Route::post('/', [ManufacturerController::class, 'store']);
-    Route::post('/{id}', [ManufacturerController::class, 'update']);
-    Route::delete('/{id}', [ManufacturerController::class, 'destroy']);
+    Route::get('/', [ManufacturerController::class, 'index'])->middleware('permission:manufacturing_list');
+    Route::get('/{id}', [ManufacturerController::class, 'show'])->middleware('permission:manufacturing_display');
+    Route::post('/', [ManufacturerController::class, 'store'])->middleware('permission:manufacturing_insert');
+    Route::post('/{id}', [ManufacturerController::class, 'update'])->middleware('permission:manufacturing_update');
+    Route::delete('/{id}', [ManufacturerController::class, 'destroy'])->middleware('permission:manufacturing_delete');
 });
 
 // CAC endpoints
 Route::prefix('cac')->middleware('auth:sanctum')->controller(CacController::class)->group(function() {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::post('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+    Route::get('/', 'index')->middleware('permission:indexCAC_list');
+    Route::post('/', 'store')->middleware('permission:indexCAC_insert');
+    Route::post('/{id}', 'update')->middleware('permission:indexCAC_update');
+    Route::delete('/{id}', 'destroy')->middleware('permission:indexCAC_delete');
 });
 
 Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::class)->group(function() {
+    Route::get('/', 'index')->middleware('permission:indexIPC_list');
+    Route::post('/', 'store')->middleware('permission:indexIPC_insert');
+    Route::post('/{id}', 'update')->middleware('permission:indexIPC_update');
+    Route::delete('/{id}', 'destroy')->middleware('permission:indexIPC_delete');
+});
+
+Route::prefix('permissions_dev')->middleware('auth:sanctum')->controller(permission_dev::class)->group(function() {
     Route::get('/', 'index');
     Route::post('/', 'store');
     Route::post('/{id}', 'update');
