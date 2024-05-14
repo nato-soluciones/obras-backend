@@ -11,8 +11,7 @@ class RolUserController extends Controller
 {
     public function index()
     {
-        $userRoles = Role::whereDoesntHave('permissions')
-            ->where('name', 'not like', 'functional\_%')
+        $userRoles = Role::where('name', 'not like', 'functional\_%')
             ->select('id', 'name', 'description')
             ->get();
         return response($userRoles);
