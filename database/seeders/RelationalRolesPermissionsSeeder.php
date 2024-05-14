@@ -107,15 +107,15 @@ class RelationalRolesPermissionsSeeder extends Seeder
         $functionalRol = Role::where('name', 'functional_obraOutcomes_full')->first();
         $functionalRol->givePermissionTo($obras_outcomes_permission_names);
 
-        $obras_aditionals_permission_names = [
-            "obraAditionals_list",
-            "obraAditionals_insert",
-            "obraAditionals_update",
-            "obraAditionals_delete",
-            "obraAditionals_display"
+        $obras_additionals_permission_names = [
+            "obraAdditional_list",
+            "obraAdditional_insert",
+            "obraAdditional_update",
+            "obraAdditional_delete",
+            "obraAdditional_display"
         ];
-        $functionalRol = Role::where('name', 'functional_obraAditionals_full')->first();
-        $functionalRol->givePermissionTo($obras_aditionals_permission_names);
+        $functionalRol = Role::where('name', 'functional_obraAdditionals_full')->first();
+        $functionalRol->givePermissionTo($obras_additionals_permission_names);
 
         $obras_contractors_permission_names = [
             "obraContractors_list",
@@ -299,8 +299,8 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "functional_notes_full"
         ];
 
-        $roleFuntionals = Role::whereIn('name', $functionalRoles_names)->get();
-        foreach ($roleFuntionals as $roleFunctional) {
+        $roleFunctionals = Role::whereIn('name', $functionalRoles_names)->get();
+        foreach ($roleFunctionals as $roleFunctional) {
             if ($roleFunctional->permissions->count() > 0) {
                 RoleRelationship::FirstOrCreate([
                     'functional_role_id' => $roleFunctional['id'],
