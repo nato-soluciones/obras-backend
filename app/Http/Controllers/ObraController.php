@@ -184,8 +184,6 @@ class ObraController extends Controller
      */
     public function additionals(Request $request, int $id): Response
     {
-        $obra = Obra::find($id);
-
         $additionalService = app(AdditionalService::class);
         $additionalData = $request->all();
         $additional = $additionalService->createAdditionalWithCategories($additionalData);
@@ -221,7 +219,7 @@ class ObraController extends Controller
             ->groupBy('outcomes.contractor_id')
             ->get();
 
-        // Calcula el porcentaje de avance de cada proveedor (en base a los proveedores que estan en el presupuesto)
+        // Calcula el porcentaje de avance de cada proveedor (en base a los proveedores que están en el presupuesto)
         $result = $resultBudget->map(function ($budgetItem) use ($resultOutcomes, $resultAdditional) {
             $outcomeItem = $resultOutcomes->where('contractor_id', $budgetItem->contractor_id)->first();
             $additionalItem = $resultAdditional->where('contractor_id', $budgetItem->contractor_id)->first();
@@ -241,7 +239,7 @@ class ObraController extends Controller
         })->values();
 
 
-        // Recupera los proveedores que estan en adicionales pero no en presupuesto
+        // Recupera los proveedores que están en adicionales pero no en presupuesto
 
         // Obtener todos los contractor_id de $result
         $resultContractorIds = $result->pluck('contractor_id');
