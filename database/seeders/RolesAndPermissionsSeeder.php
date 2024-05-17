@@ -62,6 +62,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Completo",
             ],
             [
+                "name" => "functional_navbar_arquitecto",
+                "guard_name" => "api",
+                "description" => "Menú Arquitecto",
+            ],
+            [
                 "name" => "functional_obras_full",
                 "guard_name" => "api",
                 "description" => "Obras Completo",
