@@ -280,7 +280,7 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "functional_obraStageTasks_full",
             "functional_obraIncomes_full",
             "functional_obraOutcomes_full",
-            "functional_obraAditionals_full",
+            "functional_obraAdditionals_full",
             "functional_obraContractors_full",
             "functional_obraDocuments_full",
             "functional_contractors_full",
