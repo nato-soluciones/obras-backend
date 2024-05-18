@@ -7,6 +7,9 @@ use Illuminate\Http\Response;
 
 use App\Models\Cac;
 
+use App\Http\Requests\Cac\CreateCacRequest;
+use App\Http\Requests\Cac\UpdateCacRequest;
+
 class CacController extends Controller
 {
     /**
@@ -26,7 +29,7 @@ class CacController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(CreateCacRequest $request): Response
     {
         $cac = Cac::create($request->all());        
         return response($cac, 201);
@@ -38,7 +41,7 @@ class CacController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(UpdateCacRequest $request, int $id): Response
     {
         $cac = Cac::find($id);
         $cac->update($request->all());
