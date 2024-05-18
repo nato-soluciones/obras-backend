@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -149,6 +150,8 @@ class UserController extends Controller
         $entity = $request->input('entity', '');
 
         $user = Auth::user();
+        if(strtoupper($user->getRoleNames()[0]) === 'SUPERADMIN') return Response(['full'], 200);
+
         $permissions = $user->getAllPermissions();
  
         // Filtra los permisos por entidad
