@@ -11,8 +11,7 @@ class RolFunctionalController extends Controller
 {
     public function index()
     {
-        $userRoles = Role::whereHas('permissions')
-            ->orWhere('name', 'like', 'functional\_%')
+        $userRoles = Role::Where('name', 'like', 'functional\_%')
             ->select('id', 'name', 'description')
             ->get();
         return response($userRoles);
