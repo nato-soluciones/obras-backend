@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RoleRelationship;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class RolUserController extends Controller
@@ -13,8 +13,62 @@ class RolUserController extends Controller
     {
         $userRoles = Role::where('name', 'not like', 'functional\_%')
             ->select('id', 'name', 'description')
+            ->orderBy('description', 'asc')
             ->get();
         return response($userRoles);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->all();
+        $data['guard_name'] = 'api';
+
+        // Check name is unique
+        if (Role::where('name', $data['name'])->exists()) {
+            return response(['message' => 'Ya existe un rol con el código ingresado.'], 409);
+        }
+        $data['name'] = strtoupper($data['name']);
+        $user = Role::create($data);
+
+        return response($user, 201);
+    }
+
+    public function show(int $id)
+    {
+        $user = Role::select("id", "name", "description")->find($id);
+
+        return response($user, 200);
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $data = $request->all();
+        unset($data['name']);
+
+        $user = Role::find($id);
+        $user->update($data);
+
+        return response($user, 200);
+    }
+
+    public function usersAssociated(int $id)
+    {
+        $users = Role::find($id)->users()->select('id', 'firstname', 'lastname', 'email')->get()->makeHidden('pivot');
+
+        return response($users, 200);
+    }
+
+    public function functionalRoleAssociated(int $id)
+    {
+        $roles = RoleRelationship::where('user_role_id', $id)
+            ->with(['functionalRole' => function ($query) {
+                $query->select('id', 'description', 'name')
+                    ->orderBy('description', 'asc');
+            }])
+            ->get()
+            ->pluck('functionalRole');
+
+        return response($roles, 200);
     }
 
     public function functionalRoleAdd(Request $request, int $idRolUsuario)
@@ -25,16 +79,13 @@ class RolUserController extends Controller
         $rolesFuncionales = $request->all();
         // Recorrer los roles y validar que existan el rol
         foreach ($rolesFuncionales as $rolFuncional) {
-            $functionalRolExist = Role::where('name', $rolFuncional['name'])->exists();
+            $functionalRolExist = Role::where('name', $rolFuncional)->exists();
             if (!$functionalRolExist) {
-                return response(['error' => "El rol funcional '{$rolFuncional['name']}' no existe. No se asignó ningún rol funcional al rol '{$userRol->name}'"], 400);
+                return response(['error' => "El rol funcional '{$rolFuncional}' no existe. No se asignó ningún rol funcional al rol '{$userRol->name}'"], 400);
             }
         }
-
-        $rolesFuncionalesSave = array_column($rolesFuncionales, 'name');
-
         // Asocia los roles funcionales al rol de usuario
-        $roleFunctionals = Role::whereIn('name', $rolesFuncionalesSave)->get();
+        $roleFunctionals = Role::whereIn('name', $rolesFuncionales)->get();
         foreach ($roleFunctionals as $roleFunctional) {
             if ($roleFunctional->permissions->count() > 0) {
                 RoleRelationship::FirstOrCreate([
@@ -54,18 +105,17 @@ class RolUserController extends Controller
         $userRol = Role::find($idRolUsuario);
 
         $rolesFuncionales = $request->all();
+
         // Recorrer los roles y validar que existan el rol
         foreach ($rolesFuncionales as $rolFuncional) {
-            $functionalRolExist = Role::where('name', $rolFuncional['name'])->exists();
+            $functionalRolExist = Role::where('name', $rolFuncional)->exists();
             if (!$functionalRolExist) {
-                return response(['error' => "El rol funcional '{$rolFuncional['name']}' no existe. No se eliminó ningún rol funcional al rol '{$userRol->name}'"], 400);
+                return response(['error' => "El rol funcional '{$rolFuncional}' no existe. No se eliminó ningún rol funcional al rol '{$userRol->name}'"], 400);
             }
         }
 
-        $rolesFuncionalesNameRemove = array_column($rolesFuncionales, 'name');
-        $roleFunctionals = Role::whereIn('name', $rolesFuncionalesNameRemove)->get();
-
         // Elimina los roles funcionales al rol de usuario
+        $roleFunctionals = Role::whereIn('name', $rolesFuncionales)->get();
         foreach ($roleFunctionals as $roleFunctional) {
             if ($roleFunctional->permissions->count() > 0) {
                 // Elimina la asociación entre el rol de usuario y el rol funcional

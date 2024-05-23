@@ -35,13 +35,23 @@ Route::prefix('users')->middleware('auth:sanctum')->controller(UserController::c
 // Roles de usuario
 Route::prefix('role_users')->middleware('auth:sanctum')->controller(RolUserController::class)->group(function () {
   Route::get('/', 'index');
-  Route::post('/{id}/functional_role', 'functionalRoleAdd');
-  Route::delete('/{id}/functional_role', 'functionalRoleRemove');
+  Route::get('/{id}/users', 'usersAssociated');
+  Route::get('/{id}/role_functionals', 'functionalRoleAssociated');
+  Route::get('/{id}', 'show');
+  Route::post('/', 'store');
+  Route::post('/{id}', 'update');
+  Route::post('/{id}/role_functionals', 'functionalRoleAdd');
+  Route::delete('/{id}/role_functionals', 'functionalRoleRemove');
 });
 
 // Roles funcionales
 Route::prefix('role_functionals')->middleware('auth:sanctum')->controller(RolFunctionalController::class)->group(function () {
   Route::get('/', 'index');
+  Route::get('/{id}/role_users', 'userRolesAssociated');
+  Route::get('/{id}/permissions', 'permissionsAssociated');
+  Route::get('/{id}', 'show');
+  Route::post('/', 'store');
+  Route::post('/{id}', 'update');
   Route::post('/{id}/permissions', 'permissionsAdd');
   Route::delete('/{id}/permissions', 'permissionsRemove');
 });

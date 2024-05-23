@@ -114,17 +114,17 @@ Obtener todos los roles funcionales
 
 1. Creación de usuarios
 2. Asignación de roles de usuario a usuarios
+3. Listado de Roles de usuario
+4. Alta y modificación de Roles de usuario
+5. Alta de roles funcionales en Roles de usuario
+6. Baja de roles funcionales en Roles de usuario
+7. Listado de Roles funcionales
+8. Alta y modificación de Roles funcionales
+9. Alta de permisos en Roles funcionales
+10. Baja de permisos en Roles funcionales
 
 ## API
-
-1. Listado de Roles de usuario
-2. Listado de Roles funcionales
-3. Listado de Permisos
-
-4. Alta de roles funcionales en Roles de usuario
-5. Baja de roles funcionales en Roles de usuario
-6. Alta de permisos en Roles funcionales
-7. Baja de permisos en Roles funcionales
+1. Listado de Permisos
 
 ## Seeder
 
@@ -133,7 +133,3 @@ Obtener todos los roles funcionales
 3. Alta de Permisos
 4. Alta de Relaciones iniciales entre Permisos y roles funcionales
 5. Alta de Relaciones iniciales entre roles de usuario y roles funcionales (solo rol Dueño)
-
-## DB
-
-Todas las consultas de roles y permisos
