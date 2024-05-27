@@ -243,7 +243,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Cotizaciones",
             ],
             [
-                "name" => "navbar_note",
+                "name" => "navbar_notes",
                 "guard_name" => "api",
                 "description" => "Menú Notas",
             ],
