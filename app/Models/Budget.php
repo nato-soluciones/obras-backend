@@ -28,6 +28,7 @@ class Budget extends Model
         'total_cost',
         'user_id',
         'client_id',
+        'created_by_id',
     ];
 
     /**
@@ -46,18 +47,18 @@ class Budget extends Model
      *
      * @return void
      */
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($budget) {
-            do {
-                $randomNumber = mt_rand(100000000, 999999999);
-            } while (self::where('code', $randomNumber)->exists());
+    //     static::creating(function ($budget) {
+    //         do {
+    //             $randomNumber = mt_rand(100000000, 999999999);
+    //         } while (self::where('code', $randomNumber)->exists());
 
-            $budget->code = $randomNumber;
-        });
-    }
+    //         $budget->code = $randomNumber;
+    //     });
+    // }
 
     public function client()
     {

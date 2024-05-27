@@ -7,7 +7,6 @@ use App\Models\BudgetCategory;
 use App\Models\BudgetCategoryActivity;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use PgSql\Lob;
 
 class BudgetService
 {
@@ -15,7 +14,7 @@ class BudgetService
   {
     $categories = $data['categories'];
     unset($data['categories']);
-    $data['user_id'] = Auth::user()->id;
+    $data['created_by_id'] = Auth::user()->id;
 
     $budget = Budget::create($data);
 
