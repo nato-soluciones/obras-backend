@@ -18,4 +18,5 @@ Route::prefix('contractors')->middleware('auth:sanctum')->controller(ContractorC
 Route::prefix('contractor_industries')->middleware('auth:sanctum')->controller(ContractorIndustryController::class)->group(function () {
   Route::get('/', 'index');
   Route::get('/{code}', 'show');
+  Route::post('/', 'store');
 });

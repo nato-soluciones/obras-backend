@@ -28,4 +28,15 @@ class ContractorIndustryController extends Controller
         return response($contractorIndustry, 200);
     }
 
+    public function store(Request $request): Response
+    {
+        $contractorIndustry = new ContractorIndustry();
+        $contractorIndustry->code = strtoupper(str_replace(' ', '_', $request->name));
+        $contractorIndustry->name = $request->name;
+        $contractorIndustry->save();
+        return response($contractorIndustry, 200);
+
+    }
+
+
 }
