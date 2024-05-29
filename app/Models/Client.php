@@ -23,6 +23,7 @@ class Client extends Model
         'address',
         'city',
         'state',
+        'zip',
         'email',
         'phone',
         'cuit',
