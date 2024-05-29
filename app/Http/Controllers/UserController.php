@@ -24,7 +24,10 @@ class UserController extends Controller
     {
         $users = User::with(['roles' => function ($q) {
             $q->select("name", "description");
-        }])->get();
+        }])->whereHas('roles', function ($query) {
+            $query->where('name', '!=', 'SUPERADMIN');
+        })->orWhereDoesntHave('roles')
+        ->get();
 
         // Ocultar la propiedad pivot de los roles
         $users->each(function ($user) {
@@ -72,7 +75,7 @@ class UserController extends Controller
         if ($user) {
             $user->roles->makeHidden('pivot');
         }
-   
+
         return response($user, 200);
     }
     public function showWithPermissions(int $id)
@@ -103,7 +106,7 @@ class UserController extends Controller
         $user = User::find($id);
         $user->update($data);
         $user->syncRoles($role);
-        
+
         return response($user, 200);
     }
 
@@ -139,7 +142,7 @@ class UserController extends Controller
 
     public function permissionsCheck(Request $request)
     {
-        $permission = $request->input('permission','');
+        $permission = $request->input('permission', '');
         $user = Auth::user();
         $userPermission = $user->hasPermissionTo($permission);
         return response($userPermission, 200);
@@ -150,10 +153,10 @@ class UserController extends Controller
         $entity = $request->input('entity', '');
 
         $user = Auth::user();
-        if(strtoupper($user->getRoleNames()[0]) === 'SUPERADMIN') return Response(['full'], 200);
+        if (strtoupper($user->getRoleNames()[0]) === 'SUPERADMIN') return Response(['full'], 200);
 
         $permissions = $user->getAllPermissions();
- 
+
         // Filtra los permisos por entidad
         $entityPermissions = $permissions->filter(function ($permission) use ($entity) {
             return strpos($permission->name, $entity . '_') === 0;

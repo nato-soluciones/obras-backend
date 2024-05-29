@@ -15,6 +15,14 @@ class RolUserController extends Controller
             ->select('id', 'name', 'description')
             ->orderBy('description', 'asc')
             ->get();
+
+        // Si el usuario logueado no es superadmin quita el rol SUPERADMIN
+        if (!auth()->user()->hasRole('SUPERADMIN')) {
+            $userRoles = $userRoles->filter(function ($userRole) {
+                return $userRole->name !== 'SUPERADMIN';
+            });
+        }
+
         return response($userRoles);
     }
 

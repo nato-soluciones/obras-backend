@@ -32,12 +32,7 @@ class RolesAndPermissionsSeeder extends Seeder
             [
                 "name" => "CONSTRUCTION_MANAGER",
                 "guard_name" => "api",
-                "description" => "Maestro mayor de obras",
-            ],
-            [
-                "name" => "CONTRACTOR",
-                "guard_name" => "api",
-                "description" => "Contratista",
+                "description" => "Jefe de Obra",
             ],
             [
                 "name" => "ADMINISTRATIVE",
@@ -764,6 +759,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "users_display",
                 "guard_name" => "api",
                 "description" => "Ver Usuario",
+            ],
+            [
+                "name" => "users_role_change",
+                "guard_name" => "api",
+                "description" => "Cambiar Rol de Usuario",
             ],
         ];
         $contacts_permission = [
