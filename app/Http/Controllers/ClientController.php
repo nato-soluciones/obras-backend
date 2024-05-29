@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Client;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ClientController extends Controller
 {
@@ -42,7 +43,7 @@ class ClientController extends Controller
      */
     public function show(int $id): Response
     {
-        $client = Client::with('users')->find($id);
+        $client = Client::find($id);
         return response($client, 200);
     }
 
@@ -68,8 +69,13 @@ class ClientController extends Controller
      */
     public function destroy(int $id): Response
     {
-        $client = Client::find($id);
-        $client->delete();
-        return response(['message' => 'Client deleted'], 200);
+        try {
+            $client = Client::findOrFail($id);
+            $client->delete();
+            return response(['message' => 'Cliente eliminado correctamente'], 200);
+        } catch (ModelNotFoundException $e) {
+            // Devolver una respuesta JSON indicando que el recurso no se encontró
+            return response(['error' => 'Cliente no encontrado'], 404);
+        }
     }
 }
