@@ -21,6 +21,7 @@ return new class extends Migration
 
             $table->string('person_type')->default('individual');
             $table->string('lastname')->nullable();
+            $table->string('zip')->nullable();
             $table->string('name')->nullable()->change();
         });
     }
@@ -33,6 +34,7 @@ return new class extends Migration
         Schema::table('clients', function (Blueprint $table) {
             $table->dropColumn('person_type');
             $table->dropColumn('lastname');
+            $table->dropColumn('zip');
         });
     }
 };
