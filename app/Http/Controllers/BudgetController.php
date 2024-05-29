@@ -128,15 +128,17 @@ class BudgetController extends Controller
     public function show(int $id): Response
     {
         $budget = Budget::with(['client' => function ($q) {
-            $q->select('id', 'name');
-        }, 'categories.activities'])->find($id);
+            $q->select('id', 'person_type', 'business_name', 'firstname', 'lastname');
+        }, 'user' => function ($q) {
+            $q->select('id', 'firstname', 'lastname');
+        },  'categories.activities'])->find($id);
 
         // Carga manualmente el proveedor (contratista) para cada actividad si el campo provider_id no es nulo
         foreach ($budget->categories as $category) {
             foreach ($category->activities as $activity) {
                 if ($activity->provider_id !== null) {
-                    $constractorBusinessName = Contractor::where('id', $activity->provider_id)->value('business_name');
-                    $activity->provider_name = $constractorBusinessName;
+                    $contractorBusinessName = Contractor::where('id', $activity->provider_id)->value('business_name');
+                    $activity->provider_name = $contractorBusinessName;
                 }
             }
         }
