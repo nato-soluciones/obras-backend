@@ -16,7 +16,7 @@ class ToolCategoryController extends Controller
      */
     public function index(): Response
     {
-        $categories = ToolCategory::all();
+        $categories = ToolCategory::select(['id', 'name'])->orderBy('name')->get();
         return response($categories, 200);
     }
 

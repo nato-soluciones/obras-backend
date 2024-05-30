@@ -14,7 +14,7 @@ class ContractorIndustryController extends Controller
      */
     public function index(): Response
     {
-        $contractorIndustries = ContractorIndustry::all(['code', 'name']);
+        $contractorIndustries = ContractorIndustry::select(['code', 'name'])->orderBy('name')->get();
         return response($contractorIndustries, 200);
     }
 
