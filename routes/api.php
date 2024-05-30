@@ -57,12 +57,18 @@ Route::prefix('contacts')->middleware('auth:sanctum')->controller(ContactControl
     Route::delete('/{id}', 'destroy')->middleware('permission:contacts_delete');
 });
 
+// Tools Locations endpoints
+Route::prefix('tools/{id}/locations')->middleware('auth:sanctum')->controller(ToolLocationController::class)->group(function() {
+    Route::post('/', 'store'); //->middleware('permission:locations_insert');
+    Route::post('/{locationId}', 'update'); //->middleware('permission:locations_update');
+    Route::delete('/{locationId}', 'destroy'); //->middleware('permission:locations_delete');
+});
+
 // Tools endpoints
 Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
     Route::get('/categories', [ToolCategoryController::class, 'index']);
     Route::post('/categories', [ToolCategoryController::class, 'store']);
     Route::post('/categories/{id}', [ToolCategoryController::class, 'destroy']);
-    Route::post('/locations', [ToolLocationController::class, 'store']);
 
     Route::get('/', [ToolController::class, 'index'])->middleware('permission:tools_list');
     Route::get('/{id}', [ToolController::class, 'show'])->middleware('permission:tools_display');
@@ -70,6 +76,8 @@ Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
     Route::post('/{id}', [ToolController::class, 'update'])->middleware('permission:tools_update');
     Route::delete('/{id}', [ToolController::class, 'destroy'])->middleware('permission:tools_delete');
 });
+
+
 
 // Manufacturies endpoints
 Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {

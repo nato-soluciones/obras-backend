@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\ToolLocation;
+use Illuminate\Support\Facades\Log;
 
 class ToolLocationController extends Controller
 {
@@ -16,7 +17,7 @@ class ToolLocationController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(Request $request, int $id): Response
     {
         $image = $request->file('image');
         $created_by = $request->user()->id;
@@ -36,5 +37,23 @@ class ToolLocationController extends Controller
         $location->save();
 
         return response($location, 201);
+    }
+
+    public function update(Request $request, int $id, int $locationId): Response
+    {
+        $location = ToolLocation::find($locationId);
+        $data = $request->all();
+        unset($data['image']);    
+        $location->update($data);   
+
+        return response($location, 200);
+    }
+
+    public function destroy(int $id, int $locationId): Response
+    {
+        $location = ToolLocation::find($locationId);
+        $location->delete();
+
+        return response(['message' => 'Movimiento de Herramienta eliminado'], 204);
     }
 }
