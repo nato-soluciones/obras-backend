@@ -47,7 +47,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($userRoles as $role) {
-            Role::firstOrCreate($role);
+            Role::updateOrCreate($role);
         }
         
         $functionalRoles = [
