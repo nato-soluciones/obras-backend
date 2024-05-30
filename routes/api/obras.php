@@ -16,21 +16,24 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
   Route::get('/', 'index')->middleware('permission:obras_list');
   Route::get('/{id}', 'show')->middleware('permission:obras_display');
   Route::get('/{id}/contractors', 'contractors')->middleware('permission:obraContractors_list');
+
   Route::post('/', 'store')->middleware('permission:obras_insert');
   Route::post('/{id}', 'update')->middleware('permission:obras_update');
-  Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
   Route::post('/{id}/documents', 'documents')->middleware('permission:obraDocuments_insert');
   Route::post('/{id}/additionals', 'additionals')->middleware('permission:obraAdditional_insert');
+
+  Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
 });
 
 // Incomes endpoints
-Route::prefix('incomes')->middleware('auth:sanctum')->controller(IncomeController::class)->group(function () {
+Route::prefix('obras/{obraId}/incomes')->middleware('auth:sanctum')->controller(IncomeController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obraIncomes_list');
+  Route::get('/list_all', 'listAll')->middleware('permission:obraIncomes_list');
   Route::get('/export', 'exportList')->middleware('permission:obraIncomes_export');
-  Route::get('/{id}', 'show')->middleware('permission:obraIncomes_display');
+  Route::get('/{incomeId}', 'show')->middleware('permission:obraIncomes_display');
   Route::post('/', 'store')->middleware('permission:obraIncomes_insert');
-  Route::post('/{id}', 'update')->middleware('permission:obraIncomes_update');
-  Route::delete('/{id}', 'destroy')->middleware('permission:obraIncomes_delete');
+  Route::post('/{incomeId}', 'update')->middleware('permission:obraIncomes_update');
+  Route::delete('/{incomeId}', 'destroy')->middleware('permission:obraIncomes_delete');
 });
 
 // Outcomes endpoints

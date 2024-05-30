@@ -74,7 +74,6 @@ class ClientController extends Controller
             $client->delete();
             return response(['message' => 'Cliente eliminado correctamente'], 200);
         } catch (ModelNotFoundException $e) {
-            // Devolver una respuesta JSON indicando que el recurso no se encontró
             return response(['error' => 'Cliente no encontrado'], 404);
         }
     }
