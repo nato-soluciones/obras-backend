@@ -47,7 +47,19 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($userRoles as $role) {
-            Role::updateOrCreate($role);
+            $existingRole = Role::firstOrNew(
+                ['name' => $role['name'], 'guard_name' => $role['guard_name']],
+                ['description' => $role['description']]
+            );
+
+            if ($existingRole->exists) {
+                // Si el rol ya existe, actualiza la descripción
+                $existingRole->description = $role['description'];
+                $existingRole->save();
+            } else {
+                // Si el rol no existe, créalo
+                $existingRole->save();
+            }
         }
         
         $functionalRoles = [
