@@ -15,8 +15,8 @@ class DataMigrationSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
-            // Actualiza los registros con type = 'OTHER' a 'OWNER_EXPENSES'
-            Outcome::where('type', 'OTHER')
+            // Actualiza los registros con type = 'OTHERS' a 'OWNER_EXPENSES'
+            Outcome::where('type', 'OTHERS')
                 ->update(['type' => 'OWNER_EXPENSES']);
 
             // Actualiza los registros con type = 'MANAGEMENT' a 'PROJECT_EXPENSES'
