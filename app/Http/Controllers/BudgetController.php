@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use App\Services\BudgetService;
 use App\Models\Budget;
 use App\Models\Contractor;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -171,9 +172,14 @@ class BudgetController extends Controller
      */
     public function destroy(int $id): Response
     {
-        $budget = Budget::find($id);
-        $budget->delete();
-        return response(['message' => 'Budget deleted'], 200);
+        try {
+            $budget = Budget::findOrFail($id);
+            $budget->delete();
+            return response(['message' => 'Presupuesto eliminado correctamente'], 204);
+            
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Presupuesto no encontrado'], 404);
+        }
     }
 
     /**
