@@ -27,7 +27,10 @@ class IncomeController extends Controller
 
     public function listAll(Request $request, int $obraId): Response
     {
-        $incomes = Income::where('obra_id', $obraId)->withTrashed()->orderBy('receipt_number', 'desc')->get();
+        $incomes = Income::where('obra_id', $obraId)
+            ->withTrashed()
+            ->orderBy('receipt_number', 'desc')
+            ->get();
         return response($incomes, 200);
     }
     /**
@@ -68,7 +71,7 @@ class IncomeController extends Controller
     {
         $income = Income::find($incomeId);
         if (is_null($income)) {
-            return response()->json(['message' => 'Income not found'], 404);
+            return response()->json(['message' => 'Ingreso no encontrado'], 404);
         }
         $income->update($request->all());
         return response($income, 200);
@@ -94,7 +97,10 @@ class IncomeController extends Controller
 
     public function exportList(int $obraId)
     {
-        $incomes = Income::where('obra_id', $obraId)->withTrashed()->orderBy('receipt_number', 'desc')->get();
+        $incomes = Income::where('obra_id', $obraId)
+            ->withTrashed()
+            ->orderBy('receipt_number', 'desc')
+            ->get();
         $f = fopen('php://memory', 'r+');
 
         $csvTitles = [
