@@ -18,5 +18,6 @@ class Document extends Model
         'name',
         'category',
         'path',
+        'obra_id'
     ];
 }

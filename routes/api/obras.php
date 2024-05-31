@@ -5,6 +5,7 @@ use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\ObraDailyLogController;
 use App\Http\Controllers\ObraDailyLogTagController;
+use App\Http\Controllers\ObraDocumentController;
 use App\Http\Controllers\ObraStageController;
 use App\Http\Controllers\ObraStageTaskController;
 use App\Http\Controllers\OutcomeController;
@@ -15,14 +16,13 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obras_list');
   Route::get('/{id}', 'show')->middleware('permission:obras_display');
-  Route::get('/{id}/contractors', 'contractors')->middleware('permission:obraContractors_list');
-
   Route::post('/', 'store')->middleware('permission:obras_insert');
   Route::post('/{id}', 'update')->middleware('permission:obras_update');
-  Route::post('/{id}/documents', 'documents')->middleware('permission:obraDocuments_insert');
-  Route::post('/{id}/additionals', 'additionals')->middleware('permission:obraAdditional_insert');
-
   Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
+  
+
+  Route::get('/{id}/contractors', 'contractors')->middleware('permission:obraContractors_list');
+  Route::post('/{id}/additionals', 'additionals')->middleware('permission:obraAdditional_insert');
 });
 
 // Incomes endpoints
@@ -37,13 +37,20 @@ Route::prefix('obras/{obraId}/incomes')->middleware('auth:sanctum')->controller(
 });
 
 // Outcomes endpoints
-Route::prefix('outcomes')->middleware('auth:sanctum')->controller(OutcomeController::class)->group(function () {
+Route::prefix('obras/{obraId}/outcomes')->middleware('auth:sanctum')->controller(OutcomeController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obraOutcomes_list');
+  Route::get('/list_all', 'listAll')->middleware('permission:obraOutcomes_list');
   Route::get('/export', 'exportList')->middleware('permission:obraOutcomes_export');
-  Route::get('/{id}', 'show')->middleware('permission:obraOutcomes_display');
+  Route::get('/{outcomeId}', 'show')->middleware('permission:obraOutcomes_display');
   Route::post('/', 'store')->middleware('permission:obraOutcomes_insert');
-  Route::post('/{id}', 'update')->middleware('permission:obraOutcomes_update');
-  Route::delete('/{id}', 'destroy')->middleware('permission:obraOutcomes_delete');
+  Route::post('/{outcomeId}', 'update')->middleware('permission:obraOutcomes_update');
+  Route::delete('/{outcomeId}', 'destroy')->middleware('permission:obraOutcomes_delete');
+});
+
+// Documents endpoints
+Route::prefix('obras/{obraId}/documents')->middleware('auth:sanctum')->controller(ObraDocumentController::class)->group(function () {
+  Route::get('/', 'index')->middleware('permission:obraDocuments_list');
+  Route::post('/', 'store')->middleware('permission:obraDocuments_insert');
 });
 
 // Additionals endpoints

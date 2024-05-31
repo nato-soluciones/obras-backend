@@ -10,6 +10,7 @@ use App\Models\Obra;
 use App\Models\Outcome;
 use App\Models\ObraStage;
 use App\Services\AdditionalService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 
 class ObraController extends Controller
@@ -21,7 +22,9 @@ class ObraController extends Controller
      */
     public function index(): Response
     {
-        $obras = Obra::with('client')->get();
+        $obras = Obra::with(['client' => function($q){
+            $q->select('id', 'person_type','firstname', 'lastname', 'business_name');
+        }])->get();
 
         $obras->each(function ($obra) {
             $activeStage = ObraStage::select('id', 'name', 'progress', 'end_date')
@@ -73,14 +76,15 @@ class ObraController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obra::with(['client', 'budget', 'outcomes.contractor', 'documents', 'additionals.user'])->find($id);
+        $obra = Obra::with(['client', 'budget',  'documents', 'additionals.user'])->find($id);
 
-        $outcomes = Outcome::where('obra_id', $id)
-            ->whereNotNull('contractor_id')
-            ->with('contractor')
-            ->get();
-        $contractors = $outcomes->pluck('contractor')->unique('id');
-        $obra->contractors = $contractors;
+        // 'outcomes.contractor',
+        // $outcomes = Outcome::where('obra_id', $id)
+        //     ->whereNotNull('contractor_id')
+        //     ->with('contractor')
+        //     ->get();
+        // $contractors = $outcomes->pluck('contractor')->unique('id');
+        // $obra->contractors = $contractors;
 
         return response($obra, 200);
     }
@@ -121,58 +125,13 @@ class ObraController extends Controller
      */
     public function destroy(int $id): Response
     {
-        $obra = Obra::find($id);
-        $obra->delete();
-        return response(['message' => 'Obra deleted'], 204);
-    }
-
-    /**
-     * Store a document for an obra
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function documents(Request $request, int $id): Response
-    {
-        $obra = Obra::find($id);
-        $name = $request->input('name');
-        $category = $request->input('category');
-        $document = $request->file('file');
-
-        $directory = 'public/uploads/obras/' . $obra->id;
-        $documentName = $document->getClientOriginalName();
-        $documentPath = Storage::putFileAs($directory, $document, $documentName, 'public');
-
-        $obra->documents()->create([
-            'name' => $name,
-            'category' => $category,
-            'path' => Storage::url($documentPath),
-        ]);
-
-        $absolutePathToDirectory = storage_path('app/' . $directory);
-        chmod($absolutePathToDirectory, 0755);
-
-        return response(['message' => 'Document uploaded'], 201);
-    }
-
-    /**
-     * Delete a document for an obra
-     *
-     * @param int $id
-     * @param int $documentId
-     * @return Response
-     */
-    public function deleteDocument(int $id, int $documentId): Response
-    {
-        $obra = Obra::find($id);
-        $document = $obra->documents()->find($documentId);
-        $document->delete();
-
-        $absolutePathToFile = storage_path('app/' . $document->path);
-        unlink($absolutePathToFile);
-
-        return response(['message' => 'Document deleted'], 204);
+        try {
+            $obra = Obra::findOrFail($id);
+            $obra->delete();
+            return response(['message' => 'Obra eliminada correctamente'], 204);
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Obra no encontrada'], 404);
+        }
     }
 
     /**
