@@ -12,6 +12,7 @@ use App\Http\Controllers\ManufacturerCategoryController;
 use App\Http\Controllers\ManufacturerFileController;
 use App\Http\Controllers\CacController;
 use App\Http\Controllers\IpcController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -108,4 +109,8 @@ Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::clas
     Route::post('/', 'store')->middleware('permission:indexIPC_insert');
     Route::post('/{id}', 'update')->middleware('permission:indexIPC_update');
     Route::delete('/{id}', 'destroy')->middleware('permission:indexIPC_delete');
+});
+
+Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function() {
+    Route::get('/', 'index');
 });

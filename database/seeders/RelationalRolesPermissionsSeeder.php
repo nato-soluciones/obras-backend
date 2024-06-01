@@ -41,7 +41,7 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "navbar_contacts",
             "navbar_calendar",
             "navbar_exchange_rate",
-            "navbar_note"
+            "navbar_notes"
         ];
         $functionalRol = Role::where('name', 'functional_navbar_full')->first();
         $functionalRol->givePermissionTo($navbar_permissions);
