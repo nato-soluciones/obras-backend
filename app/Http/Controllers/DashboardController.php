@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+use App\Models\Obra;
 use App\Models\Budget;
 use App\Models\Ipc;
+use App\Models\Cac;
 
 class DashboardController extends Controller
 {
@@ -17,24 +19,46 @@ class DashboardController extends Controller
      */
     public function index(): Response
     {
+        $overdueObras = Obra::where('end_date', '<', now())->count();
+        $upcomingObras = Obra::where('start_date', '>', now())->count();
+        $ondayObras = Obra::where('start_date', '<', now())
+            ->where('end_date', '>', now())
+            ->count();
+
+        $inProgressObras = Obra::where('status', 'IN_PROGRESS')->count();
+
         $pendingBudgets = Budget::where('status', 'PENDING')->count();
         $revisionBudgets = Budget::where('status', 'REVISION')->count();
 
         // Get the IPC data
-        $ipcs = Ipc::all(['period', 'value']);
-        $ipcData = $ipcs->map(function ($ipc) {
-            return [
-                'date' => $ipc->period,
-                'value' => $ipc->value,
-            ];
-        });
+        $ipcs = Ipc::orderBy('period', 'asc')->get(['period', 'value']);
+        $uniqueDates = $ipcs->pluck('period')->unique()->sort();
+        $ipcData = [
+            'labels' => $uniqueDates->values()->all(),
+            'data' => []
+        ];
+        foreach ($uniqueDates as $date) {
+            $ipc = $ipcs->where('period', $date)->first();
+            $ipcData['data'][] = $ipc ? $ipc->value : null;
+        }
+
+        // Get the CAC data
+        $cacs = Cac::orderBy('period', 'asc')->get(['period', 'general', 'materials', 'labour']);
+        $cacData = [
+            'labels' => $cacs->pluck('period')->all(),
+            'data' => [
+                'general' => $cacs->pluck('general')->all(),
+                'materials' => $cacs->pluck('materials')->all(),
+                'labor' => $cacs->pluck('labour')->all(),
+            ]
+        ];
 
         $data = [
             'obras' => [
-                'upcoming' => 10,
-                'overdue' => 5,
-                'onday' => 5,
-                'in_progress' => 5,
+                'upcoming' => $upcomingObras,
+                'overdue' => $overdueObras,
+                'onday' => $ondayObras,
+                'in_progress' => $inProgressObras,
             ],
             'budgets' => [
                 'pending' => $pendingBudgets,
@@ -42,9 +66,7 @@ class DashboardController extends Controller
             ],
             'graphs' => [
                 'ipc' => $ipcData,
-                'cac' => [
-
-                ]
+                'cac' => $cacData
             ]
         ];
 
