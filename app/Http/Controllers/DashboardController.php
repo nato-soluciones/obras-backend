@@ -21,7 +21,7 @@ class DashboardController extends Controller
     {
         $overdueObras = Obra::where('end_date', '<', now())->count();
         $upcomingObras = Obra::where('start_date', '>', now())->count();
-        $ondayObras = Obra::where('start_date', '<', now())
+        $onDayObras = Obra::where('start_date', '<', now())
             ->where('end_date', '>', now())
             ->count();
 
@@ -31,25 +31,31 @@ class DashboardController extends Controller
         $revisionBudgets = Budget::where('status', 'REVISION')->count();
 
         // Get the IPC data
-        $ipcs = Ipc::orderBy('period', 'asc')->get(['period', 'value']);
-        $uniqueDates = $ipcs->pluck('period')->unique()->sort();
+        $IPCs = Ipc::orderByDesc('period')
+            ->take(13)
+            ->get(['period', 'value'])
+            ->sortBy('period');
+        $uniqueDates = $IPCs->pluck('period');
         $ipcData = [
             'labels' => $uniqueDates->values()->all(),
             'data' => []
         ];
         foreach ($uniqueDates as $date) {
-            $ipc = $ipcs->where('period', $date)->first();
+            $ipc = $IPCs->where('period', $date)->first();
             $ipcData['data'][] = $ipc ? $ipc->value : null;
         }
 
         // Get the CAC data
-        $cacs = Cac::orderBy('period', 'asc')->get(['period', 'general', 'materials', 'labour']);
+        $CACs = Cac::orderByDesc('period')
+            ->take(13)
+            ->get(['period', 'general', 'materials', 'labour'])
+            ->sortBy('period');
         $cacData = [
-            'labels' => $cacs->pluck('period')->all(),
+            'labels' => $CACs->pluck('period')->all(),
             'data' => [
-                'general' => $cacs->pluck('general')->all(),
-                'materials' => $cacs->pluck('materials')->all(),
-                'labor' => $cacs->pluck('labour')->all(),
+                'general' => $CACs->pluck('general')->all(),
+                'materials' => $CACs->pluck('materials')->all(),
+                'labor' => $CACs->pluck('labour')->all(),
             ]
         ];
 
@@ -57,7 +63,7 @@ class DashboardController extends Controller
             'obras' => [
                 'upcoming' => $upcomingObras,
                 'overdue' => $overdueObras,
-                'onday' => $ondayObras,
+                'on_day' => $onDayObras,
                 'in_progress' => $inProgressObras,
             ],
             'budgets' => [
