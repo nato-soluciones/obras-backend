@@ -138,8 +138,10 @@ class BudgetController extends Controller
         foreach ($budget->categories as $category) {
             foreach ($category->activities as $activity) {
                 if ($activity->provider_id !== null) {
-                    $contractorBusinessName = Contractor::where('id', $activity->provider_id)->value('business_name');
-                    $activity->provider_name = $contractorBusinessName;
+                    $contractor = Contractor::where('id', $activity->provider_id)->first();
+                    $activity->provider_name = $contractor->person_type === 'individual'
+                        ? $contractor->last_name . ' ' . $contractor->first_name
+                        : $contractor->business_name;
                 }
             }
         }
@@ -176,7 +178,6 @@ class BudgetController extends Controller
             $budget = Budget::findOrFail($id);
             $budget->delete();
             return response(['message' => 'Presupuesto eliminado correctamente'], 204);
-            
         } catch (ModelNotFoundException $e) {
             return response(['error' => 'Presupuesto no encontrado'], 404);
         }
