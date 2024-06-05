@@ -17,7 +17,7 @@ class ObraStageController extends Controller
      */
     public function index(int $obraId)
     {
-        $incomes = ObraStage::where('obra_id', $obraId)->get();
+        $incomes = ObraStage::where('obra_id', $obraId)->orderBy('start_date', 'asc')->orderBy('id', 'asc')->get();
         return response($incomes, 200);
     }
 

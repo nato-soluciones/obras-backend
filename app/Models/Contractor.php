@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Contractor extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
+        'type',
+        'last_name',
+        'first_name',
         'business_name',
         'trade_name',
         'person_type',

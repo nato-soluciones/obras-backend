@@ -7,6 +7,9 @@ use Illuminate\Http\Response;
 
 use App\Models\Ipc;
 
+use App\Http\Requests\Ipc\CreateIpcRequest;
+use App\Http\Requests\Ipc\UpdateIpcRequest;
+
 class IpcController extends Controller
 {
     /**
@@ -26,7 +29,7 @@ class IpcController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(CreateIpcRequest $request): Response
     {
         $ipc = Ipc::create($request->all());        
         return response($ipc, 201);
@@ -38,7 +41,7 @@ class IpcController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(UpdateIpcRequest $request, int $id): Response
     {
         $ipc = Ipc::find($id);
         $ipc->update($request->all());

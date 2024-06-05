@@ -11,11 +11,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(UserSeeder::class);
-        $this->call(ContractorIndustriesSeeder::class);
-        $this->call(ToolCategorySeeder::class);
-        $this->call(ManufacturerCategories::class);
-        $this->call(ObraDailyLogTagsSeeder::class);
         $this->call(BanksSeeder::class);
+        $this->call(UserSeeder::class);
+        $this->call(RolesAndPermissionsSeeder::class);
+        $this->call(RelationalRolesPermissionsSeeder::class);
+        $this->call(ObraDailyLogTagsSeeder::class);
+        $this->call(ContractorIndustriesSeeder::class);
+
+        // $this->call(ToolCategorySeeder::class);
+        // $this->call(ManufacturerCategories::class);
     }
 }

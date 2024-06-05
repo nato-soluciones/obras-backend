@@ -13,7 +13,7 @@ class BankController extends Controller
      */
     public function index(): Response
     {
-        $Banks = Bank::all(['code', 'name']);
+        $Banks = Bank::select(['code', 'name', 'is_virtual_wallet'])->orderBy('name', 'asc')->get();
         return response($Banks, 200);
     }
 

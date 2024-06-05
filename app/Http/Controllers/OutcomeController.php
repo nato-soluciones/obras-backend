@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Outcome;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 
 class OutcomeController extends Controller
@@ -15,12 +16,24 @@ class OutcomeController extends Controller
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request, int $obraId): Response
     {
-        $outcomes = Outcome::with('obra.client')->get();
+        $outcomes = Outcome::where('obra_id', $obraId)
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
         return response($outcomes, 200);
     }
 
+    public function listAll(Request $request, int $obraId): Response
+    {
+        $incomes = Outcome::where('obra_id', $obraId)
+            ->withTrashed()
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+        return response($incomes, 200);
+    }
     /**
      * Create an outcome
      *
@@ -54,11 +67,11 @@ class OutcomeController extends Controller
      * @param int $id
      * @return Response
      */
-    public function show(int $id): Response
+    public function show(int $obraId, int $outcomeId): Response
     {
-        $outcome = Outcome::with('obra.client')->find($id);
+        $outcome = Outcome::with('obra.client')->find($outcomeId);
         if (is_null($outcome)) {
-            return response()->json(['message' => 'Outcome not found'], 404);
+            return response()->json(['message' => 'Egreso no encontrado'], 404);
         }
         return response($outcome, 200);
     }
@@ -70,11 +83,11 @@ class OutcomeController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(Request $request, int $obraId, int $outcomeId): Response
     {
-        $outcome = Outcome::find($id);
+        $outcome = Outcome::find($outcomeId);
         if (is_null($outcome)) {
-            return response()->json(['message' => 'Outcome not found'], 404);
+            return response()->json(['message' => 'Egreso no encontrado'], 404);
         }
         $outcome->fill($request->all());
 
@@ -100,27 +113,31 @@ class OutcomeController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy(int $id)
+    public function destroy(int $obraId, int $outcomeId)
     {
-        $outcome = Outcome::find($id);
-        if (is_null($outcome)) {
-            return response()->json(['message' => 'Outcome not found'], 404);
+        try {
+            $outcome = Outcome::findOrFail($outcomeId);
+            $outcome->delete();
+            return response(['message' => 'Egreso eliminado correctamente'], 204);
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Egreso no encontrado'], 404);
         }
-        $outcome->delete();
-        return response()->json(['message' => 'Outcome deleted'], 204);
     }
 
-    public function exportList()
+    public function exportList(int $obraId)
     {
-        $outcomes = Outcome::all();
+        $outcomes = Outcome::where('obra_id', $obraId)
+            ->withTrashed()
+            ->orderBy('date', 'desc')
+            ->get();
         $f = fopen('php://memory', 'r+');
 
         $csvTitles = [
             'Fecha',
             'Tipo',
             'Contratista',
-            'Categoria',
-            'Metodo de pago',
+            'Categoría',
+            'Método de pago',
             'Fecha de pago',
             'Total',
         ];

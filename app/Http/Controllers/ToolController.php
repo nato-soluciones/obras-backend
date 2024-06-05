@@ -59,7 +59,7 @@ class ToolController extends Controller
     public function show(int $id): Response
     {
         $tool = Tool::with(['locations' => function($query){
-            $query->orderBy('date', 'asc');
+            $query->orderBy('date', 'desc');
         }])->find($id);
         return response($tool, 200);
     }

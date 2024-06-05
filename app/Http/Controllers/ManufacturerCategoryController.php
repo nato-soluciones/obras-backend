@@ -16,7 +16,7 @@ class ManufacturerCategoryController extends Controller
      */
     public function index(): Response
     {
-        $manufacturerCategories = ManufacturerCategory::all();
+        $manufacturerCategories = ManufacturerCategory::select(['id', 'name'])->orderBy('name')->get();
         return response($manufacturerCategories, 200);
     }
 

@@ -6,14 +6,14 @@ use Illuminate\Support\Facades\Route;
 
 // Budgets endpoints
 Route::prefix('budgets')->middleware('auth:sanctum')->controller(BudgetController::class)->group(function () {
-  Route::get('/', 'index');
-  Route::get('/export', 'exportList');
-  Route::get('/{id}', 'show');
-  Route::post('/', 'store');
-  Route::post('/{id}', 'update');
-  Route::delete('/{id}', 'destroy');
+  Route::get('/', 'index')->middleware('permission:budgets_list');
+  Route::get('/export', 'exportList')->middleware('permission:budgets_export');
+  Route::get('/{id}', 'show')->middleware('permission:budgets_display');
+  Route::post('/', 'store')->middleware('permission:budgets_insert');
+  Route::post('/{id}', 'update')->middleware('permission:budgets_update');
+  Route::delete('/{id}', 'destroy')->middleware('permission:budgets_delete');
 
-  Route::post('/{id}/approve', 'approve');
+  Route::post('/{id}/approve', 'approve')->middleware('permission:budgets_approve');
   Route::post('/{id}/revert', 'revert');
 });
 

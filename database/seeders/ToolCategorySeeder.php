@@ -36,7 +36,7 @@ class ToolCategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            ToolCategory::create([
+            ToolCategory::firstOrCreate([
                 'name' => $category,
             ]);
         }

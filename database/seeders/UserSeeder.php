@@ -16,7 +16,6 @@ class UserSeeder extends Seeder
             [
                 "firstname" => "Paco Nicolas",
                 "lastname" => "Miranda",
-                "role" => "OWNER",
                 "email" => "paconicolasmiranda@gmail.com",
                 "password" => bcrypt("CCian2023"),
                 'email_verified_at' => now(),
@@ -24,26 +23,30 @@ class UserSeeder extends Seeder
             [
                 "firstname" => "Tomas",
                 "lastname" => "Gimenez",
-                "role" => "OWNER",
                 "email" => "tomasgimenez11@gmail.com",
                 "password" => bcrypt("CCian2023"),
                 'email_verified_at' => now(),
             ],
             [
-              "firstname" => "Pablo",
-              "lastname" => "Carnevale",
-              "role" => "OWNER",
-              "email" => "pablo.carnevale7@gmail.com",
-              "password" => bcrypt("CCian2023"),
-              'email_verified_at' => now(),
-          ],
+                "firstname" => "Super",
+                "lastname" => "Admin",
+                "email" => "superadmin@gmail.com",
+                "password" => bcrypt("Nato2024"),
+                'email_verified_at' => now(),
+            ],
+            [
+                "firstname" => "Arqui",
+                "lastname" => "tecto",
+                "email" => "Arquitecto@gmail.com",
+                "password" => bcrypt("Nato2024"),
+                'email_verified_at' => now(),
+            ],
         ];
 
         foreach ($users as $user) {
             $existingUser = User::where('email', $user['email'])->first();
-
             if (!$existingUser) {
-                User::create($user);
+                $user = User::create($user);
             }
         }
     }

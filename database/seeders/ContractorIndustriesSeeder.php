@@ -31,7 +31,7 @@ class ContractorIndustriesSeeder extends Seeder
 
         // Insertar datos en la tabla contractor_industries
         foreach ($industries as $industry) {
-            ContractorIndustry::create($industry);
+            ContractorIndustry::firstOrCreate($industry);
         }
     }
 }

@@ -14,7 +14,7 @@ class ContractorIndustryController extends Controller
      */
     public function index(): Response
     {
-        $contractorIndustries = ContractorIndustry::all(['code', 'name']);
+        $contractorIndustries = ContractorIndustry::select(['code', 'name'])->orderBy('name')->get();
         return response($contractorIndustries, 200);
     }
 
@@ -27,5 +27,16 @@ class ContractorIndustryController extends Controller
         $contractorIndustry = ContractorIndustry::where('code', $code)->first();
         return response($contractorIndustry, 200);
     }
+
+    public function store(Request $request): Response
+    {
+        $contractorIndustry = new ContractorIndustry();
+        $contractorIndustry->code = strtoupper(str_replace(' ', '_', $request->name));
+        $contractorIndustry->name = $request->name;
+        $contractorIndustry->save();
+        return response($contractorIndustry, 200);
+
+    }
+
 
 }

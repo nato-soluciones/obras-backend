@@ -9,6 +9,7 @@ use Illuminate\Notifications\AnonymousNotifiable;
 
 use App\Models\Income;
 use App\Notifications\IncomeCreated;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class IncomeController extends Controller
 {
@@ -18,12 +19,20 @@ class IncomeController extends Controller
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request, int $obraId): Response
     {
-        $incomes = Income::with('obra.client')->get();
+        $incomes = Income::where('obra_id', $obraId)->orderBy('receipt_number', 'desc')->get();
         return response($incomes, 200);
     }
 
+    public function listAll(Request $request, int $obraId): Response
+    {
+        $incomes = Income::where('obra_id', $obraId)
+            ->withTrashed()
+            ->orderBy('receipt_number', 'desc')
+            ->get();
+        return response($incomes, 200);
+    }
     /**
      * Create an income
      *
@@ -33,12 +42,6 @@ class IncomeController extends Controller
     public function store(Request $request): Response
     {
         $income = Income::create($request->all());
-        if (!empty($income->email)) {
-            if (filter_var($income->email, FILTER_VALIDATE_EMAIL)) {
-                Notification::route('mail', $income->email)
-                    ->notify(new IncomeCreated($income));
-            }
-        }
         return response($income, 201);
     }
 
@@ -48,11 +51,11 @@ class IncomeController extends Controller
      * @param int $id
      * @return Response
      */
-    public function show(int $id): Response
+    public function show(int $obraId, int $incomeId): Response
     {
-        $income = Income::with('obra.client')->find($id);
+        $income = Income::find($incomeId);
         if (is_null($income)) {
-            return response()->json(['message' => 'Income not found'], 404);
+            return response(['message' => 'Ingreso no encontrado'], 404);
         }
         return response($income, 200);
     }
@@ -64,11 +67,11 @@ class IncomeController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(Request $request, int $obraId, int $incomeId): Response
     {
-        $income = Income::find($id);
+        $income = Income::find($incomeId);
         if (is_null($income)) {
-            return response()->json(['message' => 'Income not found'], 404);
+            return response()->json(['message' => 'Ingreso no encontrado'], 404);
         }
         $income->update($request->all());
         return response($income, 200);
@@ -80,23 +83,29 @@ class IncomeController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy(int $id): Response
+    public function destroy(int $obraId, int $incomeId): Response
     {
-        $income = Income::find($id);
-        $income->delete();
+        try {
+            $income = Income::findOrFail($incomeId);
+            $income->delete();
 
-        return response(['message' => 'Income deleted'], 200);
+            return response(['message' => 'Ingreso eliminado correctamente'], 200);
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Ingreso no encontrado'], 404);
+        }
     }
 
-    public function exportList()
+    public function exportList(int $obraId)
     {
-        $incomes = Income::all();
+        $incomes = Income::where('obra_id', $obraId)
+            ->withTrashed()
+            ->orderBy('receipt_number', 'desc')
+            ->get();
         $f = fopen('php://memory', 'r+');
 
         $csvTitles = [
             'Fecha',
             'Recibo',
-            'Cliente',
             'Obra',
             'Concepto',
             'Importe USD',
@@ -109,7 +118,6 @@ class IncomeController extends Controller
             $csvRow = [
                 $item->date,
                 $item->receipt_number,
-                $item->obra->client->name,
                 $item->obra->name,
                 $item->payment_concept,
                 $item->amount_usd,

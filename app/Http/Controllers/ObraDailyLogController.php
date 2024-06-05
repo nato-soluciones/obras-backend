@@ -29,7 +29,11 @@ class ObraDailyLogController extends Controller
             ->when($userId, function ($query, $userId) {
                 $query->where('created_by_id', $userId);
             })
-            ->with(['obraDailyLogTag', 'user'])
+            ->with(['obraDailyLogTag' => function ($q) {
+                $q->select('id', 'name', 'color');
+            }, 'user' => function ($q) {
+                $q->select('id', 'firstname', 'lastname');
+            }])
             ->orderByDesc('event_date')
             ->simplePaginate($perPage, ['*'], 'page', $page);
 
@@ -61,7 +65,6 @@ class ObraDailyLogController extends Controller
 
             $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
-
         } else {
             $obraDailyLog->file_name = null;
         }
@@ -112,15 +115,13 @@ class ObraDailyLogController extends Controller
 
             $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
-
         } else if ($requestData['file_name'] === "null") {
             if ($obraDailyLog->file_name) {
                 Storage::delete('public/uploads/dailyLogs/obra_' . $obraDailyLog->obra_id . '/' . $obraDailyLog->file_name);
             }
             $requestData['file_name'] = null;
-            
         }
-        
+
         $obraDailyLog->update($requestData);
 
         return response($obraDailyLog, 200);
@@ -137,7 +138,7 @@ class ObraDailyLogController extends Controller
         if (!Storage::exists($filePath)) {
             return response()->json(['error' => 'Archivo no encontrado'], 404);
         }
-        
+
         $fileName = $obraDailyLog->file_name;
 
         return response()->download(storage_path('app/' . $filePath), $fileName);

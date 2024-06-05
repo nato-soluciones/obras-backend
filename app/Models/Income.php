@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notifiable;
 
 class Income extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -36,7 +37,7 @@ class Income extends Model
      * @var array<string, string>
      */
     protected $casts = [
-      'date' => 'date',
+        'date' => 'date',
     ];
 
     protected static function boot()
@@ -45,25 +46,32 @@ class Income extends Model
 
         static::creating(function ($income) {
             if (empty($income->receipt_number)) {
-                $income->receipt_number = static::generateReceiptNumber();
+                $income->receipt_number = static::generateReceiptNumber($income->obra_id);
             }
         });
     }
 
-    protected static function generateReceiptNumber()
+    protected static function generateReceiptNumber($obraId)
     {
-        return DB::transaction(function () {
-            $lastIncome = static::latest('id')->lockForUpdate()->first();
-            $lastNumber = $lastIncome ? intval(substr($lastIncome->receipt_number, 4)) : 0;
+        // Genera el número de recibo de fora correlativa para cada obra.
+        // El formato es: 000-00000 -> primeros 3 Nros obra + 5 Nros consecutivos de ingresos
+        $obraIdStr = str_pad($obraId, 3, '0', STR_PAD_LEFT);
+
+        return DB::transaction(function () use ($obraId, $obraIdStr) {
+            $lastIncome = static::where('obra_id', $obraId)->latest('id')->lockForUpdate()->first();
+            $lastNumber = $lastIncome ? intval(substr($lastIncome->receipt_number, 6)) : 0;
             $newNumber = $lastNumber + 1;
-            $receiptNumber = sprintf('000-%05d', $newNumber);
-            
+            $receiptNumber = $obraIdStr . sprintf('-%05d', $newNumber);
+
             // Ensure uniqueness in case of race conditions
-            while (static::where('receipt_number', $receiptNumber)->exists()) {
+            while (static::where('obra_id', $obraId)
+                ->where('receipt_number', $receiptNumber)
+                ->exists()
+            ) {
                 $newNumber++;
-                $receiptNumber = sprintf('000-%05d', $newNumber);
+                $receiptNumber = $obraIdStr . sprintf('-%05d', $newNumber);
             }
-            
+
             return $receiptNumber;
         }, 5); // The second parameter is the number of attempts to run the transaction
     }
