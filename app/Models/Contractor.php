@@ -36,4 +36,9 @@ class Contractor extends Model
         'bank_alias',
         'comments',
     ];
+
+    public function industries()
+    {
+        return $this->belongsTo(ContractorIndustry::class, 'industry', 'code');
+    }
 }
