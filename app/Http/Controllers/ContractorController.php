@@ -19,7 +19,7 @@ class ContractorController extends Controller
      */
     public function index(): Response
     {
-        $contractors = Contractor::orderBy('business_name')->get();
+        $contractors = Contractor::with('industries')->orderBy('business_name')->get();
         return response($contractors, 200);
     }
 
