@@ -38,10 +38,10 @@ Route::post('/clear-cookies', function (Request $request) {
     $cookiesToDelete = [];
     foreach ($cookieNames as $cookieName) {
         // Set the cookie to expire in the past
-        $cookiesToDelete[] = setcookie($cookieName, '', time() - 3600, '/', 'test.nato-app.com.ar', true, true);
+        $cookiesToDelete[] = setcookie($cookieName, '', time() - 3600, '/', '.nato-app.com.ar', true, true);
     }
 
-    return response(['message' => 'Cookies borradas ('.implode(', ', $cookieNames).') - ('.json_encode($_COOKIE).')'], 200)
+    return response(['message' => 'Cookies borradas ('.implode(', ', $cookieNames).')'], 200)
         ->withHeaders(['Set-Cookie' => $cookiesToDelete]);
 });
 
