@@ -41,7 +41,7 @@ Route::post('/clear-cookies', function (Request $request) {
         $cookiesToDelete[] = setcookie($cookieName, '', time() - 3600, '/', 'test.nato-app.com.ar', true, true);
     }
 
-    return response(['message' => 'Cookies borradas'], 200)
+    return response(['message' => 'Cookies borradas ('.implode(', ', $cookieNames).') - ('.json_encode($_COOKIE).')'], 200)
         ->withHeaders(['Set-Cookie' => $cookiesToDelete]);
 });
 
