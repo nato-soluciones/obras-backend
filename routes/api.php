@@ -35,10 +35,10 @@ include_once __DIR__ . '/api/permissions.php';
 
 Route::post('/clear-cookies', function (Request $request) {
     $cookieNames = array_keys($_COOKIE);
-    // foreach ($cookieNames as $cookieName) {
-    //     setcookie($cookieName, '', time() - 3600, '/');
-    // }
-    return response($cookieNames, 200);
+    foreach ($cookieNames as $cookieName) {
+        setcookie($cookieName, '', time() - 3600, '/');
+    }
+    return response(['message' => 'Cookies borradas ('.implode(', ', $cookieNames).')'], 200);
 });
 
 // Notes endpoints
