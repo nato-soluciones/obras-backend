@@ -35,14 +35,13 @@ include_once __DIR__ . '/api/permissions.php';
 
 Route::post('/clear-cookies', function (Request $request) {
     $cookieNames = array_keys($_COOKIE);
-    $cookiesToDelete = [];
+    $response = response(['message' => 'Cookies borradas']);
+
     foreach ($cookieNames as $cookieName) {
-        // Set the cookie to expire in the past
-        $cookiesToDelete[] = setcookie($cookieName, '', time() - 3600, '/', '.nato-app.com.ar', true, true);
+        $response->headers->setCookie(cookie($cookieName, '', -3600, '/', '.nato-app.com.ar', true, true));
     }
 
-    return response(['message' => 'Cookies borradas ('.implode(', ', $cookieNames).')'], 200)
-        ->withHeaders(['Set-Cookie' => $cookiesToDelete]);
+    return $response;
 });
 
 // Notes endpoints
