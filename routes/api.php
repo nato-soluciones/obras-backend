@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ToolController;
@@ -13,6 +12,8 @@ use App\Http\Controllers\ManufacturerFileController;
 use App\Http\Controllers\CacController;
 use App\Http\Controllers\IpcController;
 use App\Http\Controllers\DashboardController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,17 +28,20 @@ use App\Http\Controllers\DashboardController;
 
 include_once __DIR__ . '/api/auxiliaries.php';
 include_once __DIR__ . '/api/budgets.php';
+include_once __DIR__ . '/api/clients.php';
 include_once __DIR__ . '/api/contractors.php';
 include_once __DIR__ . '/api/obras.php';
 include_once __DIR__ . '/api/permissions.php';
 
-// Clients endpoints
-Route::prefix('clients')->middleware('auth:sanctum')->controller(ClientController::class)->group(function() {
-    Route::get('/', 'index')->middleware('permission:clients_list');
-    Route::get('/{id}', 'show')->middleware('permission:clients_display');
-    Route::post('/', 'store')->middleware('permission:clients_insert');
-    Route::post('/{id}', 'update')->middleware('permission:clients_update');
-    Route::delete('/{id}', 'destroy')->middleware('permission:clients_delete');
+Route::post('/clear-cookies', function (Request $request) {
+    $cookieNames = array_keys($_COOKIE);
+    $response = response(['message' => 'Cookies borradas']);
+
+    foreach ($cookieNames as $cookieName) {
+        $response->headers->setCookie(cookie($cookieName, '', -3600, '/', '.nato-app.com.ar', true, true));
+    }
+
+    return $response;
 });
 
 // Notes endpoints
