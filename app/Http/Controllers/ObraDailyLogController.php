@@ -15,7 +15,7 @@ class ObraDailyLogController extends Controller
      */
     public function index(Request $request, int $obraId): Response
     {
-        // Recupera los oarametros de la petición
+        // Recupera los parámetros de la petición
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
         $tagId = $request->input('tag_id');
