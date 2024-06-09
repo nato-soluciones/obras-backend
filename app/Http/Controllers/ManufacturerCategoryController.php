@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\ManufacturerCategory;
+use Illuminate\Support\Facades\Log;
 
 class ManufacturerCategoryController extends Controller
 {
@@ -28,6 +29,14 @@ class ManufacturerCategoryController extends Controller
      */
     public function store(Request $request): Response
     {
+        $name = strtolower($request->input('name'));
+
+        // Verificar si ya existe una categoría con el mismo nombre (sin importar mayúsculas/minúsculas)
+        $exists = ManufacturerCategory::whereRaw('LOWER(name) = ?', [$name])->exists();
+
+        if ($exists) {
+            return response(['message' => 'Ya existe una categoría con este nombre'], 201);
+        }
         $manufacturerCategory = ManufacturerCategory::create($request->all());
         return response($manufacturerCategory, 201);
     }

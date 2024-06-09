@@ -28,6 +28,14 @@ class ToolCategoryController extends Controller
      */
     public function store(Request $request): Response
     {
+        $name = strtolower($request->input('name'));
+
+        // Verificar si ya existe una categoría con el mismo nombre (sin importar mayúsculas/minúsculas)
+        $exists = ToolCategory::whereRaw('LOWER(name) = ?', [$name])->exists();
+
+        if ($exists) {
+            return response(['message' => 'Ya existe una categoría con este nombre'], 201);
+        }
         $category = ToolCategory::create($request->all());
         return response($category, 201);
     }

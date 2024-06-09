@@ -30,10 +30,12 @@ class ContractorIndustryController extends Controller
 
     public function store(Request $request): Response
     {
-        $contractorIndustry = new ContractorIndustry();
-        $contractorIndustry->code = strtoupper(str_replace(' ', '_', $request->name));
-        $contractorIndustry->name = $request->name;
-        $contractorIndustry->save();
+        $code = strtoupper(str_replace(' ', '_', $request->name));
+
+        $contractorIndustry = ContractorIndustry::firstOrCreate(
+            ['code' => $code],
+            ['name' => $request->name]
+        );
         return response($contractorIndustry, 200);
 
     }
