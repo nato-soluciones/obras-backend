@@ -14,5 +14,6 @@ class ContractorIndustry extends Model
 
     protected $fillable = [
         'code',
+        'name',
     ];
 }
