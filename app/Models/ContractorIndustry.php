@@ -11,4 +11,9 @@ class ContractorIndustry extends Model
 
     protected $primaryKey = 'code';
     protected $keyType = 'string';
+
+    protected $fillable = [
+        'code',
+        'name',
+    ];
 }
