@@ -32,7 +32,7 @@ class ObraDailyLogController extends Controller
             ->with(['obraDailyLogTag' => function ($q) {
                 $q->select('id', 'name', 'color');
             }, 'user' => function ($q) {
-                $q->select('id', 'firstname', 'lastname');
+                $q->select('id', 'firstname', 'lastname', 'deleted_at')->withTrashed();
             }])
             ->orderByDesc('event_date')
             ->simplePaginate($perPage, ['*'], 'page', $page);

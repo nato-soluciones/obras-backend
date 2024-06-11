@@ -16,13 +16,13 @@ class RelationalRolesPermissionsSeeder extends Seeder
     {
         // ? RELACIÓN DE USUARIOS CON ROLES DE USUARIO 
 
-        $users = ["paconicolasmiranda@gmail.com", "tomasgimenez11@gmail.com", "superadmin@gmail.com", "Arquitecto@gmail.com"];
+        $users = ["tomasgimenez11@gmail.com", "superadmin@gmail.com", "Arquitecto@gmail.com"];
         foreach ($users as $user) {
             $userRol = User::where('email', $user)->first();
             if ($userRol) {
                 if ($userRol['email'] === "superadmin@gmail.com") $userRol->syncRoles("SUPERADMIN");
                 if ($userRol['email'] === "Arquitecto@gmail.com") $userRol->syncRoles("ARCHITECT");
-                if ($userRol['email'] === "tomasgimenez11@gmail.com" || $userRol['email'] === "paconicolasmiranda@gmail.com") $userRol->syncRoles("OWNER");
+                if ($userRol['email'] === "tomasgimenez11@gmail.com") $userRol->syncRoles("OWNER");
             }
         }
 
