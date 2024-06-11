@@ -18,7 +18,7 @@ class ObraStageTaskController extends Controller
     public function index(Request $request, int $obraId, int $stageId)
     {
         $obraStageTasks = ObraStageTask::with(['responsible' => function ($query) {
-            $query->select('id', 'firstname', 'lastname');
+            $query->select('id', 'firstname', 'lastname', 'deleted_at')->withTrashed();
         }])->where('obra_stage_id', $stageId)->orderBy('start_date', 'asc')->orderBy('id', 'asc')->get();
         return response($obraStageTasks, 200);
     }
