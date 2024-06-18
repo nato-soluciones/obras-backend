@@ -17,6 +17,7 @@ class Tool extends Model
         'purchase_date',
         'status',
         'last_maintenance',
+        'next_maintenance',
         'description',
         'image',
     ];

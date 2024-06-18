@@ -12,6 +12,7 @@ use App\Http\Controllers\ManufacturerFileController;
 use App\Http\Controllers\CacController;
 use App\Http\Controllers\IpcController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeveloperController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -118,3 +119,7 @@ Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::clas
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function() {
     Route::get('/', 'index');
 });
+
+// Route::prefix('developer')->middleware('auth:sanctum')->controller(DeveloperController::class)->group(function() {
+//     Route::get('/', 'index');
+// });

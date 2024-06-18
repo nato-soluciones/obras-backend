@@ -6,6 +6,7 @@ use App\Models\Additional;
 use App\Models\AdditionalCategory;
 use App\Models\AdditionalCategoryActivity;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AdditionalService
 {
@@ -16,6 +17,7 @@ class AdditionalService
     $data['user_id'] = Auth::user()->id;
 
     $additional = Additional::create($data);
+    $additionalData = $additional->toArray();
 
     foreach ($categories as $categoryData) {
       $activities = isset($categoryData['activities']) ? $categoryData['activities'] : [];
@@ -23,17 +25,19 @@ class AdditionalService
       $categoryData['additional_id'] = $additional->id;
 
       $category = AdditionalCategory::create($categoryData);
+      $categoryData = $category->toArray();
 
       if (count($activities) > 0) {
+        $categoryData['activities'] = [];
         foreach ($activities as $activityData) {
           $activityData['additional_category_id'] = $category->id;
-          AdditionalCategoryActivity::create($activityData);
-          $category['activities'][] = $activityData;
+          $activity = AdditionalCategoryActivity::create($activityData);
+          $categoryData['activities'][] = $activity->toArray();
         }
       }
-      $additional['categories'][] = $category;
+      $additionalData['categories'][] = $categoryData;
     }
-    return $additional;
+    return $additionalData;
   }
 
   public function updateAdditional($additionalId, $data)
@@ -67,7 +71,6 @@ class AdditionalService
 
             $activitiesData[$i]['id'] = $activity->id;
           }
-
         }
 
         // Elimina las actividades que ya no se utilizan
@@ -79,5 +82,34 @@ class AdditionalService
     $additional->categories()->whereNotIn('id', array_column($categoriesData, 'id'))->delete();
 
     return $additional;
+  }
+
+  function getAdditionalCostsByProvider($additionalData)
+  {
+    $result = [];
+
+    foreach ($additionalData['categories'] as $category) {
+      foreach ($category['activities'] as $activity) {
+        $providerId = $activity['provider_id'];
+        $additionalCost = $activity['unit_cost'] * $activity['quantity'];
+
+        if (!isset($result[$providerId])) {
+          $result[$providerId] = 0;
+        }
+
+        $result[$providerId] += $additionalCost;
+      }
+    }
+
+    $output = [];
+
+    foreach ($result as $providerId => $additionalCost) {
+      $output[] = [
+        'contractor_id' => $providerId,
+        'additional_cost' => round($additionalCost, 2),
+      ];
+    }
+
+    return $output;
   }
 }

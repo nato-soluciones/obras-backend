@@ -12,16 +12,12 @@ class Outcome extends Model
 
     protected $fillable = [
         'type',
-        'provider_cuit',
-        'provider_name',
-        'provider_iva',
-        'provider_condition',
         'date',
-        'due_date',
         'document_type',
         'order',
         'gross_total',
         'net_total',
+        'tax_total',
         'total',
         'payment_date',
         'payment_method',

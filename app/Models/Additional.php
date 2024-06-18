@@ -18,7 +18,6 @@ class Additional extends Model
     protected $fillable = [
         'date',
         'comments',
-        'fields',
         'total',
         'total_cost',
         'obra_id',
@@ -30,11 +29,10 @@ class Additional extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'fields' => 'object',
-        'total' => 'float',
-        'total_cost' => 'float',
-    ];
+    // protected $casts = [
+    //     'total' => 'float',
+    //     'total_cost' => 'float',
+    // ];
 
     protected static function booted()
     {

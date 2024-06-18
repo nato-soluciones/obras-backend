@@ -8,6 +8,7 @@ use App\Models\Obra;
 use App\Notifications\ObraCreated;
 use App\Notifications\ObraFinalized;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 class ObraObserver
 {
@@ -17,7 +18,10 @@ class ObraObserver
     public function created(Obra $obra): void
     {
         try {
-            $users = User::whereIn('role', ['OWNER', 'ARCHITECT'])->whereNotNull('email')->get();
+            $users = User::whereHas('roles', function ($query) {
+                $query->whereIn('name', ['OWNER', 'ARCHITECT']);
+            })->whereNotNull('email')->get();
+
             $notification = new ObraCreated($obra);
 
             foreach ($users as $user) {
@@ -25,7 +29,7 @@ class ObraObserver
             }
         } catch (\Exception $e) {
             Log::error('Error al enviar la notificación de obra creada: ' . $e->getMessage());
-            Log::error($e);
+            // Log::error($e);
         }
     }
 
@@ -36,7 +40,9 @@ class ObraObserver
     {
         if ($obra->status === 'FINALIZED') {
             try {
-                $users = User::whereIn('role', ['OWNER', 'ARCHITECT'])->whereNotNull('email')->get();
+                $users = User::whereHas('roles', function ($query) {
+                    $query->whereIn('name', ['OWNER', 'ARCHITECT']);
+                })->whereNotNull('email')->get();
                 $notification = new ObraFinalized($obra);
 
                 foreach ($users as $user) {

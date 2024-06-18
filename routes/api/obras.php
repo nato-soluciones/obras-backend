@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\AdditionalController;
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\ObraAdditionalController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\ObraDailyLogController;
 use App\Http\Controllers\ObraDailyLogTagController;
@@ -20,9 +20,7 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
   Route::post('/{id}', 'update')->middleware('permission:obras_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
   
-
   Route::get('/{id}/contractors', 'contractors')->middleware('permission:obraContractors_list');
-  Route::post('/{id}/additionals', 'additionals')->middleware('permission:obraAdditional_insert');
 });
 
 // Incomes endpoints
@@ -54,8 +52,10 @@ Route::prefix('obras/{obraId}/documents')->middleware('auth:sanctum')->controlle
 });
 
 // Additionals endpoints
-Route::prefix('additionals')->middleware('auth:sanctum')->controller(AdditionalController::class)->group(function () {
+Route::prefix('obras/{obraId}/additionals')->middleware('auth:sanctum')->controller(ObraAdditionalController::class)->group(function () {
+  Route::get('/', 'index')->middleware('permission:obraAdditional_list');
   Route::get('/{id}', 'show')->middleware('permission:obraAdditional_display');
+  Route::post('/', 'store')->middleware('permission:obraAdditional_insert');
   Route::post('/{id}', 'update')->middleware('permission:obraAdditional_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:obraAdditional_delete');
 });

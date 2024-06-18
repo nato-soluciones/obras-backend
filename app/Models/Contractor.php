@@ -41,4 +41,9 @@ class Contractor extends Model
     {
         return $this->belongsTo(ContractorIndustry::class, 'industry', 'code');
     }
+    
+    public function currentAccounts()
+    {
+        return $this->hasMany(CurrentAccount::class, 'entity_id', 'id')->where('entity_type', 'PROVIDER');
+    }
 }

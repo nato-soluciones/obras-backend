@@ -48,4 +48,9 @@ class Client extends Model
     public function users() {
         return $this->hasMany(User::class);
     }
+
+    public function currentAccounts()
+    {
+        return $this->hasMany(CurrentAccount::class, 'entity_id', 'id')->where('entity_type', 'CLIENT');
+    }
 }
