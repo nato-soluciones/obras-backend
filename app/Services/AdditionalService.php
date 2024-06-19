@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Additional;
 use App\Models\AdditionalCategory;
 use App\Models\AdditionalCategoryActivity;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -42,49 +43,53 @@ class AdditionalService
 
   public function updateAdditional($additionalId, $data)
   {
-    $additional = Additional::findOrFail($additionalId);
-    $additional->update($data);
+    try {
+      $additional = Additional::findOrFail($additionalId);
+      $additional->update($data);
 
-    if (isset($data['categories'])) {
-      $categoriesData = $data['categories'];
+      if (isset($data['categories'])) {
+        $categoriesData = $data['categories'];
 
-      foreach ($categoriesData as $i => $categoryData) {
-        $categoryData['additional_id'] = $additional->id;
+        foreach ($categoriesData as $i => $categoryData) {
+          $categoryData['additional_id'] = $additional->id;
 
-        $category = $additional->categories()->updateOrCreate(
-          ['id' => $categoryData['id'] ?? null],
-          $categoryData
-        );
+          $category = $additional->categories()->updateOrCreate(
+            ['id' => $categoryData['id'] ?? null],
+            $categoryData
+          );
 
-        $categoriesData[$i]['id'] = $category->id;
+          $categoriesData[$i]['id'] = $category->id;
 
-        if (isset($categoryData['activities'])) {
-          $activitiesData = $categoryData['activities'];
+          if (isset($categoryData['activities'])) {
+            $activitiesData = $categoryData['activities'];
 
-          foreach ($activitiesData as $i => $activityData) {
-            $activityData['additional_category_id'] = $category->id;
+            foreach ($activitiesData as $i => $activityData) {
+              $activityData['additional_category_id'] = $category->id;
 
-            $activity = $category->activities()->updateOrCreate(
-              ['id' => $activityData['id'] ?? null],
-              $activityData
-            );
+              $activity = $category->activities()->updateOrCreate(
+                ['id' => $activityData['id'] ?? null],
+                $activityData
+              );
 
-            $activitiesData[$i]['id'] = $activity->id;
+              $activitiesData[$i]['id'] = $activity->id;
+            }
           }
+
+          // Elimina las actividades que ya no se utilizan
+          $category->activities()->whereNotIn('id', array_column($activitiesData, 'id'))->delete();
         }
-
-        // Elimina las actividades que ya no se utilizan
-        $category->activities()->whereNotIn('id', array_column($activitiesData, 'id'))->delete();
       }
+
+      // Elimina las categorías que ya no se utilizan
+      $additional->categories()->whereNotIn('id', array_column($categoriesData, 'id'))->delete();
+
+      return ['status' => 200, 'data' => $additional];
+    } catch (ModelNotFoundException $e) {
+      return ['status' => 422, 'message' => 'Adicional no encontrado'];
     }
-
-    // Elimina las categorías que ya no se utilizan
-    $additional->categories()->whereNotIn('id', array_column($categoriesData, 'id'))->delete();
-
-    return $additional;
   }
 
-  function getAdditionalCostsByProvider($additionalData)
+  public function getAdditionalCostsByProvider($additionalData)
   {
     $result = [];
 

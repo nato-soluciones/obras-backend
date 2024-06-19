@@ -67,7 +67,7 @@ class ObraAdditionalController extends Controller
                 'reference_id' => $additional['id'],
                 'created_by' => auth()->user()->id
             ];
-            $CA_movement_provider = $CAService->CAMovementAdd($CA_Provider, $CA_movement_provider);
+            $CAService->CAMovementAdd($CA_Provider, $CA_movement_provider);
         }
 
         // Arma arrays para crear el movimiento del cliente
@@ -92,7 +92,7 @@ class ObraAdditionalController extends Controller
             'created_by' => auth()->user()->id
         ];
 
-        $CA_movement_client = $CAService->CAMovementAdd($CA_Client, $CA_movement_client);
+        $CAService->CAMovementAdd($CA_Client, $CA_movement_client);
 
         return response(['message' => 'Adicional creado correctamente', 'data' => $additional], 201);
     }
@@ -104,7 +104,14 @@ class ObraAdditionalController extends Controller
      */
     public function show(int $id, int $additionalId): Response
     {
-        $additional = Additional::with('categories.activities')->find($additionalId);
+        $additional = Additional::with([
+            'categories' => function ($query) {
+                $query->orderBy('id');
+            },
+            'categories.activities' => function ($query) {
+                $query->orderBy('id');
+            }
+        ])->find($additionalId);
 
         // Carga manualmente el proveedor (contratista) para cada actividad si el campo provider_id no es nulo
         foreach ($additional->categories as $category) {
@@ -127,26 +134,72 @@ class ObraAdditionalController extends Controller
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id, int $additionalId): Response
+    public function update(Request $request, int $obraId, int $additionalId): Response
     {
-        // Obtiene una instancia del servicio BudgetService
-        $additionalService = app(AdditionalService::class);
+        $obra = Obra::find($obraId);
+        if (!$obra) {
+            return response(['message' => 'Obra no encontrada'], 404);
+        }
 
-        // Si la validación pasa, procede con la actualización del presupuesto
+        // Obtiene una instancia del servicio AdditionalService
+        $additionalService = app(AdditionalService::class);
         $additional = $additionalService->updateAdditional($additionalId, $request->all());
 
-        return response([
-            'message' => 'Additional edited',
-            'data' => $additional
-        ], 201);
+        if($additional['status'] !== 200) {
+            return response($additional, $additional['status']);
+        }
+        $additionalData = Additional::with('categories.activities')->find($additionalId);
+        $additionalWithCost = $additionalService->getAdditionalCostsByProvider($additionalData->toArray());
+
+        $CAService = app(CurrentAccountService::class);
+        $clientId = $obra->budget->client_id;
+        $currency = $obra->budget->currency;
+
+
+        // Arma arrays para crear los movimientos de los proveedores
+        $movementType = CurrentAccountMovementType::select('id')
+            ->where('entity_type', 'PROVIDER')
+            ->where('name', 'Adicionales')
+            ->first();
+
+        foreach ($additionalWithCost as $provider) {
+            $CA_Provider = [
+                'project_id' => $obra->id,
+                'entity_type' => 'PROVIDER',
+                'entity_id' => $provider['contractor_id'],
+                'currency' => $currency,
+            ];
+            $CA_movement_provider = [
+                'date' => Date('Y-m-d'),
+                'movement_type_id' => $movementType->id,
+                'amount' => $provider['additional_cost'],
+                'reference_entity' => 'adicional',
+                'reference_id' => $additionalId,
+                'created_by' => auth()->user()->id
+            ];
+            $CAService->CAMovementUpdateByReference($CA_Provider, $CA_movement_provider);
+        }
+
+        // Arma arrays para actualizar el movimiento del cliente
+        $CAData = [
+            'project_id' => $obra->id,
+            'entity_type' => 'CLIENT',
+            'entity_id' => $clientId,
+            'currency' => $currency,
+        ];
+        $CA_movement = [
+            'date' => Date('Y-m-d'),
+            'amount' => $additionalData->total,
+            'reference_entity' => 'adicional',
+            'reference_id' => $additionalId,
+            'created_by' => auth()->user()->id
+        ];
+        
+        $CAService->CAMovementUpdateByReference($CAData, $CA_movement);
+
+        return response(['message' => 'Adicional modificado correctamente'], 201);
     }
 
-    /**
-     * Delete an additional by id
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy(int $obraId, int $additionalId): Response
     {
         $obra = Obra::find($obraId);
@@ -155,10 +208,11 @@ class ObraAdditionalController extends Controller
         }
 
         $additional = Additional::with('categories.activities')->find($additionalId);
+        $additional->delete();
 
         $additionalService = app(AdditionalService::class);
         $additionalWithCost = $additionalService->getAdditionalCostsByProvider($additional->toArray());
-        
+
         // CREAR MOVIMIENTO EN LA CUENTAS CORRIENTES
         $CAService = app(CurrentAccountService::class);
 
@@ -187,7 +241,7 @@ class ObraAdditionalController extends Controller
                 'reference_id' => $additional['id'],
                 'created_by' => auth()->user()->id
             ];
-            $CA_movement_provider = $CAService->CAMovementDeleteByReference($CA_Provider, $CA_movement_provider);
+            $CAService->CAMovementDeleteByReference($CA_Provider, $CA_movement_provider);
         }
 
         // Arma arrays para crear el movimiento del cliente
@@ -210,7 +264,7 @@ class ObraAdditionalController extends Controller
             'created_by' => auth()->user()->id
         ];
 
-        $CA_movement_client = $CAService->CAMovementDeleteByReference($CA_Client, $CA_movement_client);
+        $CAService->CAMovementDeleteByReference($CA_Client, $CA_movement_client);
 
         Log::debug($additionalWithCost);
         return response(['message' => 'Additional deleted'], 204);

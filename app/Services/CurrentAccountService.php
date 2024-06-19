@@ -155,26 +155,29 @@ class CurrentAccountService
       return ['status' => 422, 'message'  => 'El movimiento de referencia (' . $CAMovementData['reference_id'] . ') no existe.'];
     }
 
-    $newBalance = ($referenceMovement->movementType->type === 'DEBIT'
-      ? $currentAccount->balance + $referenceMovement->amount - $CAMovementData['amount']
-      : $currentAccount->balance - $referenceMovement->amount + $CAMovementData['amount']);
-
     // Log::info("UPD - CAData");
     // Log::info($currentAccount);
     // Log::info("Movimiento DB UPD");
     // Log::info($referenceMovement);
     // Log::info("Movimiento NEW UPD");
     // Log::info($CAMovementData);
-    // Log::info("newBalance");
-    // Log::info($newBalance);
+    if (floatval($referenceMovement->amount) !== floatval($CAMovementData['amount'])) {
+      
+      $newBalance = ($referenceMovement->movementType->type === 'DEBIT'
+      ? $currentAccount->balance + $referenceMovement->amount - $CAMovementData['amount']
+      : $currentAccount->balance - $referenceMovement->amount + $CAMovementData['amount']);
+      
+      
+      // Log::info("newBalance");
+      // Log::info($newBalance);
 
-    // Actualiza el movimiento de la cuenta corriente
-    $CAMovementData['description'] = $referenceMovement->description . ' - Modificado';
-    $referenceMovement->update($CAMovementData);
-    // Actualiza el saldo de la cuenta corriente
-    $currentAccount->balance = $newBalance;
-    $currentAccount->save();
-
+      // Actualiza el movimiento de la cuenta corriente
+      $CAMovementData['description'] = $referenceMovement->description;
+      $referenceMovement->update($CAMovementData);
+      // Actualiza el saldo de la cuenta corriente
+      $currentAccount->balance = $newBalance;
+      $currentAccount->save();
+    }
 
     return ['status' => 200, 'message' => 'Movimiento modificado ok'];
   }
@@ -228,6 +231,4 @@ class CurrentAccountService
 
     return ['status' => 200, 'message' => 'Movimiento eliminado ok'];
   }
-
-
 }
