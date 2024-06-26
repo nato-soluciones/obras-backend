@@ -188,6 +188,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Notas Completo",
             ],
+            [
+                "name" => "functional_fleets_full",
+                "guard_name" => "api",
+                "description" => "Flotas Completo",
+            ],
         ];
         foreach ($functionalRoles as $role) {
             Role::firstOrCreate($role);
@@ -254,6 +259,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Menú Notas",
             ],
+            [
+                "name" => "navbar_fleets",
+                "guard_name" => "api",
+                "description" => "Menú Flotas",
+            ]
         ];
         $obras_permission = [
             [
@@ -847,6 +857,34 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
         ];
 
+        $fleets_permission = [
+            [
+                "name" => "fleets_list",
+                "guard_name" => "api",
+                "description" => "Ver Flotas",
+            ],
+            [
+                "name" => "fleets_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Flota",
+            ],
+            [
+                "name" => "fleets_update",
+                "guard_name" => "api",
+                "description" => "Modificar Flota",
+            ],
+            [
+                "name" => "fleets_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Flota",
+            ],
+            [
+                "name" => "fleets_display",
+                "guard_name" => "api",
+                "description" => "Ver Flota",
+            ],
+        ];
+
         $permissions = array_merge(
             $navbar_permissions,
             $obras_permission,
@@ -871,7 +909,8 @@ class RolesAndPermissionsSeeder extends Seeder
             $contacts_permission,
             $calendars_permissions,
             $exchangeRates_permissions,
-            $notes_permission
+            $notes_permission,
+            $fleets_permission
         );
 
         foreach ($permissions as $permission) {

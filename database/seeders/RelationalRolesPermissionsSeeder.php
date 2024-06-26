@@ -269,6 +269,15 @@ class RelationalRolesPermissionsSeeder extends Seeder
         $functionalRol = Role::where('name', 'functional_notes_full')->first();
         $functionalRol->givePermissionTo($notes_permission_names);
 
+        $fleets_permission_names = [
+            "fleets_list",
+            "fleets_insert",
+            "fleets_update",
+            "fleets_delete",
+            "fleets_display"
+        ];
+        $functionalRol = Role::where('name', 'functional_fleets_full')->first();
+        $functionalRol->givePermissionTo($fleets_permission_names);
 
         // ? RELACIÓN DE ROL DE USUARIO (DUEÑO) CON ROLES FUNCIONALES
         $userRol = Role::where('name', 'OWNER')->first();
@@ -296,7 +305,8 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "functional_contacts_full",
             "functional_calendar_full",
             "functional_exchangeRates_full",
-            "functional_notes_full"
+            "functional_notes_full",
+            "functional_fleets_full"
         ];
 
         $roleFunctionals = Role::whereIn('name', $functionalRoles_names)->get();
@@ -310,7 +320,5 @@ class RelationalRolesPermissionsSeeder extends Seeder
                 $userRol->givePermissionTo($roleFunctional->permissions()->pluck('id'));
             }
         }
-
-
     }
 }
