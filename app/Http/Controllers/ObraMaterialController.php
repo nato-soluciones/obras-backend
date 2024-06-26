@@ -19,10 +19,6 @@ class ObraMaterialController extends Controller
             return response()->json(['message' => 'Obra no encontrada'], 404);
         }
 
-        // $materials = ObraMaterial::with('material')
-        //     ->where('obra_id', $obraId)
-        //     ->get();
-
         $materials = ObraMaterial::from('obra_materials as om')
             ->join('materials as m', 'om.material_id', '=', 'm.id')
             ->join('measurement_units as mu', 'm.measurement_unit_id', '=', 'mu.id')
@@ -36,6 +32,8 @@ class ObraMaterialController extends Controller
                 'mu.name as unit_name',
                 'mu.abbreviation as unit_abbreviation',
             )
+            ->orderBy('m.name', 'asc')
+            ->orderBy('m.id', 'asc')
             ->get();
         return response($materials, 200);
     }
@@ -56,6 +54,7 @@ class ObraMaterialController extends Controller
             ->select(
                 'om.id as obra_material_id',
                 'om.quantity',
+                'o.id as obra_id',
                 'o.name as obra_name',
                 'm.name as material_name',
                 'mu.name as unit_name',

@@ -18,18 +18,20 @@ class ObraMaterialMovementController extends Controller
         }
 
         $obraMaterialMovements = ObraMaterialMovement::from('obra_material_movements as omm')
-        ->join('measurement_units as mu', 'omm.measurement_unit_id', '=', 'mu.id')
-        ->where('omm.obra_material_id', $obraMaterialId)
-        ->select(
-            'omm.id as movement_id',
-            'omm.date',
-            'omm.movement_type',
-            'omm.quantity',
-            'omm.description',
-            'omm.observation',
-            'mu.abbreviation as unit_abbreviation'
-        )
-        ->get();
+            ->join('measurement_units as mu', 'omm.measurement_unit_id', '=', 'mu.id')
+            ->where('omm.obra_material_id', $obraMaterialId)
+            ->select(
+                'omm.id as movement_id',
+                'omm.date',
+                'omm.movement_type',
+                'omm.quantity',
+                'omm.description',
+                'omm.observation',
+                'mu.abbreviation as unit_abbreviation'
+            )
+            ->orderBy('omm.date', 'desc')
+            ->orderBy('omm.id', 'desc')
+            ->get();
 
         return response($obraMaterialMovements, 200);
     }
