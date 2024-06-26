@@ -13,6 +13,8 @@ use App\Http\Controllers\CacController;
 use App\Http\Controllers\IpcController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeveloperController;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -114,6 +116,21 @@ Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::clas
     Route::post('/', 'store')->middleware('permission:indexIPC_insert');
     Route::post('/{id}', 'update')->middleware('permission:indexIPC_update');
     Route::delete('/{id}', 'destroy')->middleware('permission:indexIPC_delete');
+});
+
+Route::prefix('notifications')->middleware('auth:sanctum')->controller(NotificationController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/newCount', 'notificationNewCount');
+    Route::get('/{id}', 'show');
+    Route::post('/mark_all_as_read', 'markAllAsRead');
+    Route::post('/{id}/mark_as_read', 'markAsRead');
+    Route::delete('/{id}', 'destroy');
+});
+
+Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
 });
 
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function() {

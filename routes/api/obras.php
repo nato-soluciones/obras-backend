@@ -6,6 +6,8 @@ use App\Http\Controllers\ObraController;
 use App\Http\Controllers\ObraDailyLogController;
 use App\Http\Controllers\ObraDailyLogTagController;
 use App\Http\Controllers\ObraDocumentController;
+use App\Http\Controllers\ObraMaterialController;
+use App\Http\Controllers\ObraMaterialMovementController;
 use App\Http\Controllers\ObraStageController;
 use App\Http\Controllers\ObraStageTaskController;
 use App\Http\Controllers\OutcomeController;
@@ -88,8 +90,25 @@ Route::prefix('obras/{obraId}/stages/{stageId}/tasks')->middleware('auth:sanctum
 // Stages endpoints
 Route::prefix('obras/{obraId}/stages')->middleware('auth:sanctum')->controller(ObraStageController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obraStages_list');
+  Route::get('/gantt', 'indexGantt')->middleware('permission:obraStages_list');
   Route::get('/{stageId}', 'show')->middleware('permission:obraStages_display');
   Route::post('/', 'store')->middleware('permission:obraStages_insert');
   Route::post('/{stageId}', 'update')->middleware('permission:obraStages_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:obraStages_delete');
+});
+
+// materials endpoints
+Route::prefix('obras/{obraId}/materials')->middleware('auth:sanctum')->controller(ObraMaterialController::class)->group(function () {
+  Route::get('/', 'index'); //->middleware('permission:obraStages_list');
+  Route::get('/{materialId}', 'show'); //->middleware('permission:obraStages_list');
+  Route::post('/', 'store'); //->middleware('permission:obraStages_insert');
+});
+
+// materials movements endpoints
+Route::prefix('obras/{obraId}/materials/{obraMaterialId}/movements')->middleware('auth:sanctum')->controller(ObraMaterialMovementController::class)->group(function () {
+  Route::get('/', 'index'); //->middleware('permission:obraStages_list');
+  Route::get('/{movementId}', 'show'); //->middleware('permission:obraStages_display');
+  Route::post('/', 'store'); //->middleware('permission:obraStages_insert');
+  Route::post('/{movementId}', 'update'); //->middleware('permission:obraStages_update');
+  Route::delete('/{id}', 'destroy'); //->middleware('permission:obraStages_delete');
 });
