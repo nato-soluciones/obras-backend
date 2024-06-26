@@ -19,6 +19,7 @@ class Budget extends Model
         'date',
         'obra_name',
         'estimated_time',
+        'expiration_date',
         'covered_area',
         'semi_covered_area',
         'status',
