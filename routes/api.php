@@ -34,6 +34,7 @@ include_once __DIR__ . '/api/budgets.php';
 include_once __DIR__ . '/api/clients.php';
 include_once __DIR__ . '/api/contractors.php';
 include_once __DIR__ . '/api/obras.php';
+include_once __DIR__ . '/api/fleets.php';
 include_once __DIR__ . '/api/permissions.php';
 
 Route::post('/clear-cookies', function (Request $request) {
