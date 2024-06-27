@@ -10,7 +10,11 @@ class MaterialController extends Controller
 {
     public function index(): Response
     {
-        $materials = Material::select(['id', 'name'])->orderBy('name')->get();
+        $materials = Material::from('materials as m')
+            ->join('measurement_units as mu', 'm.measurement_unit_id', '=', 'mu.id')
+            ->select('m.id', 'm.name', 'mu.id as unit_id', 'mu.name as unit_name')
+            ->orderBy('name')
+            ->get();
         return response($materials, 200);
     }
 
