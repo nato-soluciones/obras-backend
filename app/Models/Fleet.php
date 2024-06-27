@@ -30,7 +30,22 @@ class Fleet extends Model
         'status',
         'type',
     ];
+    
+    protected $appends = ['type_name'];
 
+    const VEHICLE_TYPES = [
+        'CAR' => 'Auto',
+        'PICKUP' => 'Camioneta',
+        'TRUCK' => 'Camión',
+        'MOTORCYCLE' => 'Moto',
+        'UTILITY' => 'Utilitario',
+        'OTHER' => 'Otro'
+    ];
+
+    public function getTypeNameAttribute() // el atributo se llama type_name, get{AttributeName}Attribute
+    {
+        return self::VEHICLE_TYPES[$this->type] ?? 'Desconocido';
+    }
     /**
      * Get the movements for the fleet.
      */
@@ -53,8 +68,9 @@ class Fleet extends Model
     public function last_movement()
     {
         return $this->hasOne(FleetMovement::class)
-                    ->where('date', '<=', Carbon::now())
-                    ->latest('date');
+            ->where('date', '<=', Carbon::now())
+            ->where('type', '=', 'MAINTENANCE')
+            ->latest('date');
     }
 
     /**
@@ -63,7 +79,8 @@ class Fleet extends Model
     public function next_movement()
     {
         return $this->hasOne(FleetMovement::class)
-                    ->where('date', '>=', Carbon::now())
-                    ->oldest('date');
+            ->where('date', '>=', Carbon::now())
+            ->where('type', '=', 'MAINTENANCE')
+            ->oldest('date');
     }
 }

@@ -24,7 +24,7 @@ class UpdateFleetMovementRequest extends FormRequest
         return [
             'date' => ['required', 'date'],
             'location' => ['required', 'string'],
-            'type' => ['required', 'string', 'in:MAINTENANCE,UNDER_REPAIR'],
+            'type' => ['required', 'string', 'in:MAINTENANCE,REPAIR'],
             'responsible' => ['required', 'string'],
             'mileage' => ['required', 'integer'],
             'service' => ['required', 'string'],

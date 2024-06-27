@@ -41,7 +41,9 @@ class FleetController extends Controller
 
     public function show(int $id): Response
     {
-        $fleet = Fleet::with('movements', 'documents', 'last_movement', 'next_movement')->find($id);
+        $fleet = Fleet::with(['movements' => function($q){
+            $q->orderBy('date', 'desc')->orderBy('id', 'desc');
+        }, 'documents', 'last_movement', 'next_movement'])->find($id);
         return response($fleet, 200);
     }
 

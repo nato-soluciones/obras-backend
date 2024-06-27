@@ -33,7 +33,7 @@ class CreateFleetRequest extends FormRequest
             'vtv_expiration' => ['nullable', 'date'],
             'next_plate_payment' => ['nullable', 'date'],
             'status' => ['required', 'string', 'in:IN_USE,UNDER_REPAIR,DAMAGED,SOLD'],
-            'type' => ['required', 'string', 'in:TRUCK,MOTORCYCLE,CAR,UTILITY,OTHER'],
+            'type' => ['required', 'string', 'in:TRUCK,MOTORCYCLE,PICKUP,CAR,UTILITY,OTHER'],
         ];
     }
 }

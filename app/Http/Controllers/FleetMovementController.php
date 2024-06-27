@@ -21,7 +21,6 @@ class FleetMovementController extends Controller
 
     public function store(CreateFleetMovementRequest $request): Response
     {
-        $data = $request->all();
         $image = $request->file('image');
         $movement = FleetMovement::create($request->all());
 
@@ -49,6 +48,13 @@ class FleetMovementController extends Controller
         return response($movement, 200);
     }
     
+    public function update(UpdateFleetMovementRequest $request, int $fleetId, int $movementId): Response
+    {
+        $movement = FleetMovement::find($movementId);
+        $movement->update($request->all());
+        return response($movement, 200);
+    }
+
     public function destroy(int $id): Response
     {
         $movement = FleetMovement::find($id);
