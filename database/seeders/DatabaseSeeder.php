@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call(IndicesSeeder::class);
         $this->call(ObraDailyLogTagsSeeder::class);
         $this->call(CurrentAccountMovementTypesSeeder::class);
+        $this->call(MeasurementUnitsSeeder::class);
 
         // $this->call(ToolCategorySeeder::class);
         // $this->call(ManufacturerCategories::class);
