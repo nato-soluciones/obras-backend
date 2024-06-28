@@ -15,7 +15,6 @@ class RelationalRolesPermissionsSeeder extends Seeder
     public function run(): void
     {
         // ? RELACIÓN DE USUARIOS CON ROLES DE USUARIO 
-
         $users = ["tomasgimenez11@gmail.com", "superadmin@gmail.com", "Arquitecto@gmail.com"];
         foreach ($users as $user) {
             $userRol = User::where('email', $user)->first();
@@ -28,7 +27,6 @@ class RelationalRolesPermissionsSeeder extends Seeder
 
 
         // ? RELACIÓN DE ROLES FUNCIONALES CON PERMISOS 
-
         $navbar_permissions = [
             "navbar_obras",
             "navbar_contractors",
@@ -41,7 +39,8 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "navbar_contacts",
             "navbar_calendar",
             "navbar_exchange_rate",
-            "navbar_notes"
+            "navbar_notes",
+            "navbar_fleets"
         ];
         $functionalRol = Role::where('name', 'functional_navbar_full')->first();
         $functionalRol->givePermissionTo($navbar_permissions);
@@ -102,10 +101,22 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "obraOutcomes_update",
             "obraOutcomes_delete",
             "obraOutcomes_display",
-            "obraOutcomes_export"
+            "obraOutcomes_export",
+            "obraOutcomes_facturanteRedirect"
         ];
         $functionalRol = Role::where('name', 'functional_obraOutcomes_full')->first();
         $functionalRol->givePermissionTo($obras_outcomes_permission_names);
+        
+        $obras_materials_permission_names = [
+            "obraMaterials_list",
+            "obraMaterials_insert",
+            "obraMaterials_update",
+            "obraMaterials_delete",
+            "obraMaterials_display",
+            "obraMaterials_export"
+        ];
+        $functionalRol = Role::where('name', 'functional_obraMaterials_full')->first();
+        $functionalRol->givePermissionTo($obras_materials_permission_names);
 
         $obras_additionals_permission_names = [
             "obraAdditional_list",
@@ -144,6 +155,23 @@ class RelationalRolesPermissionsSeeder extends Seeder
         $functionalRol = Role::where('name', 'functional_contractors_full')->first();
         $functionalRol->givePermissionTo($contractors_permission_names);
 
+        $provider_current_accounts_permission_names = [
+            "providerCurrentAccounts_list",
+            "providerCurrentAccounts_insert",
+            "providerCurrentAccounts_display",
+        ];
+        $functionalRol = Role::where('name', 'functional_providerCurrentAccounts_full')->first();
+        $functionalRol->givePermissionTo($provider_current_accounts_permission_names);
+
+        $provider_current_accounts_movements_permission_names = [
+            "providerCurrentAccountMovements_list",
+            "providerCurrentAccountMovements_insert",
+            "providerCurrentAccountMovements_update",
+            "providerCurrentAccountMovements_display",
+        ];
+        $functionalRol = Role::where('name', 'functional_providerCurrentAccountMovements_full')->first();
+        $functionalRol->givePermissionTo($provider_current_accounts_movements_permission_names);
+
         $budgets_permission_names = [
             "budgets_list",
             "budgets_insert",
@@ -167,6 +195,23 @@ class RelationalRolesPermissionsSeeder extends Seeder
         ];
         $functionalRol = Role::where('name', 'functional_clients_full')->first();
         $functionalRol->givePermissionTo($clients_permission_names);
+
+        $client_current_accounts_permission_names = [
+            "clientCurrentAccounts_list",
+            "clientCurrentAccounts_insert",
+            "clientCurrentAccounts_display",
+        ];
+        $functionalRol = Role::where('name', 'functional_clientCurrentAccounts_full')->first();
+        $functionalRol->givePermissionTo($client_current_accounts_permission_names);
+
+        $client_current_accounts_movements_permission_names = [
+            "clientCurrentAccountMovements_list",
+            "clientCurrentAccountMovements_insert",
+            "clientCurrentAccountMovements_update",
+            "clientCurrentAccountMovements_display",
+        ];
+        $functionalRol = Role::where('name', 'functional_clientCurrentAccountMovements_full')->first();
+        $functionalRol->givePermissionTo($client_current_accounts_movements_permission_names);
 
         $tools_permission_names = [
             "tools_list",
@@ -289,12 +334,17 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "functional_obraStageTasks_full",
             "functional_obraIncomes_full",
             "functional_obraOutcomes_full",
+            "functional_obraMaterials_full",
             "functional_obraAdditionals_full",
             "functional_obraContractors_full",
             "functional_obraDocuments_full",
             "functional_contractors_full",
+            "functional_providerCurrentAccounts_full",
+            "functional_providerCurrentAccountMovements_full",
             "functional_budgets_full",
             "functional_clients_full",
+            "functional_clientCurrentAccounts_full",
+            "functional_clientCurrentAccountMovements_full",
             "functional_tools_full",
             "functional_toolLocations_full",
             "functional_manufacturing_full",

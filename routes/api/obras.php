@@ -99,16 +99,16 @@ Route::prefix('obras/{obraId}/stages')->middleware('auth:sanctum')->controller(O
 
 // materials endpoints
 Route::prefix('obras/{obraId}/materials')->middleware('auth:sanctum')->controller(ObraMaterialController::class)->group(function () {
-  Route::get('/', 'index'); //->middleware('permission:obraStages_list');
-  Route::get('/{materialId}', 'show'); //->middleware('permission:obraStages_list');
-  Route::post('/', 'store'); //->middleware('permission:obraStages_insert');
+  Route::get('/', 'index')->middleware('permission:obraMaterials_list');
+  Route::get('/{materialId}', 'show')->middleware('permission:obraMaterials_display');
+  Route::post('/', 'store')->middleware('permission:obraMaterials_insert');
 });
 
 // materials movements endpoints
 Route::prefix('obras/{obraId}/materials/{obraMaterialId}/movements')->middleware('auth:sanctum')->controller(ObraMaterialMovementController::class)->group(function () {
-  Route::get('/', 'index'); //->middleware('permission:obraStages_list');
-  Route::get('/{movementId}', 'show'); //->middleware('permission:obraStages_display');
-  Route::post('/', 'store'); //->middleware('permission:obraStages_insert');
-  Route::post('/{movementId}', 'update'); //->middleware('permission:obraStages_update');
-  Route::delete('/{id}', 'destroy'); //->middleware('permission:obraStages_delete');
+  Route::get('/', 'index')->middleware('permission:obraMaterials_list');
+  Route::get('/{movementId}', 'show')->middleware('permission:obraMaterials_display');
+  Route::post('/', 'store')->middleware('permission:obraMaterials_insert');
+  Route::post('/{movementId}', 'update')->middleware('permission:obraMaterials_update');
+  Route::delete('/{id}', 'destroy')->middleware('permission:obraMaterials_delete');
 });

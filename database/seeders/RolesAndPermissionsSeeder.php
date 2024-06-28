@@ -13,6 +13,7 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
+        // ? Crea Roles de Usuario, si no existen
         $userRoles = [
             [
                 "name" => "SUPERADMIN",
@@ -62,6 +63,7 @@ class RolesAndPermissionsSeeder extends Seeder
             }
         }
         
+        // ? Crea Roles Funcionales, si no existen
         $functionalRoles = [
             [
                 "name" => "functional_navbar_full",
@@ -104,6 +106,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Egresos de la obra Completo",
             ],
             [
+                "name" => "functional_obraMaterials_full",
+                "guard_name" => "api",
+                "description" => "Materiales de la obra Completo",
+            ],
+            [
                 "name" => "functional_obraAdditionals_full",
                 "guard_name" => "api",
                 "description" => "Adicionales de la obra Completo",
@@ -124,6 +131,16 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Contratistas Completo",
             ],
             [
+                "name" => "functional_providerCurrentAccounts_full",
+                "guard_name" => "api",
+                "description" => "Cuentas corrientes de proveedores Completo",
+            ],
+            [
+                "name" => "functional_providerCurrentAccountMovements_full",
+                "guard_name" => "api",
+                "description" => "Movimientos de cuentas corrientes de proveedores Completo",
+            ],
+            [
                 "name" => "functional_budgets_full",
                 "guard_name" => "api",
                 "description" => "Presupuestos Completo",
@@ -132,6 +149,16 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "functional_clients_full",
                 "guard_name" => "api",
                 "description" => "Clientes Completo",
+            ],
+            [
+                "name" => "functional_clientCurrentAccounts_full",
+                "guard_name" => "api",
+                "description" => "Cuentas corrientes de clientes Completo",
+            ],
+            [
+                "name" => "functional_clientCurrentAccountMovements_full",
+                "guard_name" => "api",
+                "description" => "Movimientos de cuentas corrientes de clientes Completo",
             ],
             [
                 "name" => "functional_tools_full",
@@ -198,6 +225,7 @@ class RolesAndPermissionsSeeder extends Seeder
             Role::firstOrCreate($role);
         }
 
+        // ? Crea Permisos, si no existen
         $navbar_permissions = [
             [
                 "name" => "navbar_obras",
@@ -431,6 +459,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Exportar egresos de la obra",
             ],
+            [
+                "name" => "obraOutcomes_facturanteRedirect",
+                "guard_name" => "api",
+                "description" => "Redirecciona a facturante",
+            ],
         ];
         $obras_additional_permission = [
             [
@@ -493,6 +526,33 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Eliminar documento de la obra",
             ],
         ];
+        $obras_materials_permission = [
+            [
+                "name" => "obraMaterials_list",
+                "guard_name" => "api",
+                "description" => "Ver materiales de la obra",
+            ],
+            [
+                "name" => "obraMaterials_insert",
+                "guard_name" => "api",
+                "description" => "Agregar material de la obra",
+            ],
+            [
+                "name" => "obraMaterials_update",
+                "guard_name" => "api",
+                "description" => "Modificar material de la obra",
+            ],
+            [
+                "name" => "obraMaterials_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar material de la obra",
+            ],
+            [
+                "name" => "obraMaterials_display",
+                "guard_name" => "api",
+                "description" => "Ver material de la obra",
+            ],
+        ];
         $contractors_permission = [
             [
                 "name" => "contractors_list",
@@ -523,6 +583,45 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "contractors_export",
                 "guard_name" => "api",
                 "description" => "Exportar Contratistas",
+            ],
+        ];
+        $provider_current_accounts_permission = [
+            [
+                "name" => "providerCurrentAccounts_list",
+                "guard_name" => "api",
+                "description" => "Listar Cuentas corrientes de proveedores",
+            ],
+            [
+                "name" => "providerCurrentAccounts_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Cuenta corriente de proveedor",
+            ],
+            [
+                "name" => "providerCurrentAccounts_display",
+                "guard_name" => "api",
+                "description" => "Ver Cuenta corriente de proveedores",
+            ],
+        ];
+        $provider_current_accounts_movements_permission = [
+            [
+                "name" => "providerCurrentAccountMovements_list",
+                "guard_name" => "api",
+                "description" => "Listar Movimientos de cuentas corrientes en proveedores",
+            ],
+            [
+                "name" => "providerCurrentAccountMovements_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Movimiento de cuenta corriente en proveedores",
+            ],
+            [
+                "name" => "providerCurrentAccountMovements_update",
+                "guard_name" => "api",
+                "description" => "Modificar Movimiento de cuenta corriente en proveedores",
+            ],
+            [
+                "name" => "providerCurrentAccountMovements_display",
+                "guard_name" => "api",
+                "description" => "Ver Movimiento de cuenta corriente en proveedores",
             ],
         ];
         $budgets_permission = [
@@ -597,6 +696,45 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "clients_display",
                 "guard_name" => "api",
                 "description" => "Ver Cliente",
+            ],
+        ];
+        $client_current_accounts_permission = [
+            [
+                "name" => "clientCurrentAccounts_list",
+                "guard_name" => "api",
+                "description" => "Listar Cuentas corrientes de clientes",
+            ],
+            [
+                "name" => "clientCurrentAccounts_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Cuenta corriente de cliente",
+            ],
+            [
+                "name" => "clientCurrentAccounts_display",
+                "guard_name" => "api",
+                "description" => "Ver Cuenta corriente de cliente",
+            ],
+        ];
+        $client_current_accounts_movements_permission = [
+            [
+                "name" => "clientCurrentAccountMovements_list",
+                "guard_name" => "api",
+                "description" => "Listar Movimientos de cuentas corrientes en clientes",
+            ],
+            [
+                "name" => "clientCurrentAccountMovements_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Movimiento de cuenta corriente en clientes",
+            ],
+            [
+                "name" => "clientCurrentAccountMovements_update",
+                "guard_name" => "api",
+                "description" => "Modificar Movimiento de cuenta corriente en clientes",
+            ],
+            [
+                "name" => "clientCurrentAccountMovements_display",
+                "guard_name" => "api",
+                "description" => "Ver Movimiento de cuenta corriente en clientes",
             ],
         ];
         $tools_permission = [
@@ -896,9 +1034,14 @@ class RolesAndPermissionsSeeder extends Seeder
             $obras_additional_permission,
             $obras_contractors_permission,
             $obras_documents_permission,
+            $obras_materials_permission,
             $contractors_permission,
+            $provider_current_accounts_permission,
+            $provider_current_accounts_movements_permission,
             $budgets_permission,
             $clients_permission,
+            $client_current_accounts_permission,
+            $client_current_accounts_movements_permission,
             $tools_permission,
             $tool_locations_permission,
             $manufacturing_permission,

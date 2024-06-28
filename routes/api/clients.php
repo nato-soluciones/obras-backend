@@ -16,15 +16,15 @@ Route::prefix('clients')->middleware('auth:sanctum')->controller(ClientControlle
 
 // CurrentAccounts Clients endpoints
 Route::prefix('clients/{id}/curr_accs')->middleware('auth:sanctum')->controller(CurrentAccountController::class)->group(function () {
-  Route::get('/', 'indexClients');
-  Route::get('/{projectId}/{currency}', 'showClient');
-  Route::post('/', 'storeClient');
+  Route::get('/', 'indexClients')->middleware('permission:clientCurrentAccounts_list');
+  Route::get('/{projectId}/{currency}', 'showClient')->middleware('permission:clientCurrentAccounts_display');
+  Route::post('/', 'storeClient')->middleware('permission:clientCurrentAccounts_insert');
 });
 
 // CurrentAccountMovements Clients endpoints
 Route::prefix('clients/{id}/curr_accs/{projectId}/{currency}/movements')->middleware(['auth:sanctum', 'api'])->controller(CurrentAccountMovementController::class)->group(function () {
-  Route::get('/', 'indexClients');
-  Route::get('/{movementId}', 'showClient'); // ->middleware('permission:contractors_display');
-  Route::post('/', 'storeClient'); // ->middleware('permission:contractors_insert');
-  Route::post('/{movementId}', 'updateClient'); // ->middleware('permission:contractors_insert');
+  Route::get('/', 'indexClients')->middleware('permission:clientCurrentAccountMovements_list');
+  Route::get('/{movementId}', 'showClient')->middleware('permission:clientCurrentAccountMovements_display');
+  Route::post('/', 'storeClient')->middleware('permission:clientCurrentAccountMovements_insert');
+  Route::post('/{movementId}', 'updateClient')->middleware('permission:clientCurrentAccountMovements_update');
 });

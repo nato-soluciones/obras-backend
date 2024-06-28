@@ -107,6 +107,8 @@ Obtener todos los roles de usuario
 Obtener todos los roles funcionales
 
 -   
+# APIs
+- **Entity_check**: El servicio entity_check?entity=xxxx, devuelve los permisos que tiene el usuario para la entidad pasada, ej: si se pasa fleets, verificará todos permisos que comiencen con "fleets_", como podría ser "fleets_display".
 
 # FUNCIONES IMPLEMENTADAS
 
