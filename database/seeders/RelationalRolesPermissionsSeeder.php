@@ -112,8 +112,7 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "obraMaterials_insert",
             "obraMaterials_update",
             "obraMaterials_delete",
-            "obraMaterials_display",
-            "obraMaterials_export"
+            "obraMaterials_display"
         ];
         $functionalRol = Role::where('name', 'functional_obraMaterials_full')->first();
         $functionalRol->givePermissionTo($obras_materials_permission_names);
