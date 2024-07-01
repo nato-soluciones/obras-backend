@@ -31,7 +31,12 @@ class ContractorController extends Controller
      */
     public function show(int $id): Response
     {
-        $contractor = Contractor::find($id);
+        $contractor = Contractor::from('contractors as c')
+            ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
+            ->join('banks as b', 'c.bank', '=', 'b.code')
+            ->where('c.id', $id)
+            ->select('c.*', 'i.name as industry_name', 'b.name as bank_name')
+            ->first();
         return response($contractor, 200);
     }
 
@@ -43,7 +48,7 @@ class ContractorController extends Controller
      */
     public function store(CreateContractorRequest $request): Response
     {
-        // Ckeck cuit is unique
+        // Check cuit is unique
         if (Contractor::where('cuit', $request->cuit)->exists()) {
             return response(['message' => 'El CUIT ya está en uso'], 409);
         }
@@ -68,7 +73,7 @@ class ContractorController extends Controller
         if (Contractor::where('cuit', $request->cuit)->where('id', '!=', $id)->exists()) {
             return response(['message' => 'El CUIT ya está en uso'], 409);
         }
-        
+
         $contractor = Contractor::find($id);
         $contractor->update($request->all());
 
@@ -102,17 +107,18 @@ class ContractorController extends Controller
         $contractors = Contractor::all();
         $f = fopen('php://memory', 'r+');
 
-        $csvTitles = ['Razón Social',
-                      'Nombre de Fantasía', 
-                      'Condición de IVA', 
-                      'CUIT', 
-                      'Contacto de Referencia', 
-                      'Email', 
-                      'Teléfono',
-                      'Ciudad', 
-                      'Dirección', 
-                      'CP', 
-                    ];
+        $csvTitles = [
+            'Razón Social',
+            'Nombre de Fantasía',
+            'Condición de IVA',
+            'CUIT',
+            'Contacto de Referencia',
+            'Email',
+            'Teléfono',
+            'Ciudad',
+            'Dirección',
+            'CP',
+        ];
         fputcsv($f, $csvTitles, ',');
 
         foreach ($contractors as $item) {
@@ -130,7 +136,7 @@ class ContractorController extends Controller
             ];
             fputcsv($f, $csvRow, ',');
         }
-        
+
         rewind($f);
         $csv = stream_get_contents($f);
         fclose($f);

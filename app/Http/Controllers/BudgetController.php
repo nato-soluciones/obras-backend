@@ -20,11 +20,14 @@ class BudgetController extends Controller
      */
     public function index(): Response
     {
-        $budgets = Budget::with(['client' => function($q){
+        $budgets = Budget::with(['client' => function ($q) {
             $q->select('id', 'person_type', 'firstname', 'lastname', 'business_name', 'deleted_at')->withTrashed();
-        }, 'user' => function($q){
+        }, 'user' => function ($q) {
             $q->select('id', 'firstname', 'lastname', 'deleted_at')->withTrashed();
-        }])->get();
+        }])
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
         return response($budgets, 200);
     }
 
