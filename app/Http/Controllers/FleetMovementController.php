@@ -42,9 +42,9 @@ class FleetMovementController extends Controller
         return response($movement, 201);
     }
 
-    public function show(int $id): Response
+    public function show(int $fleetId, int $movementId): Response
     {
-        $movement = FleetMovement::find($id);
+        $movement = FleetMovement::find($movementId);
         return response($movement, 200);
     }
     
@@ -55,9 +55,9 @@ class FleetMovementController extends Controller
         return response($movement, 200);
     }
 
-    public function destroy(int $id): Response
+    public function destroy(int $fleetId, int $movementId): Response
     {
-        $movement = FleetMovement::find($id);
+        $movement = FleetMovement::find($movementId);
         $movement->delete();
         return response(null, 204);
     }
