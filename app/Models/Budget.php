@@ -17,7 +17,7 @@ class Budget extends Model
      */
     protected $fillable = [
         'date',
-        'obra_name',
+        'project_name',
         'estimated_time',
         'expiration_date',
         'covered_area',

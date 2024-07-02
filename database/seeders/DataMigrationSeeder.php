@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Obra;
 use Illuminate\Support\Facades\DB;
 use App\Models\Outcome;
 use Illuminate\Database\Seeder;
@@ -30,6 +31,21 @@ class DataMigrationSeeder extends Seeder
             // Actualiza los registros con document_type = 'PAYMENT' a 'RECEIPT'
             Outcome::where('document_type', 'PAYMENT')
                 ->update(['document_type' => 'RECEIPT']);
+        });
+
+        DB::transaction(function () {
+            // Recorre todas las obras y recupera datos del presupuesto y los guarda en la obra
+            $obras = Obra::all();
+
+            foreach ($obras as $obra) {
+                $budget = $obra->budget;
+                $obra->covered_area = $budget->covered_area;
+                $obra->semi_covered_area = $budget->semi_covered_area;
+                $obra->currency = $budget->currency;
+                $obra->total = $budget->total;
+                $obra->total_cost = $budget->total_cost;
+                $obra->save();
+            }
         });
     }
 }

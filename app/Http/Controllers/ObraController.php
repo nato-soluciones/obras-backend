@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Budget;
 use App\Models\CurrentAccountMovementType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -52,7 +53,19 @@ class ObraController extends Controller
 
         try {
             // DB::transaction(function () use ($request, $image, $obra) {
-            $obra = Obra::create($request->all());
+            $obraData = $request->all();
+            $budget = null;
+            if (isset($obraData['budget_id']) || intval($obraData['budget_id']) > 0) {
+                $budget = Budget::find($obraData['budget_id']);
+                $obraData['covered_area'] = $budget->covered_area;
+                $obraData['semi_covered_area'] = $budget->semi_covered_area;
+                $obraData['currency'] = $budget->currency;
+                $obraData['total'] = $budget->total;
+                $obraData['total_cost'] = $budget->total_cost;
+                $obraData['client_id'] = $budget->client_id;
+            }
+
+            $obra = Obra::create($obraData);
 
             if ($image) {
                 $directory = 'public/uploads/obras/' . $obra->id;
@@ -62,58 +75,58 @@ class ObraController extends Controller
 
                 $absolutePathToDirectory = storage_path('app/' . $directory);
                 chmod($absolutePathToDirectory, 0755);
+
+                $obra->save();
             }
 
-            $obra->save();
-
-            $budget = $obra->budget;
-            $budget->status = 'FINISHED';
-            $budget->save();
+            $clientId = $obra->client_id;
+            $currency = $obra->currency;
+            $totalObra = $obra->total;
 
             // CREAR MOVIMIENTO EN LA CUENTAS CORRIENTES
             $CAService = app(CurrentAccountService::class);
 
-            // Recuperar datos del presupuesto
-            $clientId = $budget->client_id;
-            $currency = $budget->currency;
-            $totalObra = $budget->total;
+            // Actualiza presupuesto y prepara las cuentas corrientes de los proveedores
+            if ($budget) {
+                $budget->status = 'FINISHED';
+                $budget->save();
 
-            // Recuperar costos por proveedor del presupuesto
-            $resultBudget = $obra->budget->categories()
-                ->join(
-                    'budgets_categories_activities as bca',
-                    'budgets_categories.id',
-                    '=',
-                    'bca.budget_category_id'
-                )
-                ->selectRaw('bca.provider_id as contractor_id, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
-                ->groupBy('bca.provider_id')
-                ->get();
+                // Recuperar costos por proveedor del presupuesto
+                $resultBudget = $budget->categories()
+                    ->join(
+                        'budgets_categories_activities as bca',
+                        'budgets_categories.id',
+                        '=',
+                        'bca.budget_category_id'
+                    )
+                    ->selectRaw('bca.provider_id as contractor_id, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
+                    ->groupBy('bca.provider_id')
+                    ->get();
 
+                // Arma arrays para crear los movimientos de los proveedores
+                $movementType = CurrentAccountMovementType::select('id')
+                    ->where('entity_type', 'PROVIDER')
+                    ->where('name', 'Proyecto')
+                    ->first();
 
-            // Arma arrays para crear los movimientos de los proveedores
-            $movementType = CurrentAccountMovementType::select('id')
-                ->where('entity_type', 'PROVIDER')
-                ->where('name', 'Proyecto')
-                ->first();
-
-            foreach ($resultBudget as $provider) {
-                $CA_Provider = [
-                    'project_id' => $obra->id,
-                    'entity_type' => 'PROVIDER',
-                    'entity_id' => $provider->contractor_id,
-                    'currency' => $currency,
-                ];
-                $CA_movement_provider = [
-                    'date' => Date('Y-m-d'),
-                    'movement_type_id' => $movementType->id,
-                    'description' => 'Obra ' . $obra->name,
-                    'amount' => $provider->budgeted_price,
-                    'reference_entity' => 'obra',
-                    'reference_id' => $obra->id,
-                    'created_by' => auth()->user()->id
-                ];
-                $CA_movement_provider = $CAService->CAMovementAdd($CA_Provider, $CA_movement_provider);
+                foreach ($resultBudget as $provider) {
+                    $CA_Provider = [
+                        'project_id' => $obra->id,
+                        'entity_type' => 'PROVIDER',
+                        'entity_id' => $provider->contractor_id,
+                        'currency' => $currency,
+                    ];
+                    $CA_movement_provider = [
+                        'date' => Date('Y-m-d'),
+                        'movement_type_id' => $movementType->id,
+                        'description' => 'Obra ' . $obra->name,
+                        'amount' => $provider->budgeted_price,
+                        'reference_entity' => 'obra',
+                        'reference_id' => $obra->id,
+                        'created_by' => auth()->user()->id
+                    ];
+                    $CA_movement_provider = $CAService->CAMovementAdd($CA_Provider, $CA_movement_provider);
+                }
             }
 
             // Arma arrays para crear el movimiento del cliente
