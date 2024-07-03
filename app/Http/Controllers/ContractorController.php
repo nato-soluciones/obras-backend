@@ -9,6 +9,7 @@ use App\Models\Contractor;
 
 use App\Http\Requests\Contractor\CreateContractorRequest;
 use App\Http\Requests\Contractor\UpdateContractorRequest;
+use Illuminate\Support\Facades\Log;
 
 class ContractorController extends Controller
 {
@@ -31,9 +32,11 @@ class ContractorController extends Controller
      */
     public function show(int $id): Response
     {
+        Log::debug('ContractorController@show');
+        Log::debug($id);
         $contractor = Contractor::from('contractors as c')
             ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
-            ->join('banks as b', 'c.bank', '=', 'b.code')
+            ->leftJoin('banks as b', 'c.bank', '=', 'b.code')
             ->where('c.id', $id)
             ->select('c.*', 'i.name as industry_name', 'b.name as bank_name')
             ->first();
