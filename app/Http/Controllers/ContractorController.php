@@ -32,8 +32,6 @@ class ContractorController extends Controller
      */
     public function show(int $id): Response
     {
-        Log::debug('ContractorController@show');
-        Log::debug($id);
         $contractor = Contractor::from('contractors as c')
             ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
             ->leftJoin('banks as b', 'c.bank', '=', 'b.code')
