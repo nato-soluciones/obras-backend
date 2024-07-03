@@ -27,7 +27,7 @@ class UserController extends Controller
         }])->whereHas('roles', function ($query) {
             $query->where('name', '!=', 'SUPERADMIN');
         })->orWhereDoesntHave('roles')
-        ->get();
+            ->get();
 
         // Ocultar la propiedad pivot de los roles
         $users->each(function ($user) {
@@ -150,23 +150,35 @@ class UserController extends Controller
 
     public function entityCheck(Request $request)
     {
+        $debug = false;
+        if ($debug) {
+            Log::debug('---------- entityCheck INICIO ----------');
+            Log::debug('Request: ' . json_encode($request->all()));
+        }
         $entity = $request->input('entity', '');
 
         $user = Auth::user();
-        if (strtoupper($user->getRoleNames()[0]) === 'SUPERADMIN') return Response(['full'], 200);
+        if ($debug) Log::debug('User: ' . json_encode($user));
+        
+        if (strtoupper($user->getRoleNames()[0]) === 'SUPERADMIN') {
+            if ($debug) Log::debug('RETURN Superadmin');
+            return response(['full'], 200);
+        }
 
         $permissions = $user->getAllPermissions();
-
         // Filtra los permisos por entidad
         $entityPermissions = $permissions->filter(function ($permission) use ($entity) {
             return strpos($permission->name, $entity . '_') === 0;
         })->pluck('name')->toArray();
 
+        if ($debug) Log::debug('ENTITY Permissions: ' . json_encode($entityPermissions));
         // Obtiene solo la acción de los permisos
         $actions = array_map(function ($permission) use ($entity) {
             return substr($permission, strlen($entity) + 1);
         }, $entityPermissions);
 
-        return Response(array_unique($actions), 200);
+        if ($debug) Log::debug('RETURN Actions: ' . json_encode($actions));
+        if ($debug) Log::debug('---------------- FIN ---------------------');
+        return response(array_unique($actions), 200);
     }
 }
