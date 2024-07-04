@@ -19,6 +19,11 @@ class Obra extends Model
     protected $fillable = [
         'budget_id',
         'client_id',
+        'covered_area',
+        'semi_covered_area',
+        'currency',
+        'total',
+        'total_cost',
         'image',
         'name',
         'address',
@@ -47,27 +52,33 @@ class Obra extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function incomes() {
+    public function incomes()
+    {
         return $this->hasMany(Income::class);
     }
 
-    public function outcomes() {
+    public function outcomes()
+    {
         return $this->hasMany(Outcome::class);
     }
 
-    public function budget() {
+    public function budget()
+    {
         return $this->belongsTo(Budget::class);
     }
 
-    public function documents() {
+    public function documents()
+    {
         return $this->hasMany(Document::class);
     }
 
-    public function additionals() {
+    public function additionals()
+    {
         return $this->hasMany(Additional::class);
     }
 
-    public function dailyLogs() {
+    public function dailyLogs()
+    {
         return $this->hasMany(ObraDailyLog::class);
     }
 }
