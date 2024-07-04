@@ -87,6 +87,7 @@ class ObraMaterialController extends Controller
                         'quantity' => $materialMovement['quantity'],
                         'description' => $materialMovement['description'],
                         'observation' => $materialMovement['observation'],
+                        'created_by_id' => auth()->id()
                     ]);
 
                     // actualiza la cantidad del material
