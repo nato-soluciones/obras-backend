@@ -17,6 +17,7 @@ class ObraMaterialMovement extends Model
         'quantity',
         'description',
         'observation',
+        'created_by_id',
     ];
 
     public function obraMaterial()
@@ -27,5 +28,10 @@ class ObraMaterialMovement extends Model
     public function measurementUnit()
     {
         return $this->belongsTo(MeasurementUnit::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by_id');
     }
 }
