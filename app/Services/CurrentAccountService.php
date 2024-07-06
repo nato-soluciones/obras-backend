@@ -69,7 +69,7 @@ class CurrentAccountService
       ->orderBy('id', 'desc')
       ->get();
 
-    $currentBalance = 0;
+    $currentBalance = $this->getInitialCurrentBalance();
     $movementsWithBalance = [];
 
     $cantMovements = count($ca_movements) - 1;
@@ -230,5 +230,10 @@ class CurrentAccountService
 
 
     return ['status' => 200, 'message' => 'Movimiento eliminado ok'];
+  }
+
+  public function getInitialCurrentBalance()
+  {
+    return 0;
   }
 }
