@@ -79,9 +79,9 @@ class CurrentAccountService
       $amount = $movement->amount;
 
       if ($movementType === 'DEBIT') {
-        $currentBalance -= $amount;
-      } else {
         $currentBalance += $amount;
+      } else {
+        $currentBalance -= $amount;
       }
 
       $movementWithBalance = $movement;
@@ -111,8 +111,8 @@ class CurrentAccountService
     $currentAccount = $RespCurrentAccount['currentAccount'];
 
     $newBalance = ($movementType['type'] === 'DEBIT'
-      ? $currentAccount->balance - $CAMovementData['amount']
-      : $currentAccount->balance + $CAMovementData['amount']);
+      ? $currentAccount->balance + $CAMovementData['amount']
+      : $currentAccount->balance - $CAMovementData['amount']);
 
     // Crea el movimiento de la cuenta corriente
     $CAMovementData['current_account_id'] = $currentAccount->id;
@@ -164,8 +164,8 @@ class CurrentAccountService
     if (floatval($referenceMovement->amount) !== floatval($CAMovementData['amount'])) {
       
       $newBalance = ($referenceMovement->movementType->type === 'DEBIT'
-      ? $currentAccount->balance + $referenceMovement->amount - $CAMovementData['amount']
-      : $currentAccount->balance - $referenceMovement->amount + $CAMovementData['amount']);
+      ? $currentAccount->balance + $referenceMovement->amount + $CAMovementData['amount']
+      : $currentAccount->balance - $referenceMovement->amount - $CAMovementData['amount']);
       
       
       // Log::info("newBalance");
