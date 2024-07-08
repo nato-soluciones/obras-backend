@@ -179,6 +179,7 @@ class CurrentAccountService
     // Log::info("Movimiento NEW UPD");
     // Log::info($CAMovementData);
     if (floatval($referenceMovement->amount) !== floatval($CAMovementData['amount'])) {
+      unset($CAMovementData['date']);
 
       $newBalance = ($referenceMovement->movementType->type === 'DEBIT'
         ? $currentAccount->balance + $referenceMovement->amount + $CAMovementData['amount']
