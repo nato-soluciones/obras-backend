@@ -58,7 +58,7 @@ class Income extends Model
         $obraIdStr = str_pad($obraId, 3, '0', STR_PAD_LEFT);
 
         return DB::transaction(function () use ($obraId, $obraIdStr) {
-            $lastIncome = static::where('obra_id', $obraId)->latest('id')->lockForUpdate()->first();
+            $lastIncome = static::withTrashed()->where('obra_id', $obraId)->latest('id')->lockForUpdate()->first();
             $lastNumber = $lastIncome ? intval(substr($lastIncome->receipt_number, 6)) : 0;
             $newNumber = $lastNumber + 1;
             $receiptNumber = $obraIdStr . sprintf('-%05d', $newNumber);
