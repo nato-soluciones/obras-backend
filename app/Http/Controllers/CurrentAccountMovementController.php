@@ -14,9 +14,10 @@ class CurrentAccountMovementController extends Controller
     /////////////////////
     //? Clients Methods
     /////////////////////
-    public function indexClients(int $clientId, int $projectId, string $currency)
+    public function indexClients(Request $request, int $clientId, int $projectId, string $currency)
     {
         $entityType = 'CLIENT';
+        // $page = $request->input('page', 1);
 
         $CAService = app(CurrentAccountService::class);
         $respService = $CAService->CAMovementList($entityType, $clientId, $projectId, $currency);
