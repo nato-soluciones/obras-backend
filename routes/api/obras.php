@@ -51,6 +51,7 @@ Route::prefix('obras/{obraId}/outcomes')->middleware('auth:sanctum')->controller
 Route::prefix('obras/{obraId}/documents')->middleware('auth:sanctum')->controller(ObraDocumentController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obraDocuments_list');
   Route::post('/', 'store')->middleware('permission:obraDocuments_insert');
+  Route::delete('/{documentId}', 'destroy')->middleware('permission:obraDocuments_delete');
 });
 
 // Additionals endpoints
