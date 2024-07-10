@@ -60,7 +60,7 @@ class ObraController extends Controller
                 $obraData['covered_area'] = $budget->covered_area;
                 $obraData['semi_covered_area'] = $budget->semi_covered_area;
                 $obraData['currency'] = $budget->currency;
-                $obraData['total'] = $budget->total;
+                $obraData['total'] = $budget->total - ($budget->discount_amount ? $budget->discount_amount : 0);
                 $obraData['total_cost'] = $budget->total_cost;
                 $obraData['client_id'] = $budget->client_id;
             }

@@ -10,11 +10,6 @@ class Budget extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'date',
         'project_name',
@@ -28,6 +23,10 @@ class Budget extends Model
         'fields',
         'total',
         'total_cost',
+        'discount_type',
+        'discount_percentage',
+        'discount_amount',
+        'discount_reason',
         'user_id',
         'client_id',
         'created_by_id',
