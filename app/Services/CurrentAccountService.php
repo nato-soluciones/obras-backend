@@ -72,7 +72,7 @@ class CurrentAccountService
       ->paginate($per_page);
 
     $movementsWithBalance = [];
-    if($ca_movements_query->isEmpty()){
+    if ($ca_movements_query->isEmpty()) {
       $response = [];
       $response['data'] = $movementsWithBalance;
       $response['current_page'] = 0;
@@ -190,7 +190,10 @@ class CurrentAccountService
       // Log::info($newBalance);
 
       // Actualiza el movimiento de la cuenta corriente
-      $CAMovementData['description'] = $referenceMovement->description;
+      $CAMovementData['description'] = str_ends_with(trim($referenceMovement->description), '- editado')
+        ? $referenceMovement->description
+        : $referenceMovement->description . ' - editado';
+
       $referenceMovement->update($CAMovementData);
       // Actualiza el saldo de la cuenta corriente
       $currentAccount->balance = $newBalance;

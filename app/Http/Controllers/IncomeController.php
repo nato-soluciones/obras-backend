@@ -75,7 +75,7 @@ class IncomeController extends Controller
             $CA_movement = [
                 'date' => $income->date,
                 'movement_type_id' => $movementType->id,
-                'description' => ' Cobro (' . $income->receipt_number . ') - ' . $income->payment_concept,
+                'description' => ' Recibo (' . $income->receipt_number . ') - ' . $income->payment_concept,
                 'amount' => $amount,
                 'reference_entity' => 'ingreso',
                 'reference_id' => $income->id,
