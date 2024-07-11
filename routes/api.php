@@ -92,16 +92,20 @@ Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
 Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {
     Route::get('/categories', [ManufacturerCategoryController::class, 'index']);
     Route::post('/categories', [ManufacturerCategoryController::class, 'store']);
-    Route::post('/categories/{id}', [ManufacturerCategoryController::class, 'destroy']);
-    
-    Route::post('/files', [ManufacturerFileController::class, 'store']);
-    Route::delete('/files/{id}', [ManufacturerFileController::class, 'destroy']);
+    // Route::post('/categories/{id}', [ManufacturerCategoryController::class, 'destroy']);
 
     Route::get('/', [ManufacturerController::class, 'index'])->middleware('permission:manufacturing_list');
     Route::get('/{id}', [ManufacturerController::class, 'show'])->middleware('permission:manufacturing_display');
     Route::post('/', [ManufacturerController::class, 'store'])->middleware('permission:manufacturing_insert');
     Route::post('/{id}', [ManufacturerController::class, 'update'])->middleware('permission:manufacturing_update');
     Route::delete('/{id}', [ManufacturerController::class, 'destroy'])->middleware('permission:manufacturing_delete');
+});
+
+// Manufacturies documents endpoints
+Route::prefix('manufacturies/{id}/files')->middleware('auth:sanctum')->controller(ManufacturerFileController::class)->group(function() {
+    Route::post('/', 'store');
+    Route::delete('/{fileId}', 'destroy');
+
 });
 
 // CAC endpoints
