@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\ManufacturerFile;
+use Illuminate\Support\Facades\Log;
 
 class ManufacturerFileController extends Controller
 {
@@ -43,11 +44,19 @@ class ManufacturerFileController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy(int $id): Response
+    public function destroy(int $manufacturerId, int $documentId): Response
     {
-        $manufacturerFile = ManufacturerFile::find($id);
-        $manufacturerFile->delete();
+        $document = ManufacturerFile::find($documentId);
+        if (is_null($document)) {
+            return response(['status' => 404, 'message' => 'Documento no encontrado'], 404);
+        }
 
-        return response(['message' => 'Manufacturer deleted'], 204);
+        $directory = 'public/uploads/manufacturers/' . $manufacturerId . '/' . basename($document->file);
+        if (Storage::delete($directory)) {
+            $document->delete();
+            return response(null, 204);
+        } else {
+            return response(['status' => 422, 'message' => 'No se pudo borrar el documento'], 422);
+        }
     }
 }
