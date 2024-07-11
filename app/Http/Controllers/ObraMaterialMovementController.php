@@ -6,6 +6,7 @@ use App\Models\Material;
 use App\Models\Obra;
 use App\Models\ObraMaterialMovement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ObraMaterialMovementController extends Controller
 {
@@ -19,6 +20,7 @@ class ObraMaterialMovementController extends Controller
 
         $obraMaterialMovements = ObraMaterialMovement::from('obra_material_movements as omm')
             ->join('measurement_units as mu', 'omm.measurement_unit_id', '=', 'mu.id')
+            ->leftJoin('users as u', 'omm.created_by_id', '=', 'u.id')
             ->where('omm.obra_material_id', $obraMaterialId)
             ->select(
                 'omm.id as movement_id',
@@ -27,7 +29,8 @@ class ObraMaterialMovementController extends Controller
                 'omm.quantity',
                 'omm.description',
                 'omm.observation',
-                'mu.abbreviation as unit_abbreviation'
+                'mu.abbreviation as unit_abbreviation',
+                DB::raw("TRIM(CONCAT(COALESCE(u.lastname, ''), ' ', COALESCE(u.firstname, ''))) as created_by_name")
             )
             ->orderBy('omm.date', 'desc')
             ->orderBy('omm.id', 'desc')

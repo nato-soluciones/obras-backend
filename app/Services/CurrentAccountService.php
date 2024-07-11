@@ -47,30 +47,42 @@ class CurrentAccountService
     return ['status' => 200, 'currentAccount' => $currentAccount];
   }
 
-  public function CAMovementList(string $entityType, int $entityId, int $projectId, string $currency, int $page = 0, int $per_page = 20)
+  public function CAMovementList(string $entityType, int $entityId, int $projectId, string $currency)
   {
-    $ca_movements = CurrentAccountMovement::select(
-      'id',
-      'current_account_id',
-      'date',
-      'movement_type_id',
-      'description',
-      'amount',
-      'observation'
-    )
-      ->whereHas('currentAccount', function ($query) use ($entityType, $entityId, $projectId, $currency) {
-        $query->where('entity_type', $entityType)
-          ->where('entity_id', $entityId)
-          ->where('project_id', $projectId)
-          ->where('currency', $currency);
-      })
-      ->with('movementType:id,name,type')
-      ->orderBy('date', 'desc')
-      ->orderBy('id', 'desc')
-      ->get();
+    $per_page = 30;
 
-    $currentBalance = 0;
+    $ca_movements_query = CurrentAccountMovement::query()
+      ->select([
+        'current_account_movements.id',
+        'current_account_movements.current_account_id',
+        'current_account_movements.date',
+        'current_account_movements.movement_type_id',
+        'current_account_movements.description',
+        'current_account_movements.amount',
+        'current_account_movements.observation'
+      ])
+      ->join('current_accounts as ca', 'current_account_movements.current_account_id', '=', 'ca.id')
+      ->where('ca.entity_type', $entityType)
+      ->where('ca.entity_id', $entityId)
+      ->where('ca.project_id', $projectId)
+      ->where('ca.currency', $currency)
+      ->with(['movementType:id,name,type'])
+      ->orderBy('current_account_movements.date', 'desc')
+      ->orderBy('current_account_movements.id', 'desc')
+      ->paginate($per_page);
+
     $movementsWithBalance = [];
+    if ($ca_movements_query->isEmpty()) {
+      $response = [];
+      $response['data'] = $movementsWithBalance;
+      $response['current_page'] = 0;
+      $response['last_page'] = 0;
+      return $response;
+    }
+
+    $ca_movements = $ca_movements_query->items();
+    $oldest_id = $ca_movements_query->sortBy('id')->first()->id;
+    $currentBalance = $this->getInitialCurrentBalance($entityType, $entityId, $projectId, $currency, $oldest_id);
 
     $cantMovements = count($ca_movements) - 1;
     for ($i = $cantMovements; $i >= 0; $i--) {
@@ -79,9 +91,9 @@ class CurrentAccountService
       $amount = $movement->amount;
 
       if ($movementType === 'DEBIT') {
-        $currentBalance -= $amount;
-      } else {
         $currentBalance += $amount;
+      } else {
+        $currentBalance -= $amount;
       }
 
       $movementWithBalance = $movement;
@@ -89,7 +101,12 @@ class CurrentAccountService
       array_unshift($movementsWithBalance, $movementWithBalance);
     }
 
-    return $movementsWithBalance;
+    $response = [];
+    $response['data'] = $movementsWithBalance;
+    $response['current_page'] = $ca_movements_query->currentPage();
+    $response['last_page'] = $ca_movements_query->lastPage();
+
+    return $response;
   }
 
   public function CAMovementAdd($CAData, $CAMovementData)
@@ -111,8 +128,8 @@ class CurrentAccountService
     $currentAccount = $RespCurrentAccount['currentAccount'];
 
     $newBalance = ($movementType['type'] === 'DEBIT'
-      ? $currentAccount->balance - $CAMovementData['amount']
-      : $currentAccount->balance + $CAMovementData['amount']);
+      ? $currentAccount->balance + $CAMovementData['amount']
+      : $currentAccount->balance - $CAMovementData['amount']);
 
     // Crea el movimiento de la cuenta corriente
     $CAMovementData['current_account_id'] = $currentAccount->id;
@@ -162,17 +179,21 @@ class CurrentAccountService
     // Log::info("Movimiento NEW UPD");
     // Log::info($CAMovementData);
     if (floatval($referenceMovement->amount) !== floatval($CAMovementData['amount'])) {
-      
+      unset($CAMovementData['date']);
+
       $newBalance = ($referenceMovement->movementType->type === 'DEBIT'
-      ? $currentAccount->balance + $referenceMovement->amount - $CAMovementData['amount']
-      : $currentAccount->balance - $referenceMovement->amount + $CAMovementData['amount']);
-      
-      
+        ? $currentAccount->balance + $referenceMovement->amount + $CAMovementData['amount']
+        : $currentAccount->balance - $referenceMovement->amount - $CAMovementData['amount']);
+
+
       // Log::info("newBalance");
       // Log::info($newBalance);
 
       // Actualiza el movimiento de la cuenta corriente
-      $CAMovementData['description'] = $referenceMovement->description;
+      $CAMovementData['description'] = str_ends_with(trim($referenceMovement->description), '- editado')
+        ? $referenceMovement->description
+        : $referenceMovement->description . ' - editado';
+
       $referenceMovement->update($CAMovementData);
       // Actualiza el saldo de la cuenta corriente
       $currentAccount->balance = $newBalance;
@@ -230,5 +251,27 @@ class CurrentAccountService
 
 
     return ['status' => 200, 'message' => 'Movimiento eliminado ok'];
+  }
+
+  public function getInitialCurrentBalance(string $entityType, int $entityId, int $projectId, string $currency, int $lastIdOfCurrentPage)
+  {
+    $netBalance = CurrentAccountMovement::query()
+      ->join('current_accounts as ca', 'current_account_movements.current_account_id', '=', 'ca.id')
+      ->join('current_account_movement_types as camt', 'current_account_movements.movement_type_id', '=', 'camt.id')
+      ->where('ca.entity_type', $entityType)
+      ->where('ca.entity_id', $entityId)
+      ->where('ca.project_id', $projectId)
+      ->where('ca.currency', $currency)
+      ->where('current_account_movements.id', '<', $lastIdOfCurrentPage)
+      ->selectRaw('SUM(
+            CASE 
+                WHEN camt.type = \'DEBIT\' THEN current_account_movements.amount
+                WHEN camt.type = \'CREDIT\' THEN -current_account_movements.amount
+                ELSE 0
+            END
+        ) as net_balance')
+      ->value('net_balance');
+
+    return $netBalance ?? 0;
   }
 }

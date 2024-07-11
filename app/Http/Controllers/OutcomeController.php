@@ -86,7 +86,7 @@ class OutcomeController extends Controller
             ];
 
             $CAMovementData = [
-                'date' => Date('Y-m-d'),
+                'date' => $outcome->payment_date,
                 'movement_type_id' => $movementType->id,
                 'description' => '(' . $outcome->id . ') Pago  - ' . EnumsOutcome::$types[$outcome->type],
                 'amount' => $outcome->total,

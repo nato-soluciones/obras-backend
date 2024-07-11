@@ -20,10 +20,16 @@ class ObraStageController extends Controller
         $stages = ObraStage::where('obra_id', $obraId)->orderBy('start_date', 'asc')->orderBy('id', 'asc')->get();
         return response($stages, 200);
     }
-    
+
     public function indexGantt(int $obraId)
     {
-        $stages = ObraStage::with('obraStageTask')->where('obra_id', $obraId)->orderBy('start_date', 'asc')->orderBy('id', 'asc')->get();
+        $stages = ObraStage::with(['obraStageTask' => function ($query) {
+            $query->orderBy('start_date', 'asc');
+        }])
+            ->where('obra_id', $obraId)
+            ->orderBy('start_date', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
         return response($stages, 200);
     }
 

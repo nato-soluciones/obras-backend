@@ -73,9 +73,9 @@ class IncomeController extends Controller
                 'currency' => $currency,
             ];
             $CA_movement = [
-                'date' => Date('Y-m-d'),
+                'date' => $income->date,
                 'movement_type_id' => $movementType->id,
-                'description' => ' Cobro (' . $income->receipt_number . ') - ' . $income->payment_concept,
+                'description' => ' Recibo (' . $income->receipt_number . ') - ' . $income->payment_concept,
                 'amount' => $amount,
                 'reference_entity' => 'ingreso',
                 'reference_id' => $income->id,
