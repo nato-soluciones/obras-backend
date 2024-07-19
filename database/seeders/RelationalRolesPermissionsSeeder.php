@@ -90,7 +90,8 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "obraIncomes_update",
             "obraIncomes_delete",
             "obraIncomes_display",
-            "obraIncomes_export"
+            "obraIncomes_export",
+            "obraIncomes_facturanteRedirect"
         ];
         $functionalRol = Role::where('name', 'functional_obraIncomes_full')->first();
         $functionalRol->givePermissionTo($obras_incomes_permission_names);
@@ -101,8 +102,7 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "obraOutcomes_update",
             "obraOutcomes_delete",
             "obraOutcomes_display",
-            "obraOutcomes_export",
-            "obraOutcomes_facturanteRedirect"
+            "obraOutcomes_export"
         ];
         $functionalRol = Role::where('name', 'functional_obraOutcomes_full')->first();
         $functionalRol->givePermissionTo($obras_outcomes_permission_names);
