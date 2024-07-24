@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Budget;
+use App\Models\CurrentAccountMovementType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\Obra;
-use App\Models\Outcome;
 use App\Models\ObraStage;
-use App\Services\AdditionalService;
+use App\Services\CurrentAccountService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ObraController extends Controller
@@ -22,8 +24,8 @@ class ObraController extends Controller
      */
     public function index(): Response
     {
-        $obras = Obra::with(['client' => function($q){
-            $q->select('id', 'person_type','firstname', 'lastname', 'business_name', 'deleted_at')->withTrashed();
+        $obras = Obra::with(['client' => function ($q) {
+            $q->select('id', 'person_type', 'firstname', 'lastname', 'business_name', 'deleted_at')->withTrashed();
         }])->get();
 
         $obras->each(function ($obra) {
@@ -47,23 +49,114 @@ class ObraController extends Controller
     public function store(Request $request): Response
     {
         $image = $request->file('image');
-        $obra = Obra::create($request->all());
+        $obra = null;
 
-        if ($image) {
-            $directory = 'public/uploads/obras/' . $obra->id;
-            $imageName = 'image.' . $image->extension();
-            $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
-            $obra->image = Storage::url($imagePath);
+        try {
+            // DB::transaction(function () use ($request, $image, $obra) {
+            $obraData = $request->all();
+            $budget = null;
+            if (isset($obraData['budget_id']) || intval($obraData['budget_id']) > 0) {
+                $budget = Budget::find($obraData['budget_id']);
+                $obraData['covered_area'] = $budget->covered_area;
+                $obraData['semi_covered_area'] = $budget->semi_covered_area;
+                $obraData['currency'] = $budget->currency;
+                $obraData['total'] = $budget->total - ($budget->discount_amount ? $budget->discount_amount : 0);
+                $obraData['total_cost'] = $budget->total_cost;
+                $obraData['client_id'] = $budget->client_id;
+            }
 
-            $absolutePathToDirectory = storage_path('app/' . $directory);
-            chmod($absolutePathToDirectory, 0755);
+            $obra = Obra::create($obraData);
+
+            if ($image) {
+                $directory = 'public/uploads/obras/' . $obra->id;
+                $imageName = 'image.' . $image->extension();
+                $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
+                $obra->image = Storage::url($imagePath);
+
+                $absolutePathToDirectory = storage_path('app/' . $directory);
+                chmod($absolutePathToDirectory, 0755);
+
+                $obra->save();
+            }
+
+            $clientId = $obra->client_id;
+            $currency = $obra->currency;
+            $totalObra = $obra->total;
+
+            // CREAR MOVIMIENTO EN LA CUENTAS CORRIENTES
+            $CAService = app(CurrentAccountService::class);
+
+            // Actualiza presupuesto y prepara las cuentas corrientes de los proveedores
+            if ($budget) {
+                $budget->status = 'FINISHED';
+                $budget->save();
+
+                // Recuperar costos por proveedor del presupuesto
+                $resultBudget = $budget->categories()
+                    ->join(
+                        'budgets_categories_activities as bca',
+                        'budgets_categories.id',
+                        '=',
+                        'bca.budget_category_id'
+                    )
+                    ->selectRaw('bca.provider_id as contractor_id, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
+                    ->groupBy('bca.provider_id')
+                    ->get();
+
+                // Arma arrays para crear los movimientos de los proveedores
+                $movementType = CurrentAccountMovementType::select('id')
+                    ->where('entity_type', 'PROVIDER')
+                    ->where('name', 'Proyecto')
+                    ->first();
+
+                foreach ($resultBudget as $provider) {
+                    $CA_Provider = [
+                        'project_id' => $obra->id,
+                        'entity_type' => 'PROVIDER',
+                        'entity_id' => $provider->contractor_id,
+                        'currency' => $currency,
+                    ];
+                    $CA_movement_provider = [
+                        'date' => Date('Y-m-d'),
+                        'movement_type_id' => $movementType->id,
+                        'description' => 'Obra ' . $obra->name,
+                        'amount' => $provider->budgeted_price,
+                        'reference_entity' => 'obra',
+                        'reference_id' => $obra->id,
+                        'created_by' => auth()->user()->id
+                    ];
+                    $CA_movement_provider = $CAService->CAMovementAdd($CA_Provider, $CA_movement_provider);
+                }
+            }
+
+            // Arma arrays para crear el movimiento del cliente
+            $movementType = CurrentAccountMovementType::select('id')
+                ->where('entity_type', 'CLIENT')
+                ->where('name', 'Proyecto')
+                ->first();
+
+            $CA_Client = [
+                'project_id' => $obra->id,
+                'entity_type' => 'CLIENT',
+                'entity_id' => $clientId,
+                'currency' => $currency,
+            ];
+            $CA_movement_client = [
+                'date' => Date('Y-m-d'),
+                'movement_type_id' => $movementType->id,
+                'description' => 'Obra ' . $obra->name,
+                'amount' => $totalObra,
+                'reference_entity' => 'obra',
+                'reference_id' => $obra->id,
+                'created_by' => auth()->user()->id
+            ];
+
+            $CA_movement_client = $CAService->CAMovementAdd($CA_Client, $CA_movement_client);
+            // });
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response(['status' => 500, 'message' => 'Error al guardar la obra'], 500);
         }
-
-        $obra->save();
-
-        $budget = $obra->budget;
-        $budget->status = 'FINISHED';
-        $budget->save();
 
         return response($obra, 201);
     }
@@ -76,19 +169,7 @@ class ObraController extends Controller
      */
     public function show(int $id): Response
     {
-        $obra = Obra::with(['client', 'budget',  'documents', 'additionals' => function ($query) {
-            $query->with(['user' => function ($q) {
-                $q->withTrashed();
-            }]);
-        }])->find($id);
-
-        // 'outcomes.contractor',
-        // $outcomes = Outcome::where('obra_id', $id)
-        //     ->whereNotNull('contractor_id')
-        //     ->with('contractor')
-        //     ->get();
-        // $contractors = $outcomes->pluck('contractor')->unique('id');
-        // $obra->contractors = $contractors;
+        $obra = Obra::with(['client'])->find($id);
 
         return response($obra, 200);
     }
@@ -138,22 +219,6 @@ class ObraController extends Controller
         }
     }
 
-    /**
-     * Create a additional for an obra
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function additionals(Request $request, int $id): Response
-    {
-        $additionalService = app(AdditionalService::class);
-        $additionalData = $request->all();
-        $additional = $additionalService->createAdditionalWithCategories($additionalData);
-
-        return response(['message' => 'Additional created', 'data' => $additional], 201);
-    }
-
     public function contractors(int $id): Response
     {
         $obra = Obra::findOrFail($id);
@@ -163,7 +228,7 @@ class ObraController extends Controller
             ->join('budgets_categories_activities as bca', 'budgets_categories.id', '=', 'bca.budget_category_id')
             ->join('contractors as c', 'bca.provider_id', '=', 'c.id')
             ->selectRaw('bca.provider_id as contractor_id, c.business_name, c.last_name, c.first_name, c.person_type, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
-            ->groupBy('bca.provider_id','c.business_name', 'c.last_name', 'c.first_name', 'c.person_type')
+            ->groupBy('bca.provider_id', 'c.business_name', 'c.last_name', 'c.first_name', 'c.person_type')
             ->get();
 
         // Recupera los proveedores de adicionales y el monto presupuestado de cada uno

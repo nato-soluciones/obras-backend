@@ -25,6 +25,10 @@ class Contractor extends Model
         'referral',
         'position',
         'phone',
+        'referral_alt',
+        'position_alt',
+        'phone_alt',
+        'email_alt',
         'cuit',
         'condition',
         'alicuota',
@@ -40,5 +44,10 @@ class Contractor extends Model
     public function industries()
     {
         return $this->belongsTo(ContractorIndustry::class, 'industry', 'code');
+    }
+
+    public function currentAccounts()
+    {
+        return $this->hasMany(CurrentAccount::class, 'entity_id', 'id')->where('entity_type', 'PROVIDER');
     }
 }

@@ -12,6 +12,9 @@ use App\Http\Controllers\ManufacturerFileController;
 use App\Http\Controllers\CacController;
 use App\Http\Controllers\IpcController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeveloperController;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -31,6 +34,7 @@ include_once __DIR__ . '/api/budgets.php';
 include_once __DIR__ . '/api/clients.php';
 include_once __DIR__ . '/api/contractors.php';
 include_once __DIR__ . '/api/obras.php';
+include_once __DIR__ . '/api/fleets.php';
 include_once __DIR__ . '/api/permissions.php';
 
 Route::post('/clear-cookies', function (Request $request) {
@@ -88,16 +92,20 @@ Route::prefix('tools')->middleware('auth:sanctum')->group(function() {
 Route::prefix('manufacturies')->middleware('auth:sanctum')->group(function() {
     Route::get('/categories', [ManufacturerCategoryController::class, 'index']);
     Route::post('/categories', [ManufacturerCategoryController::class, 'store']);
-    Route::post('/categories/{id}', [ManufacturerCategoryController::class, 'destroy']);
-    
-    Route::post('/files', [ManufacturerFileController::class, 'store']);
-    Route::delete('/files/{id}', [ManufacturerFileController::class, 'destroy']);
+    // Route::post('/categories/{id}', [ManufacturerCategoryController::class, 'destroy']);
 
     Route::get('/', [ManufacturerController::class, 'index'])->middleware('permission:manufacturing_list');
     Route::get('/{id}', [ManufacturerController::class, 'show'])->middleware('permission:manufacturing_display');
     Route::post('/', [ManufacturerController::class, 'store'])->middleware('permission:manufacturing_insert');
     Route::post('/{id}', [ManufacturerController::class, 'update'])->middleware('permission:manufacturing_update');
     Route::delete('/{id}', [ManufacturerController::class, 'destroy'])->middleware('permission:manufacturing_delete');
+});
+
+// Manufacturies documents endpoints
+Route::prefix('manufacturies/{id}/files')->middleware('auth:sanctum')->controller(ManufacturerFileController::class)->group(function() {
+    Route::post('/', 'store');
+    Route::delete('/{fileId}', 'destroy');
+
 });
 
 // CAC endpoints
@@ -115,6 +123,25 @@ Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::clas
     Route::delete('/{id}', 'destroy')->middleware('permission:indexIPC_delete');
 });
 
+Route::prefix('notifications')->middleware('auth:sanctum')->controller(NotificationController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/newCount', 'notificationNewCount');
+    Route::get('/{id}', 'show');
+    Route::post('/mark_all_as_read', 'markAllAsRead');
+    Route::post('/{id}/mark_as_read', 'markAsRead');
+    Route::delete('/{id}', 'destroy');
+});
+
+Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function() {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+});
+
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function() {
     Route::get('/', 'index');
 });
+
+// Route::prefix('developer')->middleware('auth:sanctum')->controller(DeveloperController::class)->group(function() {
+//     Route::get('/', 'index');
+// });

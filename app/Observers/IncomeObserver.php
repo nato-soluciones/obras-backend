@@ -14,7 +14,6 @@ class IncomeObserver
      */
     public function created(Income $income): void
     {
-        Log::info('Se ha creado un nuevo ingreso a notificar: ' . $income->id);
         try {
             if (!empty($income->email)) {
                 if (filter_var($income->email, FILTER_VALIDATE_EMAIL)) {

@@ -20,11 +20,14 @@ class BudgetController extends Controller
      */
     public function index(): Response
     {
-        $budgets = Budget::with(['client' => function($q){
+        $budgets = Budget::with(['client' => function ($q) {
             $q->select('id', 'person_type', 'firstname', 'lastname', 'business_name', 'deleted_at')->withTrashed();
-        }, 'user' => function($q){
+        }, 'user' => function ($q) {
             $q->select('id', 'firstname', 'lastname', 'deleted_at')->withTrashed();
-        }])->get();
+        }])
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
         return response($budgets, 200);
     }
 
@@ -39,13 +42,17 @@ class BudgetController extends Controller
         $rulesValidate = [
             'date'              => 'required|date_format:Y-m-d',
             'estimated_time'    => 'required|date_format:Y-m-d',
-            'obra_name'         => 'required|string|max:255',
+            'project_name'      => 'required|string|max:255',
             'covered_area'      => 'required|numeric',
             'semi_covered_area' => 'required|numeric',
             'status'            => 'required|string',
             'currency'          => 'required|string',
             'total'             => 'required|numeric',
             'total_cost'        => 'required|numeric',
+            'discount_type'     => ['nullable', 'in:PERCENTAGE,AMOUNT'],
+            'discount_percentage' => 'nullable|numeric',
+            'discount_amount'   => 'nullable|numeric',
+            'discount_reason'   => 'nullable|string',
             'client_id'         => 'required|numeric',
             'user_id'           => 'required|numeric',
 
@@ -66,13 +73,13 @@ class BudgetController extends Controller
             'date.date_format' => 'La fecha de inicio debe estar en formato YYYY-MM-DD.',
             'estimated_time.required' => 'La fecha de finalización es obligatoria.',
             'estimated_time.date_format' => 'La fecha de finalización debe estar en formato YYYY-MM-DD.',
-            'obra_name.required' => 'El nombre de la obra es obligatorio.',
-            'obra_name.string' => 'El nombre de la obra debe ser un texto.',
-            'obra_name.max' => 'El nombre de la obra no puede superar los 255 caracteres.',
+            'project_name.required' => 'El nombre del proyecto es obligatorio.',
+            'project_name.string' => 'El nombre del proyecto debe ser un texto.',
+            'project_name.max' => 'El nombre del proyecto no puede superar los 255 caracteres.',
             'covered_area.required' => 'El área cubierta es obligatoria.',
             'covered_area.numeric' => 'El área cubierta debe ser un número.',
-            'semi_covered_area.required' => 'El área semicubierta es obligatoria.',
-            'semi_covered_area.numeric' => 'El área semicubierta debe ser un número.',
+            'semi_covered_area.required' => 'El área semi-cubierta es obligatoria.',
+            'semi_covered_area.numeric' => 'El área semi-cubierta debe ser un número.',
             'status.required' => 'El estado es obligatorio.',
             'status.string' => 'El estado debe ser un texto.',
             'currency.required' => 'La moneda es obligatoria.',
@@ -81,6 +88,10 @@ class BudgetController extends Controller
             'total.numeric' => 'El total debe ser un número.',
             'total_cost.required' => 'El costo total es obligatorio.',
             'total_cost.numeric' => 'El costo total debe ser un número.',
+            'discount_type.in' => 'El tipo de la bonificación debe ser porcentaje o monto.',
+            'discount_percentage.numeric' => 'El porcentaje de la bonificación debe ser un número.',
+            'discount_amount.numeric' => 'El monto de la bonificación debe ser un número.',
+            'discount_reason.string' => 'El motivo de la bonificación debe ser un texto.',
             'client_id.required' => 'El cliente es obligatorio.',
             'client_id.numeric' => 'El cliente debe ser un número.',
             'user_id.required' => 'El responsable es obligatorio.',
@@ -243,7 +254,7 @@ class BudgetController extends Controller
                 $item->code,
                 $item->date,
                 $item->client->name,
-                $item->obra_name,
+                $item->project_name,
                 $item->covered_area,
                 $item->semi_covered_area,
                 $item->total,

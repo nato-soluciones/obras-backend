@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Outcome as EnumsOutcome;
+use App\Models\CurrentAccountMovementType;
+use App\Models\Obra;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Outcome;
+use App\Services\CurrentAccountService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class OutcomeController extends Controller
@@ -40,25 +45,65 @@ class OutcomeController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(Request $request, int $obraId): Response
     {
-        $file = $request->file('file');
-
-        $outcome = Outcome::create($request->all());
-
-        if ($file) {
-            $directory = 'public/uploads/outcomes/' . $outcome->id;
-            $fileName = 'file.' . $file->extension();
-            $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
-            $outcome->file = Storage::url($filePath);
-
-            $absolutePathToDirectory = storage_path('app/' . $directory);
-            chmod($absolutePathToDirectory, 0755);
+        // Verifica que la obra exista
+        $obra = Obra::find($obraId);
+        if (is_null($obra)) {
+            return response()->json(['message' => 'Obra no encontrada'], 404);
         }
+        $currency = $obra->budget->currency;
 
-        $outcome->save();
+        $request->merge(['obra_id' => $obraId]);
 
-        return response($outcome, 201);
+        $file = $request->file('file');
+        try {
+            $outcome = Outcome::create($request->all());
+
+            if ($file) {
+                $directory = 'public/uploads/outcomes/' . $outcome->id;
+                $fileName = 'file.' . $file->extension();
+                $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
+                $outcome->file = Storage::url($filePath);
+
+                $absolutePathToDirectory = storage_path('app/' . $directory);
+                chmod($absolutePathToDirectory, 0755);
+            }
+
+            $outcome->save();
+
+            // Arma arrays para crear el movimiento del proveedor
+            $movementType = CurrentAccountMovementType::select('id')
+                ->where('entity_type', 'PROVIDER')
+                ->where('name', 'Egreso')
+                ->first();
+
+            $CAData = [
+                'project_id' => $obra->id,
+                'entity_type' => 'PROVIDER',
+                'entity_id' => $outcome->contractor_id,
+                'currency' => $currency,
+            ];
+
+            $CAMovementData = [
+                'date' => $outcome->payment_date,
+                'movement_type_id' => $movementType->id,
+                'description' => '(' . $outcome->id . ') Pago  - ' . EnumsOutcome::$types[$outcome->type],
+                'amount' => $outcome->total,
+                'reference_entity' => 'egreso',
+                'reference_id' => $outcome->id,
+                'created_by' => auth()->user()->id
+            ];
+
+            $CAService = app(CurrentAccountService::class);
+            $CAService->CAMovementAdd($CAData, $CAMovementData);
+
+
+            return response($outcome, 201);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response(['status' => 500, 'message' => 'Error al guardar el egreso'], 500);
+        }
     }
 
     /**
@@ -85,26 +130,57 @@ class OutcomeController extends Controller
      */
     public function update(Request $request, int $obraId, int $outcomeId): Response
     {
+        // Verifica que la obra exista
+        $obra = Obra::find($obraId);
+        if (is_null($obra)) {
+            return response()->json(['message' => 'Obra no encontrada'], 404);
+        }
+
         $outcome = Outcome::find($outcomeId);
         if (is_null($outcome)) {
             return response()->json(['message' => 'Egreso no encontrado'], 404);
         }
-        $outcome->fill($request->all());
+        $currency = $obra->budget->currency;
 
-        $file = $request->file('file');
-        if ($file) {
-            $directory = 'public/uploads/outcomes/' . $outcome->id;
-            $fileName = 'file.' . $file->extension();
-            $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
-            $outcome->file = Storage::url($filePath);
+        try {
+            $outcome->fill($request->all());
 
-            $absolutePathToDirectory = storage_path('app/' . $directory);
-            chmod($absolutePathToDirectory, 0755);
+            $file = $request->file('file');
+            if ($file) {
+                $directory = 'public/uploads/outcomes/' . $outcome->id;
+                $fileName = 'file.' . $file->extension();
+                $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
+                $outcome->file = Storage::url($filePath);
+
+                $absolutePathToDirectory = storage_path('app/' . $directory);
+                chmod($absolutePathToDirectory, 0755);
+            }
+
+            $outcome->save();
+
+            // Arma arrays para actualizar el movimiento del proveedor
+            $CAData = [
+                'project_id' => $obra->id,
+                'entity_type' => 'PROVIDER',
+                'entity_id' => $outcome->contractor_id,
+                'currency' => $currency,
+            ];
+
+            $CA_movement = [
+                'date' => Date('Y-m-d'),
+                'amount' => $outcome->total,
+                'reference_entity' => 'egreso',
+                'reference_id' => $outcome->id,
+                'created_by' => auth()->user()->id
+            ];
+
+            $CAService = app(CurrentAccountService::class);
+            $CAService->CAMovementUpdateByReference($CAData, $CA_movement);
+            return response($outcome, 200);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response(['status' => 500, 'message' => 'Error al actualizar el egreso'], 500);
         }
-
-
-        $outcome->save();
-        return response($outcome, 200);
     }
 
     /**
@@ -115,9 +191,41 @@ class OutcomeController extends Controller
      */
     public function destroy(int $obraId, int $outcomeId)
     {
+        // Verifica que la obra exista
+        $obra = Obra::find($obraId);
+        if (is_null($obra)) {
+            return response()->json(['message' => 'Obra no encontrada'], 404);
+        }
+
+        $currency = $obra->budget->currency;
         try {
             $outcome = Outcome::findOrFail($outcomeId);
             $outcome->delete();
+
+            // Arma arrays para eliminar el movimiento del cliente
+            $movementType = CurrentAccountMovementType::select('id')
+                ->where('entity_type', 'PROVIDER')
+                ->where('name', 'Egreso - Eliminado')
+                ->first();
+
+            $CAData = [
+                'project_id' => $obra->id,
+                'entity_type' => 'PROVIDER',
+                'entity_id' => $outcome->contractor_id,
+                'currency' => $currency,
+            ];
+
+            $CA_movement = [
+                'date' => Date('Y-m-d'),
+                'movement_type_id' => $movementType->id,
+                'reference_entity' => 'egreso',
+                'reference_id' => $outcome->id,
+                'created_by' => auth()->user()->id
+            ];
+
+            $CAService = app(CurrentAccountService::class);
+            $CAService->CAMovementDeleteByReference($CAData, $CA_movement);
+
             return response(['message' => 'Egreso eliminado correctamente'], 204);
         } catch (ModelNotFoundException $e) {
             return response(['error' => 'Egreso no encontrado'], 404);

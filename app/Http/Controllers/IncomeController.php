@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CurrentAccountMovementType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Notifications\AnonymousNotifiable;
 
 use App\Models\Income;
+use App\Models\Obra;
 use App\Notifications\IncomeCreated;
+use App\Services\CurrentAccountService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class IncomeController extends Controller
 {
@@ -39,18 +43,55 @@ class IncomeController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(Request $request, int $obraId): Response
     {
-        $income = Income::create($request->all());
-        return response($income, 201);
+        // Verifica que la obra exista
+        $obra = Obra::find($obraId);
+        if (is_null($obra)) {
+            return response()->json(['message' => 'Obra no encontrada'], 404);
+        }
+        $clientId = $obra->budget->client_id;
+        $currency = $obra->budget->currency;
+        $amount = ($obra->budget->currency === 'ARS') ? $request->amount_ars : $request->amount_usd;
+
+        $request->merge(['obra_id' => $obraId]);
+
+        // Crea el ingreso
+        try {
+            $income = Income::create($request->all());
+
+            // Arma arrays para crear el movimiento del cliente
+            $movementType = CurrentAccountMovementType::select('id')
+                ->where('entity_type', 'CLIENT')
+                ->where('name', 'Ingreso')
+                ->first();
+
+            $CA_Client = [
+                'project_id' => $obra->id,
+                'entity_type' => 'CLIENT',
+                'entity_id' => $clientId,
+                'currency' => $currency,
+            ];
+            $CA_movement = [
+                'date' => $income->date,
+                'movement_type_id' => $movementType->id,
+                'description' => ' Recibo (' . $income->receipt_number . ') - ' . $income->payment_concept,
+                'amount' => $amount,
+                'reference_entity' => 'ingreso',
+                'reference_id' => $income->id,
+                'created_by' => auth()->user()->id
+            ];
+
+            $CAService = app(CurrentAccountService::class);
+            $CAService->CAMovementAdd($CA_Client, $CA_movement);
+
+            return response($income, 201);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response(['status' => 500, 'message' => 'Error al guardar el ingreso'], 500);
+        }
     }
 
-    /**
-     * Get an income
-     *
-     * @param int $id
-     * @return Response
-     */
     public function show(int $obraId, int $incomeId): Response
     {
         $income = Income::find($incomeId);
@@ -60,38 +101,90 @@ class IncomeController extends Controller
         return response($income, 200);
     }
 
-    /**
-     * Update an income
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
     public function update(Request $request, int $obraId, int $incomeId): Response
     {
+        // Verifica que la obra exista
+        $obra = Obra::find($obraId);
+        if (is_null($obra)) {
+            return response()->json(['message' => 'Obra no encontrada'], 404);
+        }
+
         $income = Income::find($incomeId);
         if (is_null($income)) {
             return response()->json(['message' => 'Ingreso no encontrado'], 404);
         }
-        $income->update($request->all());
-        return response($income, 200);
+
+        $clientId = $obra->budget->client_id;
+        $currency = $obra->budget->currency;
+        $amount = ($obra->budget->currency === 'ARS') ? $request->amount_ars : $request->amount_usd;
+
+        try {
+            $income->update($request->all());
+
+            // Arma arrays para actualizar el movimiento del cliente
+            $CAData = [
+                'project_id' => $obra->id,
+                'entity_type' => 'CLIENT',
+                'entity_id' => $clientId,
+                'currency' => $currency,
+            ];
+            $CA_movement = [
+                'date' => Date('Y-m-d'),
+                'amount' => $amount,
+                'reference_entity' => 'ingreso',
+                'reference_id' => $income->id,
+                'created_by' => auth()->user()->id
+            ];
+
+            $CAService = app(CurrentAccountService::class);
+            $CAService->CAMovementUpdateByReference($CAData, $CA_movement);
+            return response($income, 201);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response(['status' => 500, 'message' => 'Error al actualizar el ingreso'], 500);
+        }
     }
 
-    /**
-     * Delete an income
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy(int $obraId, int $incomeId): Response
     {
+        // Verifica que la obra exista
+        $obra = Obra::find($obraId);
+        if (is_null($obra)) {
+            return response()->json(['message' => 'Obra no encontrada'], 404);
+        }
+
+        $clientId = $obra->budget->client_id;
+        $currency = $obra->budget->currency;
         try {
             $income = Income::findOrFail($incomeId);
+
             $income->delete();
+
+            // Arma arrays para eliminar el movimiento del cliente
+            $movementType = CurrentAccountMovementType::select('id')
+                ->where('entity_type', 'CLIENT')
+                ->where('name', 'Ingreso - Eliminado')
+                ->first();
+            $CAData = [
+                'project_id' => $obra->id,
+                'entity_type' => 'CLIENT',
+                'entity_id' => $clientId,
+                'currency' => $currency,
+            ];
+            $CA_movement = [
+                'date' => Date('Y-m-d'),
+                'movement_type_id' => $movementType->id,
+                'reference_entity' => 'ingreso',
+                'reference_id' => $income->id,
+                'created_by' => auth()->user()->id
+            ];
+
+            $CAService = app(CurrentAccountService::class);
+            $CAService->CAMovementDeleteByReference($CAData, $CA_movement);
 
             return response(['message' => 'Ingreso eliminado correctamente'], 200);
         } catch (ModelNotFoundException $e) {
-            return response(['error' => 'Ingreso no encontrado'], 404);
+            return response(['status' => 500, 'message' => 'Error al eliminar el ingreso'], 500);
         }
     }
 
