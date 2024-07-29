@@ -242,22 +242,24 @@ class OutcomeController extends Controller
 
         $csvTitles = [
             'Fecha',
-            'Tipo',
-            'Contratista',
-            'Categoría',
+            'Comprobante',
+            'Tipo de Movimiento',
+            'Detalle',
             'Método de pago',
             'Fecha de pago',
-            'Total',
+            'Importe Total',
         ];
         fputcsv($f, $csvTitles, ',');
 
         foreach ($outcomes as $item) {
+            $comprobante = $item->document_type ? EnumsOutcome::$documentTypes[$item->document_type] : '';
+            $comprobante .= $item->order ? ' ' . $item->order : '';
             $csvRow = [
                 $item->date,
-                $item->type,
-                optional($item->contractor)->business_name,
-                '',
-                $item->payment_method,
+                $comprobante,
+                EnumsOutcome::$types[$item->type],
+                $item->description,
+                EnumsOutcome::$paymentMethods[$item->payment_method],
                 $item->payment_date,
                 $item->total,
             ];
