@@ -241,23 +241,23 @@ class OutcomeController extends Controller
         $f = fopen('php://memory', 'r+');
 
         $csvTitles = [
-            'Fecha',
-            'Tipo',
-            'Contratista',
-            'Categoría',
+            'Fecha Comprobante',
+            'Tipo de Comprobante',
+            'Nro de Comprobante',
+            'Tipo de Movimiento',
             'Método de pago',
             'Fecha de pago',
-            'Total',
+            'Importe Total',
         ];
         fputcsv($f, $csvTitles, ',');
 
         foreach ($outcomes as $item) {
             $csvRow = [
                 $item->date,
-                $item->type,
-                optional($item->contractor)->business_name,
-                '',
-                $item->payment_method,
+                EnumsOutcome::$documentTypes[$item->document_type],
+                $item->order,
+                EnumsOutcome::$types[$item->type],
+                EnumsOutcome::$paymentMethods[$item->payment_method],
                 $item->payment_date,
                 $item->total,
             ];

@@ -74,15 +74,20 @@ class RelationalRolesPermissionsSeeder extends Seeder
         $functionalRol = Role::where('name', 'functional_obraStages_full')->first();
         $functionalRol->givePermissionTo($obraStages_permission_names);
 
-        $obras_stage_tasks_permission_names = [
-            "obraStageTasks_list",
-            "obraStageTasks_insert",
-            "obraStageTasks_update",
-            "obraStageTasks_delete",
-            "obraStageTasks_display"
+        $obras_stage_substages_tasks_permission_names = [
+            "obraStageSubStages_list",
+            "obraStageSubStages_insert",
+            "obraStageSubStages_update",
+            "obraStageSubStages_delete",
+            "obraStageSubStages_display",
+            "obraStageSubStageTasks_list",
+            "obraStageSubStageTasks_insert",
+            "obraStageSubStageTasks_update",
+            "obraStageSubStageTasks_delete",
+            "obraStageSubStageTasks_display",
         ];
         $functionalRol = Role::where('name', 'functional_obraStageTasks_full')->first();
-        $functionalRol->givePermissionTo($obras_stage_tasks_permission_names);
+        $functionalRol->givePermissionTo($obras_stage_substages_tasks_permission_names);
 
         $obras_incomes_permission_names = [
             "obraIncomes_list",
@@ -101,12 +106,11 @@ class RelationalRolesPermissionsSeeder extends Seeder
             "obraOutcomes_update",
             "obraOutcomes_delete",
             "obraOutcomes_display",
-            "obraOutcomes_export",
-            "obraOutcomes_facturanteRedirect"
+            "obraOutcomes_export"
         ];
         $functionalRol = Role::where('name', 'functional_obraOutcomes_full')->first();
         $functionalRol->givePermissionTo($obras_outcomes_permission_names);
-        
+
         $obras_materials_permission_names = [
             "obraMaterials_list",
             "obraMaterials_insert",
