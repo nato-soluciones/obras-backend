@@ -460,6 +460,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Exportar Ingresos de la obra",
             ],
+            [
+                "name" => "obraIncomes_facturanteRedirect",
+                "guard_name" => "api",
+                "description" => "Redirecciona a facturante",
+            ],
         ];
         $obras_outcomes_permission = [
             [
@@ -491,11 +496,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "obraOutcomes_export",
                 "guard_name" => "api",
                 "description" => "Exportar egresos de la obra",
-            ],
-            [
-                "name" => "obraOutcomes_facturanteRedirect",
-                "guard_name" => "api",
-                "description" => "Redirecciona a facturante",
             ],
         ];
         $obras_additional_permission = [

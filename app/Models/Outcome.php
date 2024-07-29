@@ -13,6 +13,7 @@ class Outcome extends Model
     protected $fillable = [
         'type',
         'date',
+        'description',
         'document_type',
         'order',
         'gross_total',
