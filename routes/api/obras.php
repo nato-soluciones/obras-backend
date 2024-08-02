@@ -5,6 +5,7 @@ use App\Http\Controllers\ObraAdditionalController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\ObraDailyLogController;
 use App\Http\Controllers\ObraDailyLogTagController;
+use App\Http\Controllers\ObraDocumentCategoryController;
 use App\Http\Controllers\ObraDocumentController;
 use App\Http\Controllers\ObraMaterialController;
 use App\Http\Controllers\ObraMaterialMovementController;
@@ -53,6 +54,12 @@ Route::prefix('obras/{obraId}/documents')->middleware('auth:sanctum')->controlle
   Route::get('/', 'index')->middleware('permission:obraDocuments_list');
   Route::post('/', 'store')->middleware('permission:obraDocuments_insert');
   Route::delete('/{documentId}', 'destroy')->middleware('permission:obraDocuments_delete');
+});
+
+// Document Categories endpoints
+Route::prefix('obras/documents/categories')->middleware('auth:sanctum')->controller(ObraDocumentCategoryController::class)->group(function () {
+  Route::get('/',  'index');
+  Route::post('/', 'store');
 });
 
 // Additionals endpoints
