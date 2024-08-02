@@ -227,8 +227,9 @@ class ObraController extends Controller
         $resultBudget = $obra->budget->categories()
             ->join('budgets_categories_activities as bca', 'budgets_categories.id', '=', 'bca.budget_category_id')
             ->join('contractors as c', 'bca.provider_id', '=', 'c.id')
-            ->selectRaw('bca.provider_id as contractor_id, c.business_name, c.last_name, c.first_name, c.person_type, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
-            ->groupBy('bca.provider_id', 'c.business_name', 'c.last_name', 'c.first_name', 'c.person_type')
+            ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
+            ->selectRaw('bca.provider_id as contractor_id, c.business_name, c.last_name, c.first_name, c.person_type, c.type as contractor_type, i.code as industry_code, i.name as industry_name, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
+            ->groupBy('bca.provider_id', 'c.business_name', 'c.last_name', 'c.first_name', 'c.person_type', 'c.type', 'i.code', 'i.name')
             ->get();
 
         // Recupera los proveedores de adicionales y el monto presupuestado de cada uno
@@ -236,8 +237,9 @@ class ObraController extends Controller
             ->join('additionals_categories as ac', 'ac.additional_id', '=', 'additionals.id')
             ->join('additionals_categories_activities as aca', 'aca.additional_category_id', '=', 'ac.id')
             ->join('contractors as c', 'aca.provider_id', '=', 'c.id')
-            ->selectRaw('aca.provider_id as contractor_id, c.business_name, c.last_name, c.first_name, c.person_type, ROUND(SUM(aca.unit_cost * aca.quantity), 2) as budgeted_price')
-            ->groupBy('aca.provider_id', 'c.business_name', 'c.last_name', 'c.first_name', 'c.person_type')
+            ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
+            ->selectRaw('aca.provider_id as contractor_id, c.business_name, c.last_name, c.first_name, c.person_type, c.type as contractor_type, i.code as industry_code, i.name as industry_name, ROUND(SUM(aca.unit_cost * aca.quantity), 2) as budgeted_price')
+            ->groupBy('aca.provider_id', 'c.business_name', 'c.last_name', 'c.first_name', 'c.person_type', 'c.type', 'i.code', 'i.name')
             ->get();
 
         // Recupera los proveedor y el monto pagado de cada uno
@@ -257,11 +259,14 @@ class ObraController extends Controller
             $progressPaymentPercentage = $totalBudgetedPrice > 0 ? ($paidTotal / $totalBudgetedPrice) * 100 : 0;
 
             return [
+                'contractor_type' => $budgetItem->contractor_type,
                 'contractor_id' => $budgetItem->contractor_id,
                 'business_name' => $budgetItem->business_name,
                 'last_name' => $budgetItem->last_name,
                 'first_name' => $budgetItem->first_name,
                 'person_type' => $budgetItem->person_type,
+                'industry_code' => $budgetItem->industry_code,
+                'industry_name' => $budgetItem->industry_name,
                 'budgeted_price' => $totalBudgetedPrice,
                 'paid_total' => $paidTotal,
                 'balance' => $totalBudgetedPrice - $paidTotal,
@@ -287,11 +292,14 @@ class ObraController extends Controller
             $progressPaymentPercentage = $additionalBudgetedPrice > 0 ? ($paidTotal / $additionalBudgetedPrice) * 100 : 0;
 
             return [
+                'contractor_type' => $additionalItem->contractor_type,
                 'contractor_id' => $additionalItem->contractor_id,
                 'business_name' => $additionalItem->business_name,
                 'last_name'     => $additionalItem->last_name,
                 'first_name'    => $additionalItem->first_name,
                 'person_type'   => $additionalItem->person_type,
+                'industry_code' => $additionalItem->industry_code,
+                'industry_name' => $additionalItem->industry_name,
                 'budgeted_price' => $additionalBudgetedPrice,
                 'paid_total' => $paidTotal,
                 'balance' => $additionalBudgetedPrice - $paidTotal,
