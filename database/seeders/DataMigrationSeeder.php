@@ -15,6 +15,7 @@ class DataMigrationSeeder extends Seeder
      */
     public function run(): void
     {
+        // V 1.2.0
         DB::transaction(function () {
             // Actualiza los registros con type = 'OTHERS' a 'OWNER_EXPENSES'
             Outcome::where('type', 'OTHERS')
@@ -47,5 +48,7 @@ class DataMigrationSeeder extends Seeder
                 $obra->save();
             }
         });
+
+        
     }
 }

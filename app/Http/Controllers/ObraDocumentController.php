@@ -12,7 +12,13 @@ class ObraDocumentController extends Controller
 {
     public function index(Request $request, int $obraId): Response
     {
-        $documents = Document::where('obra_id', $obraId)->get();
+        $documents = Document::from('obra_documents as od')
+            ->join('obra_documents_categories as odc', 'od.category_id', '=', 'odc.id')
+            ->select('od.id', 'od.name', 'od.storage_type', 'od.link','od.path', 'od.category_id', 'odc.name as category_name')
+            ->where('od.obra_id', $obraId)
+            ->orderBy('od.category_id', 'asc')
+            ->orderBy('od.name', 'asc')
+            ->get();
         return response($documents, 200);
     }
 
@@ -25,23 +31,23 @@ class ObraDocumentController extends Controller
      */
     public function store(Request $request, int $obraId): Response
     {
-        $name = $request->input('name');
-        $category = $request->input('category');
-        $document = $request->file('file');
+        $data = $request->all();
+        $data['obra_id'] = $obraId;
+        $file = $request->file('file');
 
-        $directory = 'public/uploads/obras/' . $obraId;
-        $documentName = $document->getClientOriginalName();
-        $documentPath = Storage::putFileAs($directory, $document, $documentName, 'public');
+        $document = Document::create($data);
 
-        Document::create([
-            'name' => $name,
-            'category' => $category,
-            'path' => Storage::url($documentPath),
-            'obra_id' => $obraId
-        ]);
+        if ($file) {
+            $directory = 'public/uploads/obras/' . $obraId;
+            $fileName = $file->getClientOriginalName();
+            $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
+            $document->path = Storage::url($filePath);
 
-        $absolutePathToDirectory = storage_path('app/' . $directory);
-        chmod($absolutePathToDirectory, 0755);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
+            chmod($absolutePathToDirectory, 0755);
+        }
+
+        $document->save();
 
         return response(['message' => 'Document uploaded'], 201);
     }
@@ -59,7 +65,7 @@ class ObraDocumentController extends Controller
         if (is_null($document)) {
             return response(['status' => 404, 'message' => 'Documento no encontrado'], 404);
         }
-        $directory = 'public/uploads/obras/'.$obraId.'/'.basename($document->path);
+        $directory = 'public/uploads/obras/' . $obraId . '/' . basename($document->path);
         if (Storage::delete($directory)) {
             $document->delete();
             return response(null, 204);

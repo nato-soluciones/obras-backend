@@ -81,4 +81,9 @@ class Obra extends Model
     {
         return $this->hasMany(ObraDailyLog::class);
     }
+
+    public function stages()
+    {
+        return $this->hasMany(ObraStage::class);
+    }
 }

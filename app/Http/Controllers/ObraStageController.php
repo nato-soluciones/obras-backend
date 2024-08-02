@@ -3,29 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\ObraStage;
-use App\Services\ObraService;
+use App\Http\Services\ObraService;
+use App\Http\Services\ObraStageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ObraStageController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Dependency injection
      */
+    protected $obraStageService;
+
+    public function __construct(ObraStageService $obraStageService)
+    {
+        $this->obraStageService = $obraStageService;
+    }
+    
     public function index(int $obraId)
     {
-        $stages = ObraStage::where('obra_id', $obraId)->orderBy('start_date', 'asc')->orderBy('id', 'asc')->get();
+        $stages = ObraStage::where('obra_id', $obraId)
+            ->orderBy('start_date', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
         return response($stages, 200);
     }
 
     public function indexGantt(int $obraId)
     {
-        $stages = ObraStage::with(['obraStageTask' => function ($query) {
-            $query->orderBy('start_date', 'asc');
-        }])
+        $stages = ObraStage::with(['subStages.tasks'])
             ->where('obra_id', $obraId)
             ->orderBy('start_date', 'asc')
             ->orderBy('id', 'asc')
@@ -33,87 +41,57 @@ class ObraStageController extends Controller
         return response($stages, 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request, int $obraId)
     {
         try {
-            $request->merge(['progress' => 0]);
-            $request->merge(['created_by_id' => auth()->user()->id]);
+            $stage = $this->obraStageService->store($request, $obraId);
 
-            $obraStage = ObraStage::create($request->all());
+            if ($stage instanceof \Exception) {
+                throw $stage;
+            }
 
-            // Obtiene una instancia del servicio ObraService y actualiza el progreso de la obra
-            $obraService = app(ObraService::class);
-            $obraService->updateObraProgress($obraStage->obra);
-
-            return response($obraStage, 201);
+            return response()->json($stage, 201);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database error: ' . $e->getMessage());
+            return response()->json(['message' => '(db) Error al crear la Etapa'], 500);
         } catch (\Exception $e) {
-            Log::error("Error al crear la etapa {$request->name}: " . $e->getMessage());
-            return response(['error' => $e->getMessage()], 500);
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al crear la Etapa'], 500);
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($obraId, $stageId): Response
     {
-        $obraStage = ObraStage::find($stageId);
+        $obraStage = ObraStage::where('obra_id', $obraId)->find($stageId);
         return response($obraStage, 200);
     }
 
-
-    /**
-     * Show the form for update the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update($obraId, $stageId)
+    public function update(Request $request, $obraId, $stageId)
     {
-        $obraStage = ObraStage::find($stageId);
-        if (!$obraStage) {
-            return response()->json(['error' => 'Registro no encontrado'], 404);
+        try {
+            $stage = $this->obraStageService->update($request, $obraId, $stageId);
+            return response()->json($stage, 200);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al actualizar la etapa'], 500);
         }
-        // Obtiene el valor actual del campo obra_porcentaje
-        $oldPercentage = $obraStage->obra_percentage;
-
-        // Actualiza el registro
-        $obraStage->update(request()->all());
-
-        // Verific si el valor del campo obra_porcentaje ha cambiado
-        if ($oldPercentage != $obraStage->obra_percentage) {
-            // Actualiza el progreso de la obra
-            $obraService = app(ObraService::class);
-            $obraService->updateObraProgress($obraStage->obra);
-        }
-        return response($obraStage, 200);
+    
     }
 
-    /**
-     * Delete a user by id
-     *
-     * @param int $id
-     * @return Response
-     */
-    public function destroy(int $obraId, int $stageId)
+    public function destroy(int $obraId, $stageId)
     {
-        $obraStage = ObraStage::find($stageId);
-        $obraStage->delete();
-
-
-        // Actualiza el porcentaje de la obra
-        $obraService = app(ObraService::class);
-        $obraService->updateObraProgress($obraStage->obra);
-
-        return response(['message' => 'Obra Stage deleted'], 204);
+        try {
+            $this->obraStageService->destroy($obraId, $stageId);
+            return response()->json(['message' => 'Etapa eliminada con éxito'], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al eliminar la etapa'], 500);
+        }
     }
 }
