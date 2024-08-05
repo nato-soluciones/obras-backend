@@ -16,39 +16,41 @@ class DataMigrationSeeder extends Seeder
     public function run(): void
     {
         // V 1.2.0
-        DB::transaction(function () {
-            // Actualiza los registros con type = 'OTHERS' a 'OWNER_EXPENSES'
-            Outcome::where('type', 'OTHERS')
-                ->update(['type' => 'OWNER_EXPENSES']);
+        // DB::transaction(function () {
+        //     // Actualiza los registros con type = 'OTHERS' a 'OWNER_EXPENSES'
+        //     Outcome::where('type', 'OTHERS')
+        //         ->update(['type' => 'OWNER_EXPENSES']);
 
-            // Actualiza los registros con type = 'MANAGEMENT' a 'PROJECT_EXPENSES'
-            Outcome::where('type', 'MANAGEMENT')
-                ->update(['type' => 'PROJECT_EXPENSES']);
+        //     // Actualiza los registros con type = 'MANAGEMENT' a 'PROJECT_EXPENSES'
+        //     Outcome::where('type', 'MANAGEMENT')
+        //         ->update(['type' => 'PROJECT_EXPENSES']);
  
-            // Actualiza los registros con document_type = 'REFERENCE' a 'DELIVERY_NOTE'
-            Outcome::where('document_type', 'REFERENCE')
-                ->update(['document_type' => 'DELIVERY_NOTE']);
+        //     // Actualiza los registros con document_type = 'REFERENCE' a 'DELIVERY_NOTE'
+        //     Outcome::where('document_type', 'REFERENCE')
+        //         ->update(['document_type' => 'DELIVERY_NOTE']);
 
-            // Actualiza los registros con document_type = 'PAYMENT' a 'RECEIPT'
-            Outcome::where('document_type', 'PAYMENT')
-                ->update(['document_type' => 'RECEIPT']);
-        });
+        //     // Actualiza los registros con document_type = 'PAYMENT' a 'RECEIPT'
+        //     Outcome::where('document_type', 'PAYMENT')
+        //         ->update(['document_type' => 'RECEIPT']);
+        // });
 
-        DB::transaction(function () {
-            // Recorre todas las obras y recupera datos del presupuesto y los guarda en la obra
-            $obras = Obra::all();
+        // DB::transaction(function () {
+        //     // Recorre todas las obras y recupera datos del presupuesto y los guarda en la obra
+        //     $obras = Obra::all();
 
-            foreach ($obras as $obra) {
-                $budget = $obra->budget;
-                $obra->covered_area = $budget->covered_area;
-                $obra->semi_covered_area = $budget->semi_covered_area;
-                $obra->currency = $budget->currency;
-                $obra->total = $budget->total;
-                $obra->total_cost = $budget->total_cost;
-                $obra->save();
-            }
-        });
+        //     foreach ($obras as $obra) {
+        //         $budget = $obra->budget;
+        //         $obra->covered_area = $budget->covered_area;
+        //         $obra->semi_covered_area = $budget->semi_covered_area;
+        //         $obra->currency = $budget->currency;
+        //         $obra->total = $budget->total;
+        //         $obra->total_cost = $budget->total_cost;
+        //         $obra->save();
+        //     }
+        // });
 
-        
+        // V 1.3.0
+        //remove roles that its names start with 'functional_'
+        DB::table('roles')->where('name', 'like', 'functional_%')->delete();
     }
 }
