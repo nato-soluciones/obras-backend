@@ -369,31 +369,64 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver etapa",
             ],
         ];
-        $obras_stage_tasks_permission = [
+        $obras_stage_subStages_permission = [
             [
-                "name" => "obraStageTasks_list",
+                "name" => "obraStageSubStages_list",
+                "guard_name" => "api",
+                "description" => "Ver Sub-Etapas de la etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_insert",
+                "guard_name" => "api",
+                "description" => "Agregar sub-etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_update",
+                "guard_name" => "api",
+                "description" => "Modificar sub-etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar sub-etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_display",
+                "guard_name" => "api",
+                "description" => "Ver sub-etapa",
+            ],
+        ];
+
+        $obras_stage_subStage_tasks_permission = [
+            [
+                "name" => "obraStageSubStageTasks_list",
                 "guard_name" => "api",
                 "description" => "Ver Tareas de la etapa",
             ],
             [
-                "name" => "obraStageTasks_insert",
+                "name" => "obraStageSubStageTasks_insert",
                 "guard_name" => "api",
                 "description" => "Agregar tarea",
             ],
             [
-                "name" => "obraStageTasks_update",
+                "name" => "obraStageSubStageTasks_update",
                 "guard_name" => "api",
                 "description" => "Modificar tarea",
             ],
             [
-                "name" => "obraStageTasks_delete",
+                "name" => "obraStageSubStageTasks_delete",
                 "guard_name" => "api",
                 "description" => "Eliminar tarea",
             ],
             [
-                "name" => "obraStageTasks_display",
+                "name" => "obraStageSubStageTasks_display",
                 "guard_name" => "api",
                 "description" => "Ver tarea",
+            ],
+            [
+                "name" => "obraStageSubStageTasks_changeProgress",
+                "guard_name" => "api",
+                "description" => "Actualizar avance de tarea",
             ],
         ];
         $obras_incomes_permission = [
@@ -1028,7 +1061,8 @@ class RolesAndPermissionsSeeder extends Seeder
             $obras_permission,
             $obras_dailyLog_permission,
             $obras_stages_permission,
-            $obras_stage_tasks_permission,
+            $obras_stage_subStages_permission,
+            $obras_stage_subStage_tasks_permission,
             $obras_incomes_permission,
             $obras_outcomes_permission,
             $obras_additional_permission,

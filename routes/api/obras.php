@@ -5,11 +5,13 @@ use App\Http\Controllers\ObraAdditionalController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\ObraDailyLogController;
 use App\Http\Controllers\ObraDailyLogTagController;
+use App\Http\Controllers\ObraDocumentCategoryController;
 use App\Http\Controllers\ObraDocumentController;
 use App\Http\Controllers\ObraMaterialController;
 use App\Http\Controllers\ObraMaterialMovementController;
 use App\Http\Controllers\ObraStageController;
-use App\Http\Controllers\ObraStageTaskController;
+use App\Http\Controllers\ObraStageSubStageController;
+use App\Http\Controllers\ObraStageSubStageTaskController;
 use App\Http\Controllers\OutcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +23,7 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
   Route::post('/', 'store')->middleware('permission:obras_insert');
   Route::post('/{id}', 'update')->middleware('permission:obras_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
-  
+
   Route::get('/{id}/contractors', 'contractors')->middleware('permission:obraContractors_list');
 });
 
@@ -54,6 +56,12 @@ Route::prefix('obras/{obraId}/documents')->middleware('auth:sanctum')->controlle
   Route::delete('/{documentId}', 'destroy')->middleware('permission:obraDocuments_delete');
 });
 
+// Document Categories endpoints
+Route::prefix('obras/documents/categories')->middleware('auth:sanctum')->controller(ObraDocumentCategoryController::class)->group(function () {
+  Route::get('/',  'index');
+  Route::post('/', 'store');
+});
+
 // Additionals endpoints
 Route::prefix('obras/{obraId}/additionals')->middleware('auth:sanctum')->controller(ObraAdditionalController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obraAdditional_list');
@@ -74,18 +82,27 @@ Route::prefix('obras/{obraId}/daily_logs')->middleware('auth:sanctum')->controll
 
 // ObraDailyLogTag endpoints
 Route::prefix('obra_daily_log_tags')->middleware('auth:sanctum')->controller(ObraDailyLogTagController::class)->group(function () {
-  Route::get('/', 'index');
-  Route::get('/{id}', 'show');
-});
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+  });
 
-// Tasks in stages endpoints
-Route::prefix('obras/{obraId}/stages/{stageId}/tasks')->middleware('auth:sanctum')->controller(ObraStageTaskController::class)->group(function () {
-  Route::get('/', 'index')->middleware('permission:obraStageTasks_list');
-  Route::get('/{taskId}', 'show')->middleware('permission:obraStageTasks_display');
-  Route::post('/', 'store')->middleware('permission:obraStageTasks_insert');
-  Route::post('/{taskId}', 'update')->middleware('permission:obraStageTasks_update');
-  Route::post('/{taskId}/completed', 'checkCompleted');
-  Route::delete('/{id}', 'destroy')->middleware('permission:obraStageTasks_delete');
+// Tasks endpoints
+Route::prefix('obras/{obraId}/stages/{stageId}/sub_stages/{subStageId}/tasks')->middleware('auth:sanctum')->controller(ObraStageSubStageTaskController::class)->group(function () {
+    // Route::get('/', 'index')->middleware('permission:obraStageSubStageTasks_list');
+    Route::get('/{taskId}', 'show')->middleware('permission:obraStageSubStageTasks_display');
+    Route::post('/', 'store')->middleware('permission:obraStageSubStageTasks_insert');
+    Route::post('/{taskId}', 'update')->middleware('permission:obraStageSubStageTasks_update');
+    Route::post('/{taskId}/update_progress', 'updateProgress');
+    Route::delete('/{taskId}', 'destroy')->middleware('permission:obraStageSubStageTasks_delete');
+  });
+
+// SubStages endpoints
+Route::prefix('obras/{obraId}/stages/{stageId}/sub_stages')->middleware('auth:sanctum')->controller(ObraStageSubStageController::class)->group(function () {
+  Route::get('/full', 'indexWithTasks')->middleware('permission:obraStageSubStages_list');
+  Route::get('/{subStageId}', 'show')->middleware('permission:obraStageSubStages_display');
+  Route::post('/', 'store')->middleware('permission:obraStageSubStages_insert');
+  Route::post('/{subStageId}', 'update')->middleware('permission:obraStageSubStages_update');
+  Route::delete('/{subStageId}', 'destroy')->middleware('permission:obraStageSubStages_delete');
 });
 
 // Stages endpoints
