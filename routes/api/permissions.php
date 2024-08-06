@@ -8,12 +8,14 @@ use App\Http\Controllers\RolFunctionalController;
 use App\Http\Controllers\RolUserController;
 use App\Http\Controllers\UserController;
 
-// Authentications endpoint
+// Authentication requests
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
   Route::post('/login', 'login');
-  Route::get('/user', 'user');
-});
+  Route::post('/forgot', 'forgotPassword');
+  Route::post('/reset', 'resetPassword');
 
+  Route::middleware('auth:sanctum')->post('/logout', 'logout');
+});
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
   return $request->user();

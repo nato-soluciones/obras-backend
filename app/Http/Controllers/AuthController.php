@@ -2,35 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Auth\ForgotRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ResetRequest;
+use App\Http\Services\AuthService;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    /**
+     * Dependency injection
+     */
+    protected $authService;
+
+    public function __construct(AuthService $authService)
     {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string'
-        ]);
-
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'message' => 'The provided credentials are incorrect.'
-            ], 401);
-        }
-
-        $user = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer'
-        ]);
+        $this->authService = $authService;
     }
 
-    public function user(Request $request)
+    /**
+     * Login
+     */
+    public function login(LoginRequest $request)
     {
-        return $request->user();
+        $credentials = $request->validated();
+        $accessToken = $this->authService->login($credentials);
+
+        return $accessToken
+            ? response($accessToken)
+            : response(['message' => 'El usuario o la contraseña son incorrectos.'], 401);
+    }
+
+    /**
+     * Logout
+     */
+    public function logout()
+    {
+        $success = $this->authService->logout();
+
+        return $success
+            ? response()->json(['message' => 'Cierre de sesión con éxito!'], 200)
+            : response(['message' => 'Se ha producido un error al cerrar la sesión del usuario.'], 500);
+    }
+
+    /**
+     * Forgot Password
+     */
+    public function forgotPassword(ForgotRequest $request)
+    {
+        $data = $request->validated();
+        $success = $this->authService->forgotPassword($data);
+
+        return $success
+            ? response(['message' => 'Successfully sent password reset email!'], 200)
+            : response(['message' => 'There was a problem sending the email!'], 500);
+    }
+
+    /**
+     * Reset Password
+     */
+    public function resetPassword(ResetRequest $request)
+    {
+        $data = $request->validated();
+        $success = $this->authService->resetPassword($data);
+
+        return $success
+            ? response(['message' => 'Successfully reset of password!'], 200)
+            : response(['message' => 'There was a problem reseting the password!'], 500);
     }
 }
