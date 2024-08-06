@@ -57,12 +57,19 @@ class ObraController extends Controller
             $budget = null;
             if (isset($obraData['budget_id']) || intval($obraData['budget_id']) > 0) {
                 $budget = Budget::find($obraData['budget_id']);
-                $obraData['covered_area'] = $budget->covered_area;
-                $obraData['semi_covered_area'] = $budget->semi_covered_area;
                 $obraData['currency'] = $budget->currency;
                 $obraData['total'] = $budget->total - ($budget->discount_amount ? $budget->discount_amount : 0);
                 $obraData['total_cost'] = $budget->total_cost;
                 $obraData['client_id'] = $budget->client_id;
+
+                $obraData['covered_area'] = $budget->covered_area ?? null;
+                $obraData['semi_covered_area'] = $budget->semi_covered_area ?? null;
+                // if ($budget->covered_area) {
+                //     $obraData['covered_area'] = $budget->covered_area;
+                // }
+                // if ($budget->semi_covered_area) {
+                //     $obraData['semi_covered_area'] = $budget->semi_covered_area;
+                // }
             }
 
             $obra = Obra::create($obraData);
