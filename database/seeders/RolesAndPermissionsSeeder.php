@@ -71,6 +71,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Obras",
             ],
             [
+                "name" => "navbar_my_tasks",
+                "guard_name" => "api",
+                "description" => "Menú Mis Tareas",
+            ],
+            [
                 "name" => "navbar_contractors",
                 "guard_name" => "api",
                 "description" => "Menú Contratistas",
@@ -111,7 +116,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Agenda",
             ],
             [
-                "name" => "navbar_calendar",
+                "name" => "navbar_calendars",
                 "guard_name" => "api",
                 "description" => "Menú Calendario",
             ],
@@ -422,6 +427,33 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "obraMaterials_display",
                 "guard_name" => "api",
                 "description" => "Ver material de la obra",
+            ],
+        ];
+        $obras_materials_permission = [
+            [
+                "name" => "myTasks_list",
+                "guard_name" => "api",
+                "description" => "Ver mis tareas de la obra",
+            ],
+            [
+                "name" => "myTasks_insert",
+                "guard_name" => "api",
+                "description" => "Agregar mi tarea de la obra",
+            ],
+            [
+                "name" => "myTasks_update",
+                "guard_name" => "api",
+                "description" => "Modificar mi tarea de la obra",
+            ],
+            [
+                "name" => "myTasks_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar mi tarea de la obra",
+            ],
+            [
+                "name" => "myTasks_display",
+                "guard_name" => "api",
+                "description" => "Ver mi tarea de la obra",
             ],
         ];
         $contractors_permission = [
