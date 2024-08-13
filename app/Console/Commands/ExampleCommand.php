@@ -3,10 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Notifications\Notifiable;
-
-use App\Models\User;
-use App\Notifications\ExampleNotification;
+use App\Services\NotificationService;
+use Illuminate\Support\Facades\Log;
 
 class ExampleCommand extends Command
 {
@@ -29,9 +27,9 @@ class ExampleCommand extends Command
      */
     public function handle()
     {
-        $user = User::where('email', 'paconicolasmiranda@gmail.com')->first();
+        Log::info('Cronjob ejecutado exitosamente.');
+        $notificationService = app(NotificationService::class);
 
-        $user->notify(new ExampleNotification());
-        \Log::info('Cronjob ejecutado exitosamente.');
+        $notificationService->create(1, 'Cronjob', 'Cronjob ejecutado exitosamente.');
     }
 }

@@ -18,6 +18,7 @@ class Permission
     'indexIPC' => 'Indice IPC',
     'manufacturing' => 'Productos',
     'manufacturingDocuments' => 'Documentos de Productos',
+    'myTasks' => 'Mis tareas de obra',
     'navbar' => 'Menú lateral',
     'notes' => 'Notas',
     'obraAdditional' => 'Obra Adicionales',

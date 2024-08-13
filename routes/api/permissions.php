@@ -24,6 +24,7 @@ Route::prefix('users')->middleware('auth:sanctum')->controller(UserController::c
   Route::get('/', 'index')->middleware('permission:users_list');
   Route::get('/permissions_check', 'permissionsCheck');
   Route::get('/entity_check', 'entityCheck');
+  Route::get('/{id}/settings', 'settings');//->middleware('permission:users_display');
   Route::get('/{id}/full', 'showWithPermissions')->middleware('permission:users_display');
   Route::get('/{id}', 'show')->middleware('permission:users_display');
   Route::post('/', 'store')->middleware('permission:users_insert');

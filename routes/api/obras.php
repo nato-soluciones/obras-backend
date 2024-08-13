@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\MyTaskController;
 use App\Http\Controllers\ObraAdditionalController;
 use App\Http\Controllers\ObraController;
 use App\Http\Controllers\ObraDailyLogController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\ObraMaterialMovementController;
 use App\Http\Controllers\ObraStageController;
 use App\Http\Controllers\ObraStageSubStageController;
 use App\Http\Controllers\ObraStageSubStageTaskController;
+use App\Http\Controllers\ObraStageSubStageTaskEventController;
 use App\Http\Controllers\OutcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +27,19 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
   Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
 
   Route::get('/{id}/contractors', 'contractors')->middleware('permission:obraContractors_list');
+});
+
+// My Tasks endpoints
+Route::prefix('my-tasks/obras')->middleware('auth:sanctum')->controller(MyTaskController::class)->group(function () {
+  Route::get('/', 'obrasList')->middleware('permission:myTasks_list');
+  Route::get('/{obraId}', 'myTasksInObra')->middleware('permission:myTasks_list');
+  Route::post('/{obraId}/update_progress', 'bulkUpdate')->middleware('permission:myTasks_update');
+});
+
+// My Tasks Events endpoints
+Route::prefix('my-tasks/obras/{obraId}/tasks/{taskId}/events')->middleware('auth:sanctum')->controller(ObraStageSubStageTaskEventController::class)->group(function () {
+  Route::get('/', 'index')->middleware('permission:myTaskEvents_list');
+  Route::post('/', 'store')->middleware('permission:myTaskEvents_insert');
 });
 
 // Incomes endpoints
@@ -85,6 +100,16 @@ Route::prefix('obra_daily_log_tags')->middleware('auth:sanctum')->controller(Obr
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
   });
+
+// Task Details endpoints
+Route::prefix('obras/{obraId}/stages/{stageId}/sub_stages/{subStageId}/tasks/{taskId}/events')->middleware('auth:sanctum')->controller(ObraStageSubStageTaskEventController::class)->group(function () {
+  Route::get('/', 'index');//->middleware('permission:obraStageSubStageTasks_list');
+  // Route::get('/{taskId}','show');//->middleware('permission:obraStageSubStageTasks_display');
+  Route::post('/', 'store');//->middleware('permission:obraStageSubStageTasks_insert');
+  // Route::post('/{taskId}', 'update')->middleware('permission:obraStageSubStageTasks_update');
+  // Route::post('/{taskId}/update_progress', 'updateProgress');
+  // Route::delete('/{taskId}', 'destroy')->middleware('permission:obraStageSubStageTasks_delete');
+});
 
 // Tasks endpoints
 Route::prefix('obras/{obraId}/stages/{stageId}/sub_stages/{subStageId}/tasks')->middleware('auth:sanctum')->controller(ObraStageSubStageTaskController::class)->group(function () {
