@@ -51,7 +51,7 @@ class ObraStageSubStageTask extends Model
         return $this->belongsTo(User::class, 'responsible_id');
     }
 
-    public function taskDetail()
+    public function taskEvents()
     {
         return $this->hasMany(ObraStageSubStageTaskEvent::class);
     }

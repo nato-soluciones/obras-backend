@@ -2,9 +2,9 @@
 
 namespace App\Http\Services\Obra;
 
-use App\Http\Requests\Obra\Stage\SubStage\Task\Detail\StoreTaskDetail;
 use App\Http\Requests\Obra\Stage\SubStage\Task\Event\StoreTaskEvent;
 use App\Models\Obra;
+use App\Models\ObraStageSubStageTask;
 use App\Models\ObraStageSubStageTaskEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,15 +13,18 @@ use Illuminate\Validation\ValidationException;
 
 class ObraStageSubStageTaskEventService
 {
-  private function validateRelationships(int $obraId, int $taskId)
+  private function validateRelationships(int $obraId, int $taskId, bool $onlyAuthUser = true)
   {
-    $userId = auth()->user()->id;
+    $userId = $onlyAuthUser ? auth()->id() : null;
+
     $ObraTaskExists = Obra::join('obra_stages', 'obras.id', '=', 'obra_stages.obra_id')
       ->join('obra_stage_sub_stages', 'obra_stages.id', '=', 'obra_stage_sub_stages.obra_stage_id')
       ->join('obra_stage_sub_stage_tasks', 'obra_stage_sub_stages.id', '=', 'obra_stage_sub_stage_tasks.obra_stage_sub_stage_id')
       ->where('obras.id', $obraId)
       ->where('obra_stage_sub_stage_tasks.id', $taskId)
-      // ->where('obra_stage_sub_stage_tasks.responsible_id', $userId)
+      ->when($onlyAuthUser, function ($query) use ($userId) {
+        return $query->where('obra_stage_sub_stage_tasks.responsible_id', $userId);
+      })
       ->exists();
 
     if (!$ObraTaskExists) {
@@ -34,26 +37,32 @@ class ObraStageSubStageTaskEventService
   public function index(int $obraId, int $taskId)
   {
     // Validamos las relaciones
-    $this->validateRelationships($obraId, $taskId);
+    $this->validateRelationships($obraId, $taskId, false);
 
-    $taskDetailEvents = ObraStageSubStageTaskEvent::where('obra_stage_sub_stage_task_id', $taskId)->get();
+    $taskDetailEvents = ObraStageSubStageTaskEvent::with(['createdBy' => function ($q) {
+      $q->select('id', 'firstname', 'lastname');
+    }])
+      ->where('obra_stage_sub_stage_task_id', $taskId)
+      ->orderBy('id', 'desc')
+      ->get();
 
     return $taskDetailEvents;
   }
 
-  public function store(StoreTaskEvent $request, int $obraId, int $taskId, ObraDailyLogService $obraDailyLogService)
+  public function store(StoreTaskEvent $request, int $obraId, ObraStageSubStageTask $task, ObraDailyLogService $obraDailyLogService)
   {
     // Validamos las relaciones
-    $this->validateRelationships($obraId, $taskId);
+    $this->validateRelationships($obraId, $task->id, true);
 
     $today = date('Y-m-d');
     // Creamos la tarea
     $request->merge([
       'date' => $today,
-      'obra_stage_sub_stage_task_id' => $taskId,
+      'created_by_id' => $task->responsible_id,
+      'obra_stage_sub_stage_task_id' => $task->id,
     ]);
 
-    $comment = 'Nuevo evento en tarea ' . $taskId . "\n" . ' Titulo: ' . $request->title . "\n" . ' Descripción: ' . $request->description;
+    $comment = 'Nuevo evento en tarea ' . $task->title . "\n" . strtoupper($request->title) . "\n" .  $request->description;
 
     $dailyLogRecord = [
       'event_date' => $today,

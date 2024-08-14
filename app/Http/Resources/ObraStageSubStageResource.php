@@ -37,6 +37,7 @@ class ObraStageSubStageResource extends JsonResource
                     'responsible_firstname' => $task->responsible->firstname,
                     'responsible_lastname' => $task->responsible->lastname,
                     'responsible_deleted_at' => $task->responsible->deleted_at,
+                    'task_events_count' => $task->task_events_count,
                 ];
             }),
         ];

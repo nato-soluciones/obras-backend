@@ -13,11 +13,17 @@ class ObraStageSubStageTaskEvent extends Model
         'date',
         'title',
         'description',
+        'created_by_id',
         'obra_stage_sub_stage_task_id',
     ];
 
     public function obraStageSubStageTask()
     {
         return $this->belongsTo(ObraStageSubStageTask::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by_id');
     }
 }

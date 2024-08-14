@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->unsignedBigInteger('obra_stage_sub_stage_task_id');
+            $table->unsignedBigInteger('created_by_id');
             $table->timestamps();
-            
+            $table->foreign('created_by_id')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('obra_stage_sub_stage_task_id')->references('id')->on('obra_stage_sub_stage_tasks')->onDelete('cascade');
         });
     }

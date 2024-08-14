@@ -47,7 +47,8 @@ class ObraStageSubStageController extends Controller
                 ->with(['responsible' => function ($q1) {
                     $q1->select('id', 'firstname', 'lastname', 'deleted_at')
                         ->withTrashed();
-                }]);
+                }])
+                ->withCount('taskEvents');
         }])
             ->where('obra_stage_id', $stageId)
             ->orderBy('start_date', 'asc')
