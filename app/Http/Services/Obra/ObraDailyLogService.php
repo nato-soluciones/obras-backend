@@ -3,8 +3,10 @@
 namespace App\Http\Services\Obra;
 
 use App\Models\ObraDailyLog;
+use App\Models\ObraDailyLogTag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ObraDailyLogService
 {
@@ -36,9 +38,14 @@ class ObraDailyLogService
       $obraDailyLog->save();
     } catch (\Exception $e) {
       Log::error("Error al crear el diario de obra {$request->name}: " . $e->getMessage());
-      return $e;
+      throw ValidationException::withMessages(['obra' => "Error al crear el diario de obra {$request->name}"]);
     }
 
     return response($obraDailyLog, 201);
+  }
+
+  public function getDailyLogTagByName(string $name)
+  {
+    return ObraDailyLogTag::where('name', $name)->first();
   }
 }

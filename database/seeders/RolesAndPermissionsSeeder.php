@@ -71,7 +71,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Obras",
             ],
             [
-                "name" => "navbar_my_tasks",
+                "name" => "navbar_myTasks",
                 "guard_name" => "api",
                 "description" => "Menú Mis Tareas",
             ],
@@ -121,7 +121,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Calendario",
             ],
             [
-                "name" => "navbar_exchange_rate",
+                "name" => "navbar_exchangeRates",
                 "guard_name" => "api",
                 "description" => "Menú Cotizaciones",
             ],
@@ -239,7 +239,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver sub-etapa",
             ],
         ];
-
         $obras_stage_subStage_tasks_permission = [
             [
                 "name" => "obraStageSubStageTasks_list",
@@ -270,6 +269,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "obraStageSubStageTasks_changeProgress",
                 "guard_name" => "api",
                 "description" => "Actualizar avance de tarea",
+            ],
+            [
+                "name" => "obraStageSubStageTasks_listEvents",
+                "guard_name" => "api",
+                "description" => "Ver los eventos de la tarea",
             ],
         ];
         $obras_incomes_permission = [
@@ -429,31 +433,26 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver material de la obra",
             ],
         ];
-        $obras_materials_permission = [
+        $my_tasks_permission = [
             [
                 "name" => "myTasks_list",
                 "guard_name" => "api",
                 "description" => "Ver mis tareas de la obra",
             ],
             [
-                "name" => "myTasks_insert",
+                "name" => "myTasks_changeProgress",
                 "guard_name" => "api",
-                "description" => "Agregar mi tarea de la obra",
+                "description" => "Actualizar avance de tarea",
             ],
             [
-                "name" => "myTasks_update",
+                "name" => "myTasks_listEvents",
                 "guard_name" => "api",
-                "description" => "Modificar mi tarea de la obra",
+                "description" => "Lista los eventos de mi tarea",
             ],
             [
-                "name" => "myTasks_delete",
+                "name" => "myTasks_insertEvent",
                 "guard_name" => "api",
-                "description" => "Eliminar mi tarea de la obra",
-            ],
-            [
-                "name" => "myTasks_display",
-                "guard_name" => "api",
-                "description" => "Ver mi tarea de la obra",
+                "description" => "Agregar Evento a mi tarea",
             ],
         ];
         $contractors_permission = [
@@ -939,6 +938,7 @@ class RolesAndPermissionsSeeder extends Seeder
             $obras_contractors_permission,
             $obras_documents_permission,
             $obras_materials_permission,
+            $my_tasks_permission,
             $contractors_permission,
             $provider_current_accounts_permission,
             $provider_current_accounts_movements_permission,

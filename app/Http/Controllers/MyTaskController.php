@@ -14,7 +14,7 @@ class MyTaskController extends Controller
 {
     public function obrasList()
     {
-        $user_id = 1; // auth()->user()->id;
+        $user_id = auth()->id();
 
         $obras = Obra::distinct()
             ->join('obra_stages as os', 'obras.id', '=', 'os.obra_id')
@@ -44,7 +44,7 @@ class MyTaskController extends Controller
 
     public function myTasksInObra(int $obraId)
     {
-        $user_id = 1;
+        $user_id = auth()->id();
 
         $tasks = ObraStageSubStageTask::select(
             'obra_stage_sub_stage_tasks.*',

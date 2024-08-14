@@ -49,11 +49,11 @@ class ObraStageSubStageTaskEventService
     return $taskDetailEvents;
   }
 
-  public function store(StoreTaskEvent $request, int $obraId, ObraStageSubStageTask $task, ObraDailyLogService $obraDailyLogService)
+  public function store(StoreTaskEvent $request, int $obraId, int $taskId, ObraDailyLogService $obraDailyLogService)
   {
     // Validamos las relaciones
-    $this->validateRelationships($obraId, $task->id, true);
-
+    $this->validateRelationships($obraId, $taskId, true);
+    $task  = ObraStageSubStageTask::find($taskId);
     $today = date('Y-m-d');
     // Creamos la tarea
     $request->merge([
@@ -63,11 +63,12 @@ class ObraStageSubStageTaskEventService
     ]);
 
     $comment = 'Nuevo evento en tarea ' . $task->title . "\n" . strtoupper($request->title) . "\n" .  $request->description;
+    $dailyLogTag = $obraDailyLogService->getDailyLogTagByName('Actualización');
 
     $dailyLogRecord = [
       'event_date' => $today,
       'comment' => $comment,
-      'obra_daily_log_tag_id' => 2,
+      'obra_daily_log_tag_id' => $dailyLogTag->id,
       'obra_id' => $obraId,
     ];
 
@@ -75,16 +76,18 @@ class ObraStageSubStageTaskEventService
       $response = DB::transaction(function () use ($request, $dailyLogRecord, $obraDailyLogService) {
 
         ObraStageSubStageTaskEvent::create($request->all());
+
+        // No envolvemos la llamada al servicio en un try-catch aquí
         $obraDailyLogService->store(new Request($dailyLogRecord));
 
+        // Este return solo se ejecutará si no se lanzaron excepciones
         return ['status' => 'ok'];
       });
 
-
       return $response;
     } catch (\Exception $e) {
-      Log::error('Error en la transacción: ' . $e->getMessage());
-      return $e;
+      Log::error("Error al crear el evento de la tarea = " . $e->getMessage());
+      throw ValidationException::withMessages(['sub_stage' => 'Error al crear el evento de la tarea.']);
     }
   }
 }
