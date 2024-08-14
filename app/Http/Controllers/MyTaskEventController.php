@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Obra\Stage\SubStage\Task\Event\StoreTaskEvent;
 use App\Http\Resources\ObraStageSubStageTaskEventResource;
+use App\Http\Services\Obra\ObraDailyLogService;
 use App\Http\Services\Obra\ObraStageSubStageTaskEventService;
+use App\Models\ObraStageSubStageTask;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
-class ObraStageSubStageTaskEventController extends Controller
+class MyTaskEventController extends Controller
 {
     private $oSSTaskEventService;
 
@@ -16,7 +19,7 @@ class ObraStageSubStageTaskEventController extends Controller
         $this->oSSTaskEventService = $obraStageSubStageTaskEventService;
     }
 
-    public function index(int $obraId, int $stageId, int $subStageId, int $taskId)
+    public function index(int $obraId, int $taskId)
     {
         try {
             $taskDetailEvents = $this->oSSTaskEventService->index($obraId, $taskId);
@@ -27,5 +30,21 @@ class ObraStageSubStageTaskEventController extends Controller
             return response()->json(['message' => 'Error al recuperar los eventos de la tarea'], 500);
         }
         return ObraStageSubStageTaskEventResource::collection($taskDetailEvents);
+    }
+
+
+    public function store(StoreTaskEvent $request, int $obraId, int $taskId, ObraDailyLogService $obraDailyLogService)
+    {
+        try {
+            $taskDetailEvent = $this->oSSTaskEventService->store($request, $obraId, $taskId, $obraDailyLogService);
+            return response()->json($taskDetailEvent, 201);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al crear el evento de la tarea'], 500);
+        }
+
+        return response($taskDetailEvent, 201);
     }
 }

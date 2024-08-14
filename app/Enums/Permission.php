@@ -18,7 +18,7 @@ class Permission
     'indexIPC' => 'Indice IPC',
     'manufacturing' => 'Productos',
     'manufacturingDocuments' => 'Documentos de Productos',
-    'myTasks' => 'Mis tareas de obra',
+    'myTasks' => 'Mis tareas',
     'navbar' => 'Menú lateral',
     'notes' => 'Notas',
     'obraAdditional' => 'Obra Adicionales',
@@ -32,6 +32,7 @@ class Permission
     'obraStages' => 'Etapas en avance de obra',
     'obraStageSubStages' => 'Sub-Etapas en avance de obra',
     'obraStageSubStageTasks' => 'Tareas en avance de obra',
+    'obraStageSubStageTaskEvents' => 'Eventos de tareas en avance de obra',
     'providerCurrentAccountMovements' => 'Proveedor CC Movimientos',
     'providerCurrentAccounts' => 'Proveedor CC',
     'toolLocation' => 'Ubicaciones Herramientas',
@@ -51,5 +52,8 @@ class Permission
     'copy' => 'Copiar',
     'review' => 'Revisar',
     'facturanteRedirect' => 'Redirigir a Facturante',
+    'changeProgress' => 'Cambiar progreso',
+    'listEvents' => 'Listar eventos',
+    'insertEvent' => 'Agregar evento',
   ];
 }

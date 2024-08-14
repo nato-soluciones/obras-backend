@@ -14,7 +14,15 @@ class PermissionMigrationV1_2_1ToV1_3_0 extends Seeder
     public function run(): void
     {
         // ? Elimina permisos viejos
-        $permissions = ["obraStageTasks_list", "obraStageTasks_insert", "obraStageTasks_update", "obraStageTasks_delete", "obraStageTasks_display"];
+        $permissions = [
+            "obraStageTasks_list",
+            "obraStageTasks_insert",
+            "obraStageTasks_update",
+            "obraStageTasks_delete",
+            "obraStageTasks_display",
+            "navbar_calendar",
+            "navbar_exchange_rate"
+        ];
 
         foreach ($permissions as $permission) {
             $roles = Role::whereHas('permissions', function ($query) use ($permission) {
@@ -26,7 +34,11 @@ class PermissionMigrationV1_2_1ToV1_3_0 extends Seeder
             }
 
             // Luego elimina el permiso
-            Permission::findByName($permission, 'api')->delete();
+            try {
+                Permission::findByName($permission, 'api')->delete();
+            } catch (\Throwable $th) {
+                continue;
+            }
         }
     }
 }
