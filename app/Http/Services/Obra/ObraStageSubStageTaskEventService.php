@@ -54,10 +54,9 @@ class ObraStageSubStageTaskEventService
     // Validamos las relaciones
     $this->validateRelationships($obraId, $taskId, true);
     $task  = ObraStageSubStageTask::find($taskId);
-    $today = date('Y-m-d');
     // Creamos la tarea
     $request->merge([
-      'date' => $today,
+      'date' => date('Y-m-d'),
       'created_by_id' => $task->responsible_id,
       'obra_stage_sub_stage_task_id' => $task->id,
     ]);
@@ -66,7 +65,7 @@ class ObraStageSubStageTaskEventService
     $dailyLogTag = $obraDailyLogService->getDailyLogTagByName('Actualización');
 
     $dailyLogRecord = [
-      'event_date' => $today,
+      'event_date' => date('Y-m-d H:i:s'),
       'comment' => $comment,
       'obra_daily_log_tag_id' => $dailyLogTag->id,
       'obra_id' => $obraId,
