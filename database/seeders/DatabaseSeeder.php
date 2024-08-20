@@ -14,14 +14,12 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(RelationalRolesPermissionsSeeder::class);
+        $this->call(AppSettingsSeeder::class);
         $this->call(BanksSeeder::class);
         $this->call(ContractorIndustriesSeeder::class);
-        $this->call(IndicesSeeder::class);
-        $this->call(ObraDailyLogTagsSeeder::class);
         $this->call(CurrentAccountMovementTypesSeeder::class);
+        $this->call(IndicesSeeder::class);
         $this->call(MeasurementUnitsSeeder::class);
-
-        // $this->call(ToolCategorySeeder::class);
-        // $this->call(ManufacturerCategories::class);
+        $this->call(ObraDailyLogTagsSeeder::class);
     }
 }
