@@ -10,9 +10,14 @@ class CompanyCostService
 
   public function list(Request $request)
   {
+    $period = $request->input('period');
     $category_id = $request->input('category');
     $payment_status = $request->input('paymentStatus');
+
     $companyCost = CompanyCost::with('category', 'responsible')
+      ->when($period, function ($query, $period) {
+        $query->where('period', $period);
+      })
       ->when($category_id, function ($query, $category_id) {
         $query->where('category_id', $category_id);
       })

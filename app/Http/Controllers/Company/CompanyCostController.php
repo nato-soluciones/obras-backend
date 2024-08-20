@@ -79,7 +79,7 @@ class CompanyCostController extends Controller
     {
         try {
             // validar que venga la fecha de pago
-            
+
             $dataSave = [
                 'id' => $companyCostId,
                 'payment_status' => 'PAID',
@@ -122,5 +122,19 @@ class CompanyCostController extends Controller
         });
 
         return response()->json($data);
+    }
+
+    public function getPeriods()
+    {
+        $companyCosts = CompanyCost::distinct('period')
+            ->select('period')
+            ->orderBy('period', 'desc')
+            ->get();
+        
+        $companyCosts = $companyCosts->map(function ($cost) {
+            return $cost->period;
+        });
+
+        return response()->json($companyCosts);
     }
 }
