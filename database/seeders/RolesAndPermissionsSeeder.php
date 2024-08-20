@@ -134,6 +134,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "navbar_fleets",
                 "guard_name" => "api",
                 "description" => "Menú Flotas",
+            ],
+            [
+                "name" => "navbar_companies",
+                "guard_name" => "api",
+                "description" => "Menú Empresas",
             ]
         ];
         $obras_permission = [
@@ -924,6 +929,28 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Flota",
             ],
         ];
+        $company_costs_permission = [
+            [
+                "name" => "companyCosts_list",
+                "guard_name" => "api",
+                "description" => "Ver Costos de la Empresa",
+            ],
+            [
+                "name" => "companyCosts_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Costo",
+            ],
+            [
+                "name" => "companyCosts_update",
+                "guard_name" => "api",
+                "description" => "Modificar Costo",
+            ],
+            [
+                "name" => "companyCosts_display",
+                "guard_name" => "api",
+                "description" => "Ver Costo",
+            ],
+        ];
 
         $permissions = array_merge(
             $navbar_permissions,
@@ -957,7 +984,8 @@ class RolesAndPermissionsSeeder extends Seeder
             $calendars_permissions,
             $exchangeRates_permissions,
             $notes_permission,
-            $fleets_permission
+            $fleets_permission,
+            $company_costs_permission
         );
 
         foreach ($permissions as $permission) {
