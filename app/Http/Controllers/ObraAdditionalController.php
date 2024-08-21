@@ -19,7 +19,7 @@ class ObraAdditionalController extends Controller
     {
         $additionals = Additional::with(['user' => function ($q) {
             $q->select('id', 'firstname', 'lastname')->withTrashed();
-        }])->where('obra_id', $obraId)->get();
+        }])->select('id', 'date', 'total_cost', 'total', 'obra_id', 'created_by')->where('obra_id', $obraId)->get();
         return response($additionals, 200);
     }
 
@@ -41,8 +41,8 @@ class ObraAdditionalController extends Controller
         $CAService = app(CurrentAccountService::class);
 
         // Recuperar datos del presupuesto
-        $clientId = $obra->budget->client_id;
-        $currency = $obra->budget->currency;
+        $clientId = $obra->client_id;
+        $currency = $obra->currency;
 
 
         // Arma arrays para crear los movimientos de los proveedores
@@ -152,8 +152,8 @@ class ObraAdditionalController extends Controller
         $additionalWithCost = $additionalService->getAdditionalCostsByProvider($additionalData->toArray());
 
         $CAService = app(CurrentAccountService::class);
-        $clientId = $obra->budget->client_id;
-        $currency = $obra->budget->currency;
+        $clientId = $obra->client_id;
+        $currency = $obra->currency;
 
 
         // Arma arrays para crear los movimientos de los proveedores
@@ -217,8 +217,8 @@ class ObraAdditionalController extends Controller
         $CAService = app(CurrentAccountService::class);
 
         // Recuperar datos del presupuesto
-        $clientId = $obra->budget->client_id;
-        $currency = $obra->budget->currency;
+        $clientId = $obra->client_id;
+        $currency = $obra->currency;
 
 
         // Arma arrays para crear los movimientos de los proveedores
@@ -266,7 +266,7 @@ class ObraAdditionalController extends Controller
 
         $CAService->CAMovementDeleteByReference($CA_Client, $CA_movement_client);
 
-        Log::debug($additionalWithCost);
+        // Log::debug($additionalWithCost);
         return response(['message' => 'Additional deleted'], 204);
     }
 }
