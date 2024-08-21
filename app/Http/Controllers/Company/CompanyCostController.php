@@ -75,6 +75,20 @@ class CompanyCostController extends Controller
         }
     }
 
+    public function destroy(int $companyCostId)
+    {
+        try {
+            $companyCost = CompanyCost::findOrFail($companyCostId);
+            $companyCost->delete();
+            return response()->json(['message' => 'Costo eliminado correctamente'], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al eliminar el costo'], 500);
+        }
+    }
+
     public function paymentRegistration(Request $request, int $companyCostId)
     {
         try {

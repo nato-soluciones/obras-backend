@@ -17,12 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class ObraController extends Controller
 {
-    /**
-     * Get all obras
-     *
-     * @return Response
-     */
-    public function index(): Response
+    public function index()
     {
         $obras = Obra::with(['client' => function ($q) {
             $q->select('id', 'person_type', 'firstname', 'lastname', 'business_name', 'deleted_at')->withTrashed();
@@ -35,7 +30,7 @@ class ObraController extends Controller
                 ->whereDate('end_date', '>=', date('Y-m-d'))
                 ->first();
 
-            $obra->active_stage = $activeStage;
+            $obra->setAttribute('active_stage', $activeStage);
         });
         return response($obras, 200);
     }
@@ -55,7 +50,7 @@ class ObraController extends Controller
             // DB::transaction(function () use ($request, $image, $obra) {
             $obraData = $request->all();
             $budget = null;
-            if (isset($obraData['budget_id']) || intval($obraData['budget_id']) > 0) {
+            if (isset($obraData['budget_id']) && intval($obraData['budget_id']) > 0) {
                 $budget = Budget::find($obraData['budget_id']);
                 $obraData['currency'] = $budget->currency;
                 $obraData['total'] = $budget->total - ($budget->discount_amount ? $budget->discount_amount : 0);
@@ -64,12 +59,6 @@ class ObraController extends Controller
 
                 $obraData['covered_area'] = $budget->covered_area ?? null;
                 $obraData['semi_covered_area'] = $budget->semi_covered_area ?? null;
-                // if ($budget->covered_area) {
-                //     $obraData['covered_area'] = $budget->covered_area;
-                // }
-                // if ($budget->semi_covered_area) {
-                //     $obraData['semi_covered_area'] = $budget->semi_covered_area;
-                // }
             }
 
             $obra = Obra::create($obraData);
@@ -231,13 +220,16 @@ class ObraController extends Controller
         $obra = Obra::findOrFail($id);
 
         // Recupera los proveedores y el monto presupuestado de cada uno
-        $resultBudget = $obra->budget->categories()
-            ->join('budgets_categories_activities as bca', 'budgets_categories.id', '=', 'bca.budget_category_id')
-            ->join('contractors as c', 'bca.provider_id', '=', 'c.id')
-            ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
-            ->selectRaw('bca.provider_id as contractor_id, c.business_name, c.last_name, c.first_name, c.person_type, c.type as contractor_type, i.code as industry_code, i.name as industry_name, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
-            ->groupBy('bca.provider_id', 'c.business_name', 'c.last_name', 'c.first_name', 'c.person_type', 'c.type', 'i.code', 'i.name')
-            ->get();
+        $resultBudget = collect(); // Inicializas una colección vacía
+        if($obra->budget){
+            $resultBudget = $obra->budget->categories()
+                ->join('budgets_categories_activities as bca', 'budgets_categories.id', '=', 'bca.budget_category_id')
+                ->join('contractors as c', 'bca.provider_id', '=', 'c.id')
+                ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
+                ->selectRaw('bca.provider_id as contractor_id, c.business_name, c.last_name, c.first_name, c.person_type, c.type as contractor_type, i.code as industry_code, i.name as industry_name, ROUND(SUM(bca.unit_cost * bca.quantity), 2) as budgeted_price')
+                ->groupBy('bca.provider_id', 'c.business_name', 'c.last_name', 'c.first_name', 'c.person_type', 'c.type', 'i.code', 'i.name')
+                ->get();
+        }
 
         // Recupera los proveedores de adicionales y el monto presupuestado de cada uno
         $resultAdditional = $obra->additionals()
@@ -286,6 +278,7 @@ class ObraController extends Controller
 
         // Obtener todos los contractor_id de $result
         $resultContractorIds = $result->pluck('contractor_id');
+
         // Filtrar $resultAdditional para obtener los contractor_id que no están en $result
         $missingContractors = $resultAdditional->filter(function ($item) use ($resultContractorIds) {
             return !$resultContractorIds->contains($item->contractor_id);

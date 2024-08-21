@@ -18,6 +18,7 @@ Route::prefix('companies/costs')->middleware('auth:sanctum')->controller(Company
   Route::post('/', 'store')->middleware('permission:companyCosts_insert');
   Route::post('/{id}', 'update')->middleware('permission:companyCosts_update');
   Route::post('/{id}/paymentRegistration', 'paymentRegistration')->middleware('permission:companyCosts_update');
+  Route::delete('/{id}', 'destroy')->middleware('permission:companyCosts_delete');
 });
 
 
