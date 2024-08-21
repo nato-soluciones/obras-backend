@@ -901,7 +901,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Nota",
             ],
         ];
-
         $fleets_permission = [
             [
                 "name" => "fleets_list",
@@ -949,6 +948,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "companyCosts_display",
                 "guard_name" => "api",
                 "description" => "Ver Costo",
+            ],
+            [
+                "name" => "companyCosts_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Costo",
             ],
         ];
 
