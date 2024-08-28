@@ -178,7 +178,10 @@ class UserController extends Controller
         $user = Auth::user();
         if ($debug) Log::debug('User: ' . json_encode($user));
 
-        if (strtoupper($user->getRoleNames()[0]) === 'SUPERADMIN') {
+        $roles = $user->getRoleNames();
+
+        // Verificar si el usuario tiene roles antes de acceder al índice 0
+        if ($roles->isNotEmpty() && strtoupper($roles[0]) === 'SUPERADMIN') {
             if ($debug) Log::debug('RETURN Superadmin');
             return response(['full'], 200);
         }
