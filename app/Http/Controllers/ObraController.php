@@ -167,6 +167,9 @@ class ObraController extends Controller
     {
         $obra = Obra::with(['client'])->find($id);
 
+        if ($obra) {
+            $obra->has_plan_charge = $obra->planChanges()->exists();
+        }
         return response($obra, 200);
     }
 

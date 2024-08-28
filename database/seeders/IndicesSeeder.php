@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Auxiliaries\IndexType;
 use App\Models\Cac;
 use App\Models\Ipc;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -53,6 +54,14 @@ class IndicesSeeder extends Seeder
             ["period" => '2024-04', "general" => 12216.20, "materials" => 15226.80, "labour" => 7803.50],
         ];
 
+        $IndexTypes = [
+            ['code' => 'IPC', 'name' => 'IPC'],
+            ['code' => 'CAC_GENERAL', 'name' => 'CAC - General'],
+            ['code' => 'CAC_MATERIALS', 'name' => 'CAC - Materiales'],
+            ['code' => 'CAC_LABOUR', 'name' => 'CAC - Mano de obra'],
+
+        ];
+
 
         // Insertar datos en la tabla ipc
         foreach ($IPC as $row) {
@@ -69,5 +78,14 @@ class IndicesSeeder extends Seeder
                 Cac::create($row);
             }
         }
+
+        // Insertar datos en la tabla index_type
+        foreach ($IndexTypes as $row) {
+            $existingIndexType = IndexType::where('code', $row['code'])->first();
+            if (!$existingIndexType) {
+                IndexType::create($row);
+            }
+        }
+
     }
 }
