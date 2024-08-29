@@ -24,7 +24,13 @@ class ObraPlanChargeDetailController extends Controller
     {
         $details = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
             $query->where('obra_id', $obraId);
-        })->orderBy('due_date', 'asc')->orderBy('id', 'asc')->get();
+        })->with(['payments' => function ($q) {
+            $q->select('obra_plan_charge_detail_id', 'id', 'date', 'amount', 'description')->orderBy('date', 'asc');
+        }])
+            ->orderBy('due_date', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
         return ObraPlanChargeDetailResource::collection($details);
     }
 
@@ -37,7 +43,8 @@ class ObraPlanChargeDetailController extends Controller
         return response($detail, 200);
     }
 
-    public function store(Request $request, int $obraId) {
+    public function store(Request $request, int $obraId)
+    {
         try {
             $obraPlanChargeDetail = $this->obraPlanChargeDetailService->store($request, $obraId);
             return response()->json($obraPlanChargeDetail, 201);
@@ -50,5 +57,16 @@ class ObraPlanChargeDetailController extends Controller
     }
 
 
-    public function charge(Request $request, int $obraId) {}
+    public function charge(Request $request, int $obraId, int $detailId)
+    {
+        try {
+            $this->obraPlanChargeDetailService->charge($request, $obraId, $detailId);
+            return response()->json(['message' => 'Cobro realizado correctamente'], 201);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al realizar el cobro'], 500);
+        }
+    }
 }

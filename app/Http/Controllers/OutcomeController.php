@@ -52,7 +52,7 @@ class OutcomeController extends Controller
         if (is_null($obra)) {
             return response()->json(['message' => 'Obra no encontrada'], 404);
         }
-        $currency = $obra->budget->currency;
+        $currency = $obra->currency;
 
         $request->merge(['obra_id' => $obraId]);
 
@@ -140,7 +140,7 @@ class OutcomeController extends Controller
         if (is_null($outcome)) {
             return response()->json(['message' => 'Egreso no encontrado'], 404);
         }
-        $currency = $obra->budget->currency;
+        $currency = $obra->currency;
 
         try {
             $outcome->fill($request->all());
@@ -197,7 +197,7 @@ class OutcomeController extends Controller
             return response()->json(['message' => 'Obra no encontrada'], 404);
         }
 
-        $currency = $obra->budget->currency;
+        $currency = $obra->currency;
         try {
             $outcome = Outcome::findOrFail($outcomeId);
             $outcome->delete();

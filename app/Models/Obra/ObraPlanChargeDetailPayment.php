@@ -13,6 +13,7 @@ class ObraPlanChargeDetailPayment extends Model
         'obra_plan_charge_detail_id',
         'date',
         'amount',
-        'description'
+        'description',
+        'created_by_id'
     ];
 }

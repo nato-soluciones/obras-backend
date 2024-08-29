@@ -15,6 +15,9 @@ class ObraPlanChargeDetailResource extends JsonResource
 	 */
 	public function toArray(Request $request): array
 	{
+		// Calcula el total de pagos
+		$totalPayments = $this->payments->sum('amount');
+
 		return [
 			"id" => $this->id,
 			"obra_plan_charge_id" => $this->obra_plan_charge_id,
@@ -27,7 +30,15 @@ class ObraPlanChargeDetailResource extends JsonResource
 			"total_amount" => $this->total_amount,
 			"status" => $this->status,
 			"status_text" => EnumsObra::$paymentState[$this->status],
-
+			"total_payments" => $totalPayments,
+			"payments" => $this->payments->map(function ($payment) {
+				return [
+					"id" => $payment->id,
+					"date" => $payment->date,
+					"amount" => $payment->amount,
+					"description" => $payment->description,
+				];
+			}),
 		];
 	}
 }

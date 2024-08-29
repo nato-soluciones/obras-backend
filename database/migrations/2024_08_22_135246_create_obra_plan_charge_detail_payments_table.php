@@ -17,9 +17,11 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('amount', 18, 2);
             $table->string('description')->nullable();
+            $table->unsignedBigInteger('created_by_id');
             
             $table->timestamps();
             $table->foreign('obra_plan_charge_detail_id')->references('id')->on('obra_plan_charge_details')->onDelete('cascade');
+            $table->foreign('created_by_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 
