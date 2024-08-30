@@ -13,4 +13,6 @@ class IndexType extends Model
         'code',
         'name',
     ];
+
+    
 }

@@ -26,11 +26,14 @@ class ObraPlanChargeDetailController extends Controller
             $query->where('obra_id', $obraId);
         })->with(['payments' => function ($q) {
             $q->select('obra_plan_charge_detail_id', 'id', 'date', 'amount', 'description')->orderBy('date', 'asc');
+        }, 'indexType' => function ($q) {
+            $q->select('id', 'name');
         }])
             ->orderBy('due_date', 'asc')
             ->orderBy('id', 'asc')
             ->get();
 
+            // Log::info($details);
         return ObraPlanChargeDetailResource::collection($details);
     }
 

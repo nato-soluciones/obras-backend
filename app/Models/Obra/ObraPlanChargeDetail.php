@@ -2,6 +2,7 @@
 
 namespace App\Models\Obra;
 
+use App\Models\Auxiliaries\IndexType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,9 +30,15 @@ class ObraPlanChargeDetail extends Model
     {
         return $this->belongsTo(ObraPlanCharge::class, 'obra_plan_charge_id');
     }  
-
+    
+    public function indexType()
+    {
+        return $this->belongsTo(IndexType::class, 'index_type');
+    }
+    
     public function payments()
     {
         return $this->hasMany(ObraPlanChargeDetailPayment::class);
     }
+
 }

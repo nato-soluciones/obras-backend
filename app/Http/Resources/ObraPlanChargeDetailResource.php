@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enums\Obra as EnumsObra;
+use Illuminate\Support\Facades\Log;
 
 class ObraPlanChargeDetailResource extends JsonResource
 {
@@ -17,7 +18,6 @@ class ObraPlanChargeDetailResource extends JsonResource
 	{
 		// Calcula el total de pagos
 		$totalPayments = $this->payments->sum('amount');
-
 		return [
 			"id" => $this->id,
 			"obra_plan_charge_id" => $this->obra_plan_charge_id,
@@ -25,6 +25,8 @@ class ObraPlanChargeDetailResource extends JsonResource
 			"installment_number" => $this->installment_number,
 			"concept" => $this->concept,
 			"due_date" => $this->due_date,
+			"index_type_text" => $this->indexType['name'] ?? null,
+			"index_period" => $this->index_period,
 			"installment_amount" => $this->installment_amount,
 			"adjustment_amount" => $this->adjustment_amount,
 			"total_amount" => $this->total_amount,
