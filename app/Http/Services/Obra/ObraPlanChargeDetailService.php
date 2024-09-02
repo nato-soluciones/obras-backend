@@ -24,6 +24,7 @@ class ObraPlanChargeDetailService
 	public function store(Request $request, int $obraId)
 	{
 		try {
+			$obra = Obra::findOrFail($obraId);
 			$obraPlanCharge = ObraPlanCharge::where('obra_id', $obraId)->first();
 
 			if (!$obraPlanCharge) {
@@ -42,7 +43,31 @@ class ObraPlanChargeDetailService
 
 			// Crea el ajuste en CC si es necesario
 			if($request->type === 'ADJUSTMENT'){
+				$CAService = app(CurrentAccountService::class);
+				$CA_Client = [
+					'project_id' => $obra->id,
+					'entity_type' => 'CLIENT',
+					'entity_id' => $obra->client_id,
+					'currency' => $obra->currency,
+				];
+				if($request->installment_amount > 0){
+					$movementType = CurrentAccountMovementType::select('id')
+					->where('entity_type', 'CLIENT')
+					->where('name', 'Ajustes')
+					->first();
 
+					$CA_movement = [
+						'date' => Carbon::now()->format('Y-m-d'),
+						'movement_type_id' => $movementType->id,
+						'description' => $obraPlanChargeDetail->concept,
+						'amount' => $obraPlanChargeDetail->installment_amount,
+						'observation' => $obraPlanChargeDetail->description,
+						'reference_entity' => 'planChargeDetail',
+						'reference_id' => $obraPlanChargeDetail->id,
+						'created_by' => auth()->id()
+					];
+					$CAService->CAMovementAdd($CA_Client, $CA_movement);
+				}
 			}
 
 
