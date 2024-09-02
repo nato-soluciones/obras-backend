@@ -64,6 +64,7 @@ Route::prefix('obras/{obraId}/plan_charges')->middleware('auth:sanctum')->contro
 // Plan Charge Details endpoints
 Route::prefix('obras/{obraId}/plan_charges/details')->middleware('auth:sanctum')->controller(ObraPlanChargeDetailController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obraPlanChargeDetails_list');
+  Route::get('/index_totals', 'indexTotals')->middleware('permission:obraPlanChargeDetails_list');
   Route::get('/{detailId}', 'index')->middleware('permission:obraPlanChargeDetails_display');
   Route::post('/', 'store')->middleware('permission:obraPlanChargeDetails_insert');
   Route::post('/{detailId}/charge', 'charge')->middleware('permission:obraPlanChargeDetails_charge');

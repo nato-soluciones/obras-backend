@@ -4,11 +4,14 @@ namespace App\Http\Services\Obra;
 
 use App\Models\Auxiliaries\IndexType;
 use App\Models\Cac;
+use App\Models\CurrentAccountMovementType;
+use App\Models\Income;
 use App\Models\Ipc;
 use App\Models\Obra;
 use App\Models\Obra\ObraPlanCharge;
 use App\Models\Obra\ObraPlanChargeDetail;
 use App\Models\Obra\ObraPlanChargeDetailPayment;
+use App\Services\CurrentAccountService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +30,8 @@ class ObraPlanChargeDetailService
 				throw ValidationException::withMessages(['obra_plan_charge' => 'Plan de cobro no encontrado.']);
 			}
 
+			DB::beginTransaction();
+
 			$request->merge([
 				'obra_plan_charge_id' => $obraPlanCharge->id,
 				'total_amount' => $request->installment_amount,
@@ -34,8 +39,17 @@ class ObraPlanChargeDetailService
 			]);
 
 			$obraPlanChargeDetail = ObraPlanChargeDetail::create($request->all());
+
+			// Crea el ajuste en CC si es necesario
+			if($request->type === 'ADJUSTMENT'){
+
+			}
+
+
+			DB::commit();
 			return $obraPlanChargeDetail;
 		} catch (\Exception $e) {
+			DB::rollBack();
 			Log::error("Error al crear el detalle del plan de cobro, obraId {$obraId}:" . $e->getMessage());
 			throw ValidationException::withMessages(['obra' => "Error al crear el detalle del plan de cobro, obraId {$obraId}"]);
 		}
@@ -44,6 +58,8 @@ class ObraPlanChargeDetailService
 	public function charge(Request $request, int $obraId, int $detailId)
 	{
 		try {
+			$obra = Obra::findOrFail($obraId);
+
 			// Valida que el detalle exista en la obra
 			$obraPlanChargeDetail = ObraPlanChargeDetail::with(['planCharge' => function ($q) use ($obraId) {
 				$q->where('obra_id', $obraId);
@@ -63,7 +79,6 @@ class ObraPlanChargeDetailService
 
 				$indexTypeId = $indexType->id;
 				$indexAdjustmentAmount = $this->getAdjustmentAmount($obraId, $obraPlanChargeDetail->installment_amount, $request->index_type, $request->index_period);
-				Log::info('indexAdjustmentAmount: ' . $indexAdjustmentAmount);
 			}
 
 
@@ -102,9 +117,9 @@ class ObraPlanChargeDetailService
 			// Log::info($chargeDetailUpdate);
 			$obraPlanChargeDetail->update($chargeDetailUpdate);
 
-			////////////////////////
+			////////////////////////////////////////////////
 			// Registrar el pago realizado
-			////////////////////////
+			////////////////////////////////////////////////
 			$payment = [
 				'obra_plan_charge_detail_id' => $detailId,
 				'date' => $today,
@@ -114,10 +129,72 @@ class ObraPlanChargeDetailService
 			];
 			ObraPlanChargeDetailPayment::create($payment);
 
-			// registrar el ingreso
-
+			////////////////////////////////////////////////
+			// Registra el ingreso
+			////////////////////////////////////////////////
+			$statusPayment = $chargeDetailUpdate['status'] === 'PAID' ? 'Cobro Total' : 'Cobro Parcial';
+			$income = [
+				'obra_id' => $obraId,
+				'date' => $today,
+				'amount' => $request->payment_amount,
+				'payment_concept' => $obraPlanChargeDetail->concept. ' - ('.$statusPayment.')',
+				'exchange_rate' => 0,
+				'amount_usd' => 0,
+				'amount_ars' => 0,
+				'comments' => !empty($request->payment_description) ? $request->payment_description : null,
+			];
+			if ($obra->currency === 'USD') {
+				$income['amount_usd'] = $request->payment_amount;
+			} else if ($obra->currency === 'ARS') {
+				$income['amount_ars'] = $request->payment_amount;
+			}
+			$income = Income::create($income);
+			////////////////////////////////////////////////
 			// registrar en cuenta corriente del cliente
+			////////////////////////////////////////////////
+			$CAService = app(CurrentAccountService::class);
+			$CA_Client = [
+				'project_id' => $obra->id,
+				'entity_type' => 'CLIENT',
+				'entity_id' => $obra->client_id,
+				'currency' => $obra->currency,
+			];
+			// Si es el primer pago y tiene ajuste, agrega el ajuste a la CC
+			if ($sumPayment === 0 && $indexTypeId) {
+				$movementType = CurrentAccountMovementType::select('id')
+					->where('entity_type', 'CLIENT')
+					->where('name', 'Ajustes')
+					->first();
 
+				$CA_movement = [
+					'date' => $today,
+					'movement_type_id' => $movementType->id,
+					'description' => 'Ajuste para ' . $obraPlanChargeDetail->concept,
+					'amount' => ($indexAdjustmentAmount ?? 0),
+					'reference_entity' => 'planChargeDetail',
+					'reference_id' => $obraPlanChargeDetail->id,
+					'created_by' => auth()->id()
+				];
+				$CAService->CAMovementAdd($CA_Client, $CA_movement);
+			}
+
+			// registrar el cobro en la CC
+			// Arma arrays para crear el movimiento del cliente
+			$movementType = CurrentAccountMovementType::select('id')
+			->where('entity_type', 'CLIENT')
+			->where('name', 'Ingreso')
+			->first();
+
+			$CA_movement = [
+				'date' => $today,
+				'movement_type_id' => $movementType->id,
+				'description' => ' Recibo (' . $income->receipt_number . ') - ' . $income->payment_concept,
+				'amount' => $request->payment_amount,
+				'reference_entity' => 'ingreso',
+				'reference_id' => $income->id,
+				'created_by' => auth()->id()
+			];
+			$CAService->CAMovementAdd($CA_Client, $CA_movement);
 
 			DB::commit();
 		} catch (\Exception $e) {
@@ -139,7 +216,7 @@ class ObraPlanChargeDetailService
 			$adjustmentCalc = ($periodValue / 100) * $installmentAmount;
 		} else if ($indice === 'CAC') {
 			$obra = Obra::find($obraId);
-			if(!$obra->initial_cac_index){
+			if (!$obra->initial_cac_index) {
 				throw ValidationException::withMessages(['index' => 'La obra no tiene indice inicial.']);
 			}
 
@@ -148,5 +225,4 @@ class ObraPlanChargeDetailService
 		}
 		return $adjustmentCalc;
 	}
-
 }

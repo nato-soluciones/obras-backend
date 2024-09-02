@@ -20,21 +20,48 @@ class ObraPlanChargeDetailController extends Controller
     }
 
 
-    public function index(int $obraId)
+    public function index(Request $request, int $obraId)
     {
+        $per_page = 5;
+        $payment_status = $request->input('paymentStatus');
+
         $details = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
             $query->where('obra_id', $obraId);
         })->with(['payments' => function ($q) {
             $q->select('obra_plan_charge_detail_id', 'id', 'date', 'amount', 'description')->orderBy('date', 'asc');
         }, 'indexType' => function ($q) {
             $q->select('id', 'name');
-        }])
+        }])->when($payment_status, function ($query, $payment_status) {
+            $query->where('status', $payment_status);
+        })
             ->orderBy('due_date', 'asc')
             ->orderBy('id', 'asc')
-            ->get();
+            ->paginate($per_page);
 
-            // Log::info($details);
-        return ObraPlanChargeDetailResource::collection($details);
+        // Log::info($details);
+        return response()->json([
+            'data' => ObraPlanChargeDetailResource::collection($details)->response()->getData(true)['data'],
+            'current_page' => $details->currentPage(),
+            'last_page' => $details->lastPage(),
+        ]);
+    }
+
+    public function indexTotals(int $obraId)
+    {
+        // Calcular el total financiado de total_amount
+        $total_amount = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
+            $query->where('obra_id', $obraId);
+        })->sum('total_amount');
+
+        // Calcular el total financiado de installment_amount
+        $installment_amount = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
+            $query->where('obra_id', $obraId);
+        })->sum('installment_amount');
+
+        return response()->json([
+            'total_amount' => $total_amount,
+            'installment_amount' => $installment_amount,
+        ]);
     }
 
     public function show(int $obraId, int $detailId)

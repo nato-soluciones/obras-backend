@@ -72,9 +72,9 @@ Asignar Roles a usuarios
 Crear roles
 
 -   $userRole = Role::create([
-    "name" => "OWNER",
-    "guard_name" => "api",
-    "description" => "Dueño",
+        "name" => "OWNER",
+        "guard_name" => "api",
+        "description" => "Dueño",
     ]);
 
 Asignar permisos a los roles
