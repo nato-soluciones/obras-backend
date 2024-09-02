@@ -16,7 +16,9 @@ class CurrentAccountController extends Controller
         $currentAccounts = Client::select('id', 'person_type', 'firstname', 'lastname', 'business_name')
             ->with(['currentAccounts' => function ($q) {
                 $q->select('id', 'project_id', 'entity_id', 'currency', 'balance')
-                    ->with('project:id,name')
+                    ->with(['project' => function ($query) {
+                        $query->withTrashed()->select('id', 'name');
+                    }])
                     ->orderBy('project_id', 'asc')
                     ->orderBy('id', 'asc');
             }])
@@ -31,7 +33,10 @@ class CurrentAccountController extends Controller
             ->with([
                 'client' => function ($q) {
                     $q->select('id', 'person_type', 'firstname', 'lastname', 'business_name');
-                }, 'project:id,name'
+                },
+                'project' => function ($query) {
+                    $query->withTrashed()->select('id', 'name');
+                }
             ])
             ->where('entity_type', 'CLIENT')
             ->where('entity_id', $clientId)
@@ -75,7 +80,9 @@ class CurrentAccountController extends Controller
         $currentAccounts = Contractor::select('id', 'person_type', 'first_name', 'last_name', 'business_name')
             ->with(['currentAccounts' => function ($q) {
                 $q->select('id', 'project_id', 'entity_id', 'currency', 'balance')
-                    ->with('project:id,name')
+                    ->with(['project' => function ($query) {
+                        $query->withTrashed()->select('id', 'name');
+                    }])
                     ->orderBy('project_id', 'asc')
                     ->orderBy('id', 'asc');
             }])
@@ -90,7 +97,10 @@ class CurrentAccountController extends Controller
             ->with([
                 'provider' => function ($q) {
                     $q->select('id', 'person_type', 'first_name', 'last_name', 'business_name');
-                }, 'project:id,name'
+                },
+                'project' => function ($query) {
+                    $query->withTrashed()->select('id', 'name');
+                }
             ])
             ->where('entity_type', 'PROVIDER')
             ->where('entity_id', $providerId)
