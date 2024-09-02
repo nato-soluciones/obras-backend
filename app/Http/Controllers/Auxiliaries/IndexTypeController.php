@@ -47,13 +47,4 @@ class IndexTypeController extends Controller
       return response($cac, 200);
     }
   }
-
-  /**
-   * Display the specified resource.
-   */
-  // public function show(string $code): Response
-  // {
-  //   $bank = Bank::where('code', $code)->first();
-  //   return response($bank, 200);
-  // }
 }
