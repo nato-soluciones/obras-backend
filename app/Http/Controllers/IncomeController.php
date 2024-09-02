@@ -50,9 +50,9 @@ class IncomeController extends Controller
         if (is_null($obra)) {
             return response()->json(['message' => 'Obra no encontrada'], 404);
         }
-        $clientId = $obra->budget->client_id;
-        $currency = $obra->budget->currency;
-        $amount = ($obra->budget->currency === 'ARS') ? $request->amount_ars : $request->amount_usd;
+        $clientId = $obra->client_id;
+        $currency = $obra->currency;
+        $amount = ($obra->currency === 'ARS') ? $request->amount_ars : $request->amount_usd;
 
         $request->merge(['obra_id' => $obraId]);
 
@@ -114,9 +114,9 @@ class IncomeController extends Controller
             return response()->json(['message' => 'Ingreso no encontrado'], 404);
         }
 
-        $clientId = $obra->budget->client_id;
-        $currency = $obra->budget->currency;
-        $amount = ($obra->budget->currency === 'ARS') ? $request->amount_ars : $request->amount_usd;
+        $clientId = $obra->client_id;
+        $currency = $obra->currency;
+        $amount = ($obra->currency === 'ARS') ? $request->amount_ars : $request->amount_usd;
 
         try {
             $income->update($request->all());
@@ -153,8 +153,8 @@ class IncomeController extends Controller
             return response()->json(['message' => 'Obra no encontrada'], 404);
         }
 
-        $clientId = $obra->budget->client_id;
-        $currency = $obra->budget->currency;
+        $clientId = $obra->client_id;
+        $currency = $obra->currency;
         try {
             $income = Income::findOrFail($incomeId);
 

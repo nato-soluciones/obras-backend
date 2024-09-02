@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Obra\ObraPlanCharge;
 
 class Obra extends Model
 {
@@ -85,5 +86,9 @@ class Obra extends Model
     public function stages()
     {
         return $this->hasMany(ObraStage::class);
+    }
+
+    public function planChanges(){
+        return $this->hasMany(ObraPlanCharge::class);
     }
 }
