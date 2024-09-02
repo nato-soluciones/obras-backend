@@ -20,7 +20,10 @@ class AppSettingsSeeder extends Seeder
 
         // Insertar datos en la tabla contractor_industries
         foreach ($settings as $setting) {
-            AppSetting::firstOrCreate($setting);
+            $exist = AppSetting::where('module', $setting['module'])->where('key', $setting['key'])->first();
+            if (!$exist) {
+                AppSetting::firstOrCreate($setting);
+            }
         }
     }
 }
