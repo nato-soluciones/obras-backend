@@ -31,18 +31,25 @@ class ObraPlanChargeDetailService
 				throw ValidationException::withMessages(['obra_plan_charge' => 'Plan de cobro no encontrado.']);
 			}
 
-			DB::beginTransaction();
+			$today = Carbon::now()->format('Y-m-d');
 
-			$request->merge([
+			DB::beginTransaction();
+			$dataDetail = [
 				'obra_plan_charge_id' => $obraPlanCharge->id,
 				'total_amount' => $request->installment_amount,
 				'status' => 'PENDING',
-			]);
+			];
 
+			if ($request->type === 'ADJUSTMENT' && $request->installment_amount < 0) {
+				$dataDetail['status'] = 'PAID';
+				$dataDetail['full_payment_date'] = $today;
+			}
+
+			$request->merge($dataDetail);
 			$obraPlanChargeDetail = ObraPlanChargeDetail::create($request->all());
 
 			// Crea el ajuste en CC si es necesario
-			if($request->type === 'ADJUSTMENT'){
+			if ($request->type === 'ADJUSTMENT') {
 				$CAService = app(CurrentAccountService::class);
 				$CA_Client = [
 					'project_id' => $obra->id,
@@ -50,24 +57,29 @@ class ObraPlanChargeDetailService
 					'entity_id' => $obra->client_id,
 					'currency' => $obra->currency,
 				];
-				if($request->installment_amount > 0){
+				if ($request->installment_amount > 0) {
 					$movementType = CurrentAccountMovementType::select('id')
-					->where('entity_type', 'CLIENT')
-					->where('name', 'Ajustes')
-					->first();
-
-					$CA_movement = [
-						'date' => Carbon::now()->format('Y-m-d'),
-						'movement_type_id' => $movementType->id,
-						'description' => $obraPlanChargeDetail->concept,
-						'amount' => $obraPlanChargeDetail->installment_amount,
-						'observation' => $obraPlanChargeDetail->description,
-						'reference_entity' => 'planChargeDetail',
-						'reference_id' => $obraPlanChargeDetail->id,
-						'created_by' => auth()->id()
-					];
-					$CAService->CAMovementAdd($CA_Client, $CA_movement);
+						->where('entity_type', 'CLIENT')
+						->where('name', 'Ajustes')
+						->first();
+				} else {
+					$movementType = CurrentAccountMovementType::select('id')
+						->where('entity_type', 'CLIENT')
+						->where('name', 'Descuentos o Bonificaciones')
+						->first();
 				}
+
+				$CA_movement = [
+					'date' => $today,
+					'movement_type_id' => $movementType->id,
+					'description' => $obraPlanChargeDetail->concept,
+					'amount' => abs($obraPlanChargeDetail->installment_amount),
+					'observation' => $obraPlanChargeDetail->description,
+					'reference_entity' => 'planChargeDetail',
+					'reference_id' => $obraPlanChargeDetail->id,
+					'created_by' => auth()->id()
+				];
+				$CAService->CAMovementAdd($CA_Client, $CA_movement);
 			}
 
 
@@ -162,7 +174,7 @@ class ObraPlanChargeDetailService
 				'obra_id' => $obraId,
 				'date' => $today,
 				'amount' => $request->payment_amount,
-				'payment_concept' => $obraPlanChargeDetail->concept. ' - ('.$statusPayment.')',
+				'payment_concept' => $obraPlanChargeDetail->concept . ' - (' . $statusPayment . ')',
 				'exchange_rate' => 0,
 				'amount_usd' => 0,
 				'amount_ars' => 0,
@@ -206,9 +218,9 @@ class ObraPlanChargeDetailService
 			// registrar el cobro en la CC
 			// Arma arrays para crear el movimiento del cliente
 			$movementType = CurrentAccountMovementType::select('id')
-			->where('entity_type', 'CLIENT')
-			->where('name', 'Ingreso')
-			->first();
+				->where('entity_type', 'CLIENT')
+				->where('name', 'Ingreso')
+				->first();
 
 			$CA_movement = [
 				'date' => $today,

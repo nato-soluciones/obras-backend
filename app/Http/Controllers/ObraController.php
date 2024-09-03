@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Additional;
 use App\Models\Budget;
 use App\Models\CurrentAccountMovementType;
 use Illuminate\Http\Request;
@@ -9,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\Obra;
+use App\Models\Obra\ObraPlanChargeDetail;
 use App\Models\ObraStage;
 use App\Services\CurrentAccountService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -33,6 +35,24 @@ class ObraController extends Controller
             $obra->setAttribute('active_stage', $activeStage);
         });
         return response($obras, 200);
+    }
+
+    public function getGeneralViewTotals(int $obraId)
+    {
+        $additionalTotals = Additional::where('obra_id', $obraId)
+            ->selectRaw('SUM(total_cost) as total_cost_sum, SUM(total) as total_sum')
+            ->first();
+
+        $PCDetailTotal = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
+            $query->where('obra_id', $obraId);
+        })->where('type', 'ADJUSTMENT')->sum('total_amount');
+
+        $response = [
+            'additional_total_costs' => $additionalTotals->total_cost_sum,
+            'additional_totals' => $additionalTotals->total_sum,
+            'plan_charge_adjustment_totals' => $PCDetailTotal,
+        ];
+        return response($response, 200);
     }
 
     /**
@@ -224,7 +244,7 @@ class ObraController extends Controller
 
         // Recupera los proveedores y el monto presupuestado de cada uno
         $resultBudget = collect(); // Inicializas una colección vacía
-        if($obra->budget){
+        if ($obra->budget) {
             $resultBudget = $obra->budget->categories()
                 ->join('budgets_categories_activities as bca', 'budgets_categories.id', '=', 'bca.budget_category_id')
                 ->join('contractors as c', 'bca.provider_id', '=', 'c.id')

@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:obras_list');
   Route::get('/{id}', 'show')->middleware('permission:obras_display');
+  Route::get('/{id}/general-view-totals', 'getGeneralViewTotals')->middleware('permission:obras_display');
   Route::post('/', 'store')->middleware('permission:obras_insert');
   Route::post('/{id}', 'update')->middleware('permission:obras_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
