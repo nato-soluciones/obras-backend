@@ -112,20 +112,42 @@ class CompanyCostController extends Controller
         }
     }
 
-    public function getChartData()
+    public function getChartData(Request $request)
     {
-        $companyCosts = CompanyCost::select(DB::raw('SUM(amount) as total_amount'), 'category_id', 'period')
-            ->with('category')
-            ->groupBy('category_id', 'period')
-            ->orderBy('period', 'desc')
-            ->whereIn('period', function ($query) {
-                $query->select('period')
-                    ->from('company_costs')
-                    ->groupBy('period')
-                    ->orderBy('period', 'desc')
-                    ->limit(3);
-            })
-            ->get();
+        $cantPeriods = $request->input('cantPeriods', 4);
+        $costGroup = $request->input('costGroup', 'creation_date');
+
+
+        if ($costGroup === 'creation_date') {
+            $companyCosts = CompanyCost::select(DB::raw('SUM(amount) as total_amount'), 'category_id', 'period')
+                ->with('category')
+                ->groupBy('category_id', 'period')
+                ->orderBy('period', 'desc')
+                ->whereIn('period', function ($query) use ($cantPeriods) {
+                    $query->select('period')
+                        ->from('company_costs')
+                        ->groupBy('period')
+                        ->orderBy('period', 'desc')
+                        ->limit($cantPeriods);
+                })
+                ->get();
+
+        } else if ($costGroup === 'payment_date') {
+            $companyCosts = CompanyCost::select(DB::raw('SUM(amount) as total_amount'), 'category_id', DB::raw("TO_CHAR(payment_date, 'YYYY-MM') as period"))
+                ->with('category')
+                ->groupBy('category_id', DB::raw("TO_CHAR(payment_date, 'YYYY-MM')"))
+                ->orderBy(DB::raw("TO_CHAR(payment_date, 'YYYY-MM')"), 'desc')
+                ->whereIn(DB::raw("TO_CHAR(payment_date, 'YYYY-MM')"), function ($query) use ($cantPeriods) {
+                    $query->select(DB::raw("TO_CHAR(payment_date, 'YYYY-MM')"))
+                        ->from('company_costs')
+                        ->groupBy(DB::raw("TO_CHAR(payment_date, 'YYYY-MM')"))
+                        ->orderBy(DB::raw("TO_CHAR(payment_date, 'YYYY-MM')"), 'desc')
+                        ->limit($cantPeriods);
+                })
+                ->get();
+
+        }
+
 
         $data = $companyCosts->map(function ($cost) {
             return [
@@ -144,7 +166,7 @@ class CompanyCostController extends Controller
             ->select('period')
             ->orderBy('period', 'desc')
             ->get();
-        
+
         $companyCosts = $companyCosts->map(function ($cost) {
             return $cost->period;
         });
