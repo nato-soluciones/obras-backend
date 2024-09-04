@@ -955,6 +955,35 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Eliminar Costo",
             ],
         ];
+        $obra_plan_charges_permission = [
+            [
+                "name" => "obraPlanCharges_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Plan de cobros",
+            ],
+        ];
+        $obra_plan_charge_details_permission = [
+            [
+                "name" => "obraPlanChargeDetails_list",
+                "guard_name" => "api",
+                "description" => "Ver detalle del plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_insert",
+                "guard_name" => "api",
+                "description" => "Agregar detalle al plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_charge",
+                "guard_name" => "api",
+                "description" => "Cobrar detalle del plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_display",
+                "guard_name" => "api",
+                "description" => "Ver detalle del plan de cobros",
+            ]
+        ];
 
         $permissions = array_merge(
             $navbar_permissions,
@@ -989,7 +1018,9 @@ class RolesAndPermissionsSeeder extends Seeder
             $exchangeRates_permissions,
             $notes_permission,
             $fleets_permission,
-            $company_costs_permission
+            $company_costs_permission,
+            $obra_plan_charges_permission,
+            $obra_plan_charge_details_permission
         );
 
         foreach ($permissions as $permission) {
