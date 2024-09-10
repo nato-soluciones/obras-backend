@@ -43,14 +43,18 @@ class ObraController extends Controller
             ->selectRaw('SUM(total_cost) as total_cost_sum, SUM(total) as total_sum')
             ->first();
 
-        $PCDetailTotal = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
+        $PCDetailAdjustment = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
             $query->where('obra_id', $obraId);
         })->where('type', 'ADJUSTMENT')->sum('total_amount');
+
+        $PCDetailInstallmentAdjust = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
+            $query->where('obra_id', $obraId);
+        })->where('type', 'INSTALLMENT')->sum('adjustment_amount');
 
         $response = [
             'additional_total_costs' => $additionalTotals->total_cost_sum,
             'additional_totals' => $additionalTotals->total_sum,
-            'plan_charge_adjustment_totals' => $PCDetailTotal,
+            'plan_charge_adjustment_totals' => $PCDetailAdjustment + $PCDetailInstallmentAdjust,
         ];
         return response($response, 200);
     }
