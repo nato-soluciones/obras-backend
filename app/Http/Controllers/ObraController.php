@@ -35,7 +35,7 @@ class ObraController extends Controller
                 ->whereDate('end_date', '>=', date('Y-m-d'))
                 ->first();
 
-            $obra->active_stage = $activeStage;
+            $obra->setAttribute('active_stage', $activeStage);
         });
         return response($obras, 200);
     }
