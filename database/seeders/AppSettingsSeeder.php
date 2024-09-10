@@ -14,7 +14,8 @@ class AppSettingsSeeder extends Seeder
     {
         $settings = [
             ['module' => 'TOOLS', 'key' => 'SHOW_IMAGE_TABLE', 'value' => 'false', 'type' => 'boolean', 'description' => 'Muestra o no la imagen en la tabla'],
-            ['module' => 'FLEET', 'key' => 'SHOW_IMAGE_TABLE', 'value' => 'false', 'type' => 'boolean', 'description' => 'Muestra o no la imagen en la tabla'],
+            ['module' => 'FLEETS', 'key' => 'SHOW_IMAGE_TABLE', 'value' => 'false', 'type' => 'boolean', 'description' => 'Muestra o no la imagen en la tabla'],
+            ['module' => 'OBRAS', 'key' => 'STAGE_TO_OVERCOME', 'value' => '5', 'type' => 'number', 'description' => 'Indica cuantos días antes del vencimiento una etapa se marca como por vencer'],
         ];
 
         // Insertar datos en la tabla contractor_industries
