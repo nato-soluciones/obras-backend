@@ -35,7 +35,7 @@ class ObraController extends Controller
                 ->whereDate('end_date', '>=', date('Y-m-d'))
                 ->first();
 
-            $obra->active_stage = $activeStage;
+            $obra->setAttribute('active_stage', $activeStage);
         });
         return response($obras, 200);
     }
@@ -245,7 +245,7 @@ class ObraController extends Controller
         // Recupera los proveedor y el monto pagado de cada uno
         $resultOutcomes = $obra->outcomes()
             ->where('type', 'CONTRACTORS')
-            ->selectRaw('outcomes.contractor_id, ROUND(SUM(outcomes.gross_total), 2) as paid_total')
+            ->selectRaw('outcomes.contractor_id, ROUND(SUM(outcomes.total), 2) as paid_total')
             ->groupBy('outcomes.contractor_id')
             ->get();
 
