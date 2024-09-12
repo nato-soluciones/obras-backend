@@ -43,14 +43,18 @@ class ObraController extends Controller
             ->selectRaw('SUM(total_cost) as total_cost_sum, SUM(total) as total_sum')
             ->first();
 
-        $PCDetailTotal = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
+        $PCDetailAdjustment = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
             $query->where('obra_id', $obraId);
         })->where('type', 'ADJUSTMENT')->sum('total_amount');
+
+        $PCDetailInstallmentAdjust = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {
+            $query->where('obra_id', $obraId);
+        })->where('type', 'INSTALLMENT')->sum('adjustment_amount');
 
         $response = [
             'additional_total_costs' => $additionalTotals->total_cost_sum,
             'additional_totals' => $additionalTotals->total_sum,
-            'plan_charge_adjustment_totals' => $PCDetailTotal,
+            'plan_charge_adjustment_totals' => $PCDetailAdjustment + $PCDetailInstallmentAdjust,
         ];
         return response($response, 200);
     }
@@ -79,6 +83,7 @@ class ObraController extends Controller
 
                 $obraData['covered_area'] = $budget->covered_area ?? null;
                 $obraData['semi_covered_area'] = $budget->semi_covered_area ?? null;
+                $obraData['uncovered_area'] = $budget->uncovered_area ?? null;
             }
 
             $obra = Obra::create($obraData);
@@ -232,6 +237,22 @@ class ObraController extends Controller
         try {
             $obra = Obra::findOrFail($id);
             $obra->delete();
+            return response(['message' => 'Obra eliminada correctamente'], 204);
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Obra no encontrada'], 404);
+        }
+    }
+
+    public function imageDestroy(int $id): Response
+    {
+        try {
+            $obra = Obra::findOrFail($id);
+            if ($obra->image) {
+                Storage::delete('public/uploads/obras/' . $obra->id. '/' . basename($obra->image));
+                $obra->image = null;
+                $obra->save();
+            }
+
             return response(['message' => 'Obra eliminada correctamente'], 204);
         } catch (ModelNotFoundException $e) {
             return response(['error' => 'Obra no encontrada'], 404);

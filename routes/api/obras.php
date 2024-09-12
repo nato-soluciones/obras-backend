@@ -29,6 +29,7 @@ Route::prefix('obras')->middleware('auth:sanctum')->controller(ObraController::c
   Route::post('/', 'store')->middleware('permission:obras_insert');
   Route::post('/{id}', 'update')->middleware('permission:obras_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:obras_delete');
+  Route::delete('/{id}/image', 'imageDestroy')->middleware('permission:obras_delete');
 
   Route::get('/{id}/contractors', 'contractors')->middleware('permission:obraContractors_list');
 });

@@ -22,6 +22,7 @@ class Obra extends Model
         'client_id',
         'covered_area',
         'semi_covered_area',
+        'uncovered_area',
         'currency',
         'total',
         'total_cost',
