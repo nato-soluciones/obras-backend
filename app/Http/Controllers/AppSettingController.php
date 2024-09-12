@@ -28,7 +28,7 @@ class AppSettingController extends Controller
 
         $settingsArray = [];
         foreach ($settings as $setting) {
-            Log::debug($setting);
+            // Log::debug($setting);
             $settingsArray[$setting->key] = $this->appSettingService->transformValueByType($setting->value, $setting->type);
         }
 

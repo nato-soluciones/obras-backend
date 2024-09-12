@@ -83,6 +83,7 @@ class ObraController extends Controller
 
                 $obraData['covered_area'] = $budget->covered_area ?? null;
                 $obraData['semi_covered_area'] = $budget->semi_covered_area ?? null;
+                $obraData['uncovered_area'] = $budget->uncovered_area ?? null;
             }
 
             $obra = Obra::create($obraData);
@@ -236,6 +237,22 @@ class ObraController extends Controller
         try {
             $obra = Obra::findOrFail($id);
             $obra->delete();
+            return response(['message' => 'Obra eliminada correctamente'], 204);
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Obra no encontrada'], 404);
+        }
+    }
+
+    public function imageDestroy(int $id): Response
+    {
+        try {
+            $obra = Obra::findOrFail($id);
+            if ($obra->image) {
+                Storage::delete('public/uploads/obras/' . $obra->id. '/' . basename($obra->image));
+                $obra->image = null;
+                $obra->save();
+            }
+
             return response(['message' => 'Obra eliminada correctamente'], 204);
         } catch (ModelNotFoundException $e) {
             return response(['error' => 'Obra no encontrada'], 404);
