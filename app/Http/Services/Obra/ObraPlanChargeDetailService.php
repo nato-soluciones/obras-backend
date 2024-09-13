@@ -72,7 +72,7 @@ class ObraPlanChargeDetailService
 				$CA_movement = [
 					'date' => $today,
 					'movement_type_id' => $movementType->id,
-					'description' => $obraPlanChargeDetail->concept,
+					'description' => 'Plan de cobro - '.$obraPlanChargeDetail->concept,
 					'amount' => abs($obraPlanChargeDetail->installment_amount),
 					'observation' => $obraPlanChargeDetail->description,
 					'reference_entity' => 'planChargeDetail',
@@ -206,7 +206,7 @@ class ObraPlanChargeDetailService
 				$CA_movement = [
 					'date' => $today,
 					'movement_type_id' => $movementType->id,
-					'description' => 'Ajuste para ' . $obraPlanChargeDetail->concept,
+					'description' => 'Plan de cobro, ajuste para ' . $obraPlanChargeDetail->concept,
 					'amount' => ($indexAdjustmentAmount ?? 0),
 					'reference_entity' => 'planChargeDetail',
 					'reference_id' => $obraPlanChargeDetail->id,
