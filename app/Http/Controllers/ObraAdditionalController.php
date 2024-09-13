@@ -61,7 +61,7 @@ class ObraAdditionalController extends Controller
             $CA_movement_provider = [
                 'date' => Date('Y-m-d'),
                 'movement_type_id' => $movementType->id,
-                'description' => 'Adicional - Obra ' . $obra->name,
+                'description' => 'Ajuste/Adicional - Obra ' . $obra->name,
                 'amount' => $provider['additional_cost'],
                 'reference_entity' => 'adicional',
                 'reference_id' => $additional['id'],
@@ -85,7 +85,7 @@ class ObraAdditionalController extends Controller
         $CA_movement_client = [
             'date' => Date('Y-m-d'),
             'movement_type_id' => $movementType->id,
-            'description' => 'Adicional - Obra ' . $obra->name,
+            'description' => 'Ajuste/Adicional - Obra ' . $obra->name,
             'amount' => $additional['total'],
             'reference_entity' => 'adicional',
             'reference_id' => $additional['id'],
@@ -94,7 +94,7 @@ class ObraAdditionalController extends Controller
 
         $CAService->CAMovementAdd($CA_Client, $CA_movement_client);
 
-        return response(['message' => 'Adicional creado correctamente', 'data' => $additional], 201);
+        return response(['message' => 'Ajuste/Adicional creado correctamente', 'data' => $additional], 201);
     }
     /**
      * Get an additional by id
@@ -197,7 +197,7 @@ class ObraAdditionalController extends Controller
         
         $CAService->CAMovementUpdateByReference($CAData, $CA_movement);
 
-        return response(['message' => 'Adicional modificado correctamente'], 201);
+        return response(['message' => 'Ajuste/Adicional modificado correctamente'], 201);
     }
 
     public function destroy(int $obraId, int $additionalId): Response
