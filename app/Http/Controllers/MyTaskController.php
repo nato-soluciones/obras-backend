@@ -44,7 +44,7 @@ class MyTaskController extends Controller
 
     public function myTasksInObra(int $obraId)
     {
-        $user_id = 1; //auth()->id();
+        $user_id = auth()->id();
 
         $tasks = ObraStageSubStageTask::select(
             'obra_stage_sub_stage_tasks.*',
