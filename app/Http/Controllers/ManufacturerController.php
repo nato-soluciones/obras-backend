@@ -17,7 +17,9 @@ class ManufacturerController extends Controller
      */
     public function index(): Response
     {
-        $manufacturers = Manufacturer::with('category')->get();
+        $manufacturers = Manufacturer::with('category')
+            ->orderBy('name', 'asc')
+            ->get();
         return response($manufacturers, 200);
     }
 
@@ -34,12 +36,12 @@ class ManufacturerController extends Controller
         $manufacturer = Manufacturer::create($request->all());
 
         if ($image) {
-            $directory = 'public/uploads/manufacturers/'.$manufacturer->id;
+            $directory = 'public/uploads/manufacturers/' . $manufacturer->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $manufacturer->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $manufacturer->save();
@@ -73,12 +75,12 @@ class ManufacturerController extends Controller
         $image = $request->file('image');
 
         if ($image) {
-            $directory = 'public/uploads/manufacturers/'.$manufacturer->id;
+            $directory = 'public/uploads/manufacturers/' . $manufacturer->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $manufacturer->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
 
@@ -101,4 +103,3 @@ class ManufacturerController extends Controller
         return response(['message' => 'Manufacturer deleted'], 204);
     }
 }
-
