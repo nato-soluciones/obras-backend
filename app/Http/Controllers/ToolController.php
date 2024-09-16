@@ -20,7 +20,9 @@ class ToolController extends Controller
      */
     public function index(): Response
     {
-        $tools = Tool::with(['category', 'last_location'])->get();
+        $tools = Tool::with(['category', 'last_location'])
+            ->orderBy('name', 'asc')
+            ->get();
         return response($tools, 200);
     }
 
@@ -37,12 +39,12 @@ class ToolController extends Controller
         $tool = Tool::create($request->all());
 
         if ($image) {
-            $directory = 'public/uploads/tools/'.$tool->id;
+            $directory = 'public/uploads/tools/' . $tool->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $tool->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $tool->save();
@@ -58,7 +60,7 @@ class ToolController extends Controller
      */
     public function show(int $id): Response
     {
-        $tool = Tool::with(['locations' => function($query){
+        $tool = Tool::with(['locations' => function ($query) {
             $query->orderBy('date', 'desc');
         }])->find($id);
         return response($tool, 200);
@@ -74,17 +76,17 @@ class ToolController extends Controller
     public function update(Request $request, int $id): Response
     {
         $tool = Tool::find($id);
-        
+
         $new_image = $request->file('new_image');
         $tool->update($request->all());
 
         if ($new_image) {
-            $directory = 'public/uploads/tools/'.$tool->id;
+            $directory = 'public/uploads/tools/' . $tool->id;
             $imageName = 'image.' . $new_image->extension();
             $imagePath = Storage::putFileAs($directory, $new_image, $imageName, 'public');
             $tool->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $tool->save();

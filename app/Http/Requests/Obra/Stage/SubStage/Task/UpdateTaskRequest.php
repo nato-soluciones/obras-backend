@@ -32,10 +32,24 @@ class UpdateTaskRequest extends FormRequest
 
         if ($this->progress_type === 'quantity') {
             $rules['max_quantity'] = ['required', 'integer', 'min:1'];
-        } elseif ($this->progress_type === 'percentage') {
-            $rules['progress'] = ['required', 'integer', 'min:0', 'max:100'];
         }
 
         return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'title.required' => 'El campo título es obligatorio',
+            'start_date.required' => 'El campo fecha de inicio es obligatorio',
+            'end_date.required' => 'El campo fecha de finalización es obligatorio',
+            'end_date.after_or_equal' => 'La fecha de finalización debe ser posterior o igual a la fecha de inicio',
+            'progress_type.required' => 'El campo tipo de progreso es obligatorio',
+            'responsible_id.required' => 'El campo responsable es obligatorio',
+            'max_quantity.required' => 'El campo cantidad máxima es obligatorio',
+            'max_quantity.integer' => 'El campo cantidad máxima debe ser un valor numérico',
+            'max_quantity.min' => 'El campo cantidad máxima debe ser mayor o igual a 1',
+            'description.string' => 'El campo descripción debe ser una cadena de texto',
+        ];
     }
 }
