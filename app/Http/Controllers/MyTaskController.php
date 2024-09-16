@@ -44,12 +44,14 @@ class MyTaskController extends Controller
 
     public function myTasksInObra(int $obraId)
     {
-        $user_id = auth()->id();
+        $user_id = 1; //auth()->id();
 
         $tasks = ObraStageSubStageTask::select(
             'obra_stage_sub_stage_tasks.*',
             'obra_stage_sub_stages.id as sub_stage_id',
-            'obra_stages.id as stage_id'
+            'obra_stage_sub_stages.name as sub_stage_name',
+            'obra_stages.id as stage_id',
+            'obra_stages.name as stage_name'
         )
             ->join('obra_stage_sub_stages', 'obra_stage_sub_stage_tasks.obra_stage_sub_stage_id', '=', 'obra_stage_sub_stages.id')
             ->join('obra_stages', 'obra_stage_sub_stages.obra_stage_id', '=', 'obra_stages.id')
@@ -58,7 +60,21 @@ class MyTaskController extends Controller
             ->withCount('taskEvents')
             ->get();
 
-        return response($tasks, 200);
+        // $groupedTasks = $tasks->groupBy(['stage_name', 'sub_stage_name']);
+        $groupedTasks = $tasks->groupBy('stage_id')->map(function ($stageTasks) {
+            return [
+                'stage_id' => $stageTasks->first()->stage_id,
+                'stage_name' => $stageTasks->first()->stage_name,
+                'sub_stages' => $stageTasks->groupBy('sub_stage_id')->map(function ($subStageTasks) {
+                    return [
+                        'sub_stage_id' => $subStageTasks->first()->sub_stage_id,
+                        'sub_stage_name' => $subStageTasks->first()->sub_stage_name,
+                        'tasks' => $subStageTasks
+                    ];
+                })->values()
+            ];
+        })->values();
+        return response($groupedTasks, 200);
     }
 
     public function bulkUpdate(Request $request, int $obraId, ObraStageSubStageTaskService $obraStageSubStageTaskService)
