@@ -131,7 +131,7 @@ Route::prefix('obras/{obraId}/stages/{stageId}/sub_stages/{subStageId}/tasks')->
   Route::get('/{taskId}', 'show')->middleware('permission:obraStageSubStageTasks_display');
   Route::post('/', 'store')->middleware('permission:obraStageSubStageTasks_insert');
   Route::post('/{taskId}', 'update')->middleware('permission:obraStageSubStageTasks_update');
-  Route::post('/{taskId}/update_progress', 'updateProgress');
+  Route::post('/{taskId}/update_progress', 'updateProgress')->middleware('permission:obraStageSubStageTasks_changeProgress');
   Route::delete('/{taskId}', 'destroy')->middleware('permission:obraStageSubStageTasks_delete');
 });
 
