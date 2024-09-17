@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Auxiliaries\IndexType;
 use App\Models\Cac;
 use App\Models\Ipc;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -31,6 +32,9 @@ class IndicesSeeder extends Seeder
             ["period" => '2024-02', "value" => 13.20],
             ["period" => '2024-03', "value" => 11.00],
             ["period" => '2024-04', "value" => 8.80],
+            ["period" => '2024-05', "value" => 4.20],
+            ["period" => '2024-06', "value" => 4.60],
+            ["period" => '2024-07', "value" => 4.00],
         ];
 
         $CAC = [
@@ -51,6 +55,17 @@ class IndicesSeeder extends Seeder
             ["period" => '2024-02', "general" => 11228.30, "materials" => 14214.40, "labour" => 6851.60],
             ["period" => '2024-03', "general" => 11669.00, "materials" => 14955.80, "labour" => 6851.60],
             ["period" => '2024-04', "general" => 12216.20, "materials" => 15226.80, "labour" => 7803.50],
+            ["period" => '2024-05', "general" => 12747.40, "materials" => 15537.50, "labour" => 8657.90],
+            ["period" => '2024-06', "general" => 13295.80, "materials" => 15811.70, "labour" => 9608.30],
+            ["period" => '2024-07', "general" => 13574.80, "materials" => 16281.00, "labour" => 9608.30],
+        ];
+
+        $IndexTypes = [
+            ['code' => 'IPC', 'name' => 'IPC'],
+            ['code' => 'CAC_GENERAL', 'name' => 'CAC - General'],
+            ['code' => 'CAC_MATERIALS', 'name' => 'CAC - Materiales'],
+            ['code' => 'CAC_LABOUR', 'name' => 'CAC - Mano de obra'],
+
         ];
 
 
@@ -69,5 +84,14 @@ class IndicesSeeder extends Seeder
                 Cac::create($row);
             }
         }
+
+        // Insertar datos en la tabla index_type
+        foreach ($IndexTypes as $row) {
+            $existingIndexType = IndexType::where('code', $row['code'])->first();
+            if (!$existingIndexType) {
+                IndexType::create($row);
+            }
+        }
+
     }
 }

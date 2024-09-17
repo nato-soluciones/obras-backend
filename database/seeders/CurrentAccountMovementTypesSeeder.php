@@ -20,6 +20,7 @@ class CurrentAccountMovementTypesSeeder extends Seeder
             ["name" => 'Otros débitos', "type" => 'DEBIT', 'active' => true, 'entity_type' => 'CLIENT', 'system_type' => false],
             ["name" => 'Otros créditos', "type" => 'CREDIT', 'active' => true, 'entity_type' => 'CLIENT', 'system_type' => false],
             ["name" => 'Intereses', "type" => 'DEBIT', 'active' => true, 'entity_type' => 'CLIENT', 'system_type' => false],
+            ["name" => 'Ajustes', "type" => 'DEBIT', 'active' => true, 'entity_type' => 'CLIENT', 'system_type' => true],
             ["name" => 'Proyecto', "type" => 'DEBIT', 'active' => true, 'entity_type' => 'CLIENT', 'system_type' => true],
             ["name" => 'Ingreso', "type" => 'CREDIT', 'active' => true, 'entity_type' => 'CLIENT', 'system_type' => true],
             ["name" => 'Egreso', "type" => 'DEBIT', 'active' => true, 'entity_type' => 'CLIENT', 'system_type' => true],

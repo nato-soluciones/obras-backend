@@ -5,33 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ObraStageTask extends Model
+class ObraStageSubStage extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title',
+        'name',
+        'progress',
         'start_date',
         'end_date',
-        'responsible_id',
-        'description',
-        'is_completed',
         'obra_stage_id',
         'created_by_id',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+    
     public function obraStage()
     {
         return $this->belongsTo(ObraStage::class);
     }
 
-    public function createdBy()
+    public function tasks()
     {
-        return $this->belongsTo(User::class, 'created_by_id');
-    }
-
-    public function responsible()
-    {
-        return $this->belongsTo(User::class, 'responsible_id');
+        return $this->hasMany(ObraStageSubStageTask::class);
     }
 }

@@ -9,6 +9,7 @@ class Document extends Model
 {
     use HasFactory;
 
+    protected $table = 'obra_documents';
     /**
      * The attributes that are mass assignable.
      *
@@ -16,7 +17,10 @@ class Document extends Model
      */
     protected $fillable = [
         'name',
+        'category_id',
         'category',
+        'storage_type',
+        'link',
         'path',
         'obra_id'
     ];

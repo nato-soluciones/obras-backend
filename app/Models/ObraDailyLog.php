@@ -18,6 +18,10 @@ class ObraDailyLog extends Model
         'obra_id',
     ];
 
+    protected $casts = [
+        'event_date' => 'datetime',
+    ];
+    
     public function obra()
     {
         return $this->belongsTo(Obra::class);

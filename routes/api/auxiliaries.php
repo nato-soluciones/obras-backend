@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auxiliaries\IndexTypeController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\CurrentAccountMovementTypeController;
 use App\Http\Controllers\MeasurementUnitController;
@@ -16,4 +17,9 @@ Route::prefix('measurement_units')->middleware('auth:sanctum')->controller(Measu
 
 Route::prefix('current_account_movement_types')->middleware('auth:sanctum')->controller(CurrentAccountMovementTypeController::class)->group(function () {
   Route::get('/', 'index');
+});
+
+Route::prefix('index_types')->middleware('auth:sanctum')->controller(IndexTypeController::class)->group(function () {
+  Route::get('/', 'index');
+  Route::get('/{indexTypeCode}/periods', 'getPeriods');
 });

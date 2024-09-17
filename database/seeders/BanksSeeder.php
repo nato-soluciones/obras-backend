@@ -12,8 +12,6 @@ class BanksSeeder extends Seeder
      */
     public function run(): void
     {
-        Bank::truncate();
-
         $banks = [
             ['code' => 'NACION_ARGENTINA', 'name' => 'Banco Nación', 'is_virtual_wallet' => false],
             ['code' => 'PROVINCIA_BUENOS_AIRES', 'name' => 'Banco Provincia de Buenos Aires', 'is_virtual_wallet' => false],

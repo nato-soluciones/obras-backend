@@ -62,168 +62,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 $existingRole->save();
             }
         }
-        
-        // ? Crea Roles Funcionales, si no existen
-        $functionalRoles = [
-            [
-                "name" => "functional_navbar_full",
-                "guard_name" => "api",
-                "description" => "Menú Completo",
-            ],
-            [
-                "name" => "functional_navbar_arquitecto",
-                "guard_name" => "api",
-                "description" => "Menú Arquitecto",
-            ],
-            [
-                "name" => "functional_obras_full",
-                "guard_name" => "api",
-                "description" => "Obras Completo",
-            ],
-            [
-                "name" => "functional_obrasDailyLogs_full",
-                "guard_name" => "api",
-                "description" => "Diario de obra Completo",
-            ],
-            [
-                "name" => "functional_obraStages_full",
-                "guard_name" => "api",
-                "description" => "Etapas de la obra Completo",
-            ],
-            [
-                "name" => "functional_obraStageTasks_full",
-                "guard_name" => "api",
-                "description" => "Tareas de las etapas de la obra Completo",
-            ],
-            [
-                "name" => "functional_obraIncomes_full",
-                "guard_name" => "api",
-                "description" => "Ingresos de la obra Completo",
-            ],
-            [
-                "name" => "functional_obraOutcomes_full",
-                "guard_name" => "api",
-                "description" => "Egresos de la obra Completo",
-            ],
-            [
-                "name" => "functional_obraMaterials_full",
-                "guard_name" => "api",
-                "description" => "Materiales de la obra Completo",
-            ],
-            [
-                "name" => "functional_obraAdditionals_full",
-                "guard_name" => "api",
-                "description" => "Adicionales de la obra Completo",
-            ],
-            [
-                "name" => "functional_obraContractors_full",
-                "guard_name" => "api",
-                "description" => "Contratistas de la obra Completo",
-            ],
-            [
-                "name" => "functional_obraDocuments_full",
-                "guard_name" => "api",
-                "description" => "Documentos de la obra Completo",
-            ],
-            [
-                "name" => "functional_contractors_full",
-                "guard_name" => "api",
-                "description" => "Contratistas Completo",
-            ],
-            [
-                "name" => "functional_providerCurrentAccounts_full",
-                "guard_name" => "api",
-                "description" => "Cuentas corrientes de proveedores Completo",
-            ],
-            [
-                "name" => "functional_providerCurrentAccountMovements_full",
-                "guard_name" => "api",
-                "description" => "Movimientos de cuentas corrientes de proveedores Completo",
-            ],
-            [
-                "name" => "functional_budgets_full",
-                "guard_name" => "api",
-                "description" => "Presupuestos Completo",
-            ],
-            [
-                "name" => "functional_clients_full",
-                "guard_name" => "api",
-                "description" => "Clientes Completo",
-            ],
-            [
-                "name" => "functional_clientCurrentAccounts_full",
-                "guard_name" => "api",
-                "description" => "Cuentas corrientes de clientes Completo",
-            ],
-            [
-                "name" => "functional_clientCurrentAccountMovements_full",
-                "guard_name" => "api",
-                "description" => "Movimientos de cuentas corrientes de clientes Completo",
-            ],
-            [
-                "name" => "functional_tools_full",
-                "guard_name" => "api",
-                "description" => "Herramientas Completo",
-            ],
-            [
-                "name" => "functional_toolLocations_full",
-                "guard_name" => "api",
-                "description" => "Ubicaciones de la herramienta Completo",
-            ],
-            [
-                "name" => "functional_manufacturing_full",
-                "guard_name" => "api",
-                "description" => "Fabricación Completo",
-            ],
-            [
-                "name" => "functional_manufacturingDocuments_full",
-                "guard_name" => "api",
-                "description" => "Fabricación documentos Completo",
-            ],
-            [
-                "name" => "functional_indexIPC_full",
-                "guard_name" => "api",
-                "description" => "indice IPC Completo",
-            ],
-            [
-                "name" => "functional_indexCAC_full",
-                "guard_name" => "api",
-                "description" => "indice CAC Completo",
-            ],
-            [
-                "name" => "functional_users_full",
-                "guard_name" => "api",
-                "description" => "Usuarios Completo",
-            ],
-            [
-                "name" => "functional_contacts_full",
-                "guard_name" => "api",
-                "description" => "Contactos Completo",
-            ],
-            [
-                "name" => "functional_calendar_full",
-                "guard_name" => "api",
-                "description" => "Calendario Completo",
-            ],
-            [
-                "name" => "functional_exchangeRates_full",
-                "guard_name" => "api",
-                "description" => "Cotizaciones Completo",
-            ],
-            [
-                "name" => "functional_notes_full",
-                "guard_name" => "api",
-                "description" => "Notas Completo",
-            ],
-            [
-                "name" => "functional_fleets_full",
-                "guard_name" => "api",
-                "description" => "Flotas Completo",
-            ],
-        ];
-        foreach ($functionalRoles as $role) {
-            Role::firstOrCreate($role);
-        }
 
         // ? Crea Permisos, si no existen
         $navbar_permissions = [
@@ -231,6 +69,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "navbar_obras",
                 "guard_name" => "api",
                 "description" => "Menú Obras",
+            ],
+            [
+                "name" => "navbar_myTasks",
+                "guard_name" => "api",
+                "description" => "Menú Mis Tareas",
             ],
             [
                 "name" => "navbar_contractors",
@@ -273,12 +116,12 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Agenda",
             ],
             [
-                "name" => "navbar_calendar",
+                "name" => "navbar_calendars",
                 "guard_name" => "api",
                 "description" => "Menú Calendario",
             ],
             [
-                "name" => "navbar_exchange_rate",
+                "name" => "navbar_exchangeRates",
                 "guard_name" => "api",
                 "description" => "Menú Cotizaciones",
             ],
@@ -291,6 +134,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "navbar_fleets",
                 "guard_name" => "api",
                 "description" => "Menú Flotas",
+            ],
+            [
+                "name" => "navbar_companies",
+                "guard_name" => "api",
+                "description" => "Menú Empresas",
             ]
         ];
         $obras_permission = [
@@ -369,31 +217,68 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver etapa",
             ],
         ];
-        $obras_stage_tasks_permission = [
+        $obras_stage_subStages_permission = [
             [
-                "name" => "obraStageTasks_list",
+                "name" => "obraStageSubStages_list",
+                "guard_name" => "api",
+                "description" => "Ver Sub-Etapas de la etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_insert",
+                "guard_name" => "api",
+                "description" => "Agregar sub-etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_update",
+                "guard_name" => "api",
+                "description" => "Modificar sub-etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar sub-etapa",
+            ],
+            [
+                "name" => "obraStageSubStages_display",
+                "guard_name" => "api",
+                "description" => "Ver sub-etapa",
+            ],
+        ];
+        $obras_stage_subStage_tasks_permission = [
+            [
+                "name" => "obraStageSubStageTasks_list",
                 "guard_name" => "api",
                 "description" => "Ver Tareas de la etapa",
             ],
             [
-                "name" => "obraStageTasks_insert",
+                "name" => "obraStageSubStageTasks_insert",
                 "guard_name" => "api",
                 "description" => "Agregar tarea",
             ],
             [
-                "name" => "obraStageTasks_update",
+                "name" => "obraStageSubStageTasks_update",
                 "guard_name" => "api",
                 "description" => "Modificar tarea",
             ],
             [
-                "name" => "obraStageTasks_delete",
+                "name" => "obraStageSubStageTasks_delete",
                 "guard_name" => "api",
                 "description" => "Eliminar tarea",
             ],
             [
-                "name" => "obraStageTasks_display",
+                "name" => "obraStageSubStageTasks_display",
                 "guard_name" => "api",
                 "description" => "Ver tarea",
+            ],
+            [
+                "name" => "obraStageSubStageTasks_changeProgress",
+                "guard_name" => "api",
+                "description" => "Actualizar avance de tarea",
+            ],
+            [
+                "name" => "obraStageSubStageTasks_listEvents",
+                "guard_name" => "api",
+                "description" => "Ver los eventos de la tarea",
             ],
         ];
         $obras_incomes_permission = [
@@ -551,6 +436,28 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "obraMaterials_display",
                 "guard_name" => "api",
                 "description" => "Ver material de la obra",
+            ],
+        ];
+        $my_tasks_permission = [
+            [
+                "name" => "myTasks_list",
+                "guard_name" => "api",
+                "description" => "Ver mis tareas de la obra",
+            ],
+            [
+                "name" => "myTasks_changeProgress",
+                "guard_name" => "api",
+                "description" => "Actualizar avance de tarea",
+            ],
+            [
+                "name" => "myTasks_listEvents",
+                "guard_name" => "api",
+                "description" => "Lista los eventos de mi tarea",
+            ],
+            [
+                "name" => "myTasks_insertEvent",
+                "guard_name" => "api",
+                "description" => "Agregar Evento a mi tarea",
             ],
         ];
         $contractors_permission = [
@@ -994,7 +901,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Nota",
             ],
         ];
-
         $fleets_permission = [
             [
                 "name" => "fleets_list",
@@ -1022,19 +928,77 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Flota",
             ],
         ];
+        $company_costs_permission = [
+            [
+                "name" => "companyCosts_list",
+                "guard_name" => "api",
+                "description" => "Ver Costos de la Empresa",
+            ],
+            [
+                "name" => "companyCosts_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Costo",
+            ],
+            [
+                "name" => "companyCosts_update",
+                "guard_name" => "api",
+                "description" => "Modificar Costo",
+            ],
+            [
+                "name" => "companyCosts_display",
+                "guard_name" => "api",
+                "description" => "Ver Costo",
+            ],
+            [
+                "name" => "companyCosts_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Costo",
+            ],
+        ];
+        $obra_plan_charges_permission = [
+            [
+                "name" => "obraPlanCharges_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Plan de cobros",
+            ],
+        ];
+        $obra_plan_charge_details_permission = [
+            [
+                "name" => "obraPlanChargeDetails_list",
+                "guard_name" => "api",
+                "description" => "Ver detalle del plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_insert",
+                "guard_name" => "api",
+                "description" => "Agregar detalle al plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_charge",
+                "guard_name" => "api",
+                "description" => "Cobrar detalle del plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_display",
+                "guard_name" => "api",
+                "description" => "Ver detalle del plan de cobros",
+            ]
+        ];
 
         $permissions = array_merge(
             $navbar_permissions,
             $obras_permission,
             $obras_dailyLog_permission,
             $obras_stages_permission,
-            $obras_stage_tasks_permission,
+            $obras_stage_subStages_permission,
+            $obras_stage_subStage_tasks_permission,
             $obras_incomes_permission,
             $obras_outcomes_permission,
             $obras_additional_permission,
             $obras_contractors_permission,
             $obras_documents_permission,
             $obras_materials_permission,
+            $my_tasks_permission,
             $contractors_permission,
             $provider_current_accounts_permission,
             $provider_current_accounts_movements_permission,
@@ -1053,7 +1017,10 @@ class RolesAndPermissionsSeeder extends Seeder
             $calendars_permissions,
             $exchangeRates_permissions,
             $notes_permission,
-            $fleets_permission
+            $fleets_permission,
+            $company_costs_permission,
+            $obra_plan_charges_permission,
+            $obra_plan_charge_details_permission
         );
 
         foreach ($permissions as $permission) {

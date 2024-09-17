@@ -15,7 +15,9 @@ class FleetController extends Controller
 {
     public function index(): Response
     {
-        $fleets = Fleet::with('last_movement', 'next_movement')->get();
+        $fleets = Fleet::with('last_movement', 'next_movement')
+            ->orderBy('purchase_date', 'desc')
+            ->get();
         return response($fleets, 200);
     }
 
@@ -26,12 +28,12 @@ class FleetController extends Controller
         $fleet = Fleet::create($request->all());
 
         if ($image) {
-            $directory = 'public/uploads/fleets/'.$fleet->id;
+            $directory = 'public/uploads/fleets/' . $fleet->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $fleet->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $fleet->save();
@@ -41,7 +43,7 @@ class FleetController extends Controller
 
     public function show(int $id): Response
     {
-        $fleet = Fleet::with(['movements' => function($q){
+        $fleet = Fleet::with(['movements' => function ($q) {
             $q->orderBy('date', 'desc')->orderBy('id', 'desc');
         }, 'documents', 'last_movement', 'next_movement'])->find($id);
         return response($fleet, 200);
@@ -55,12 +57,12 @@ class FleetController extends Controller
         $fleet->update($request->all());
 
         if ($new_image) {
-            $directory = 'public/uploads/fleets/'.$fleet->id;
+            $directory = 'public/uploads/fleets/' . $fleet->id;
             $imageName = 'image.' . $new_image->extension();
             $imagePath = Storage::putFileAs($directory, $new_image, $imageName, 'public');
             $fleet->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $fleet->save();

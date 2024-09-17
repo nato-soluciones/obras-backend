@@ -17,6 +17,7 @@ class Budget extends Model
         'expiration_date',
         'covered_area',
         'semi_covered_area',
+        'uncovered_area',
         'status',
         'currency',
         'comments',
@@ -38,7 +39,6 @@ class Budget extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'fields' => 'object',
         'total' => 'float',
         'total_cost' => 'float',
     ];

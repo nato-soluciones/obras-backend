@@ -20,6 +20,10 @@ class ObraStage extends Model
         'created_by_id',
     ];
 
+    protected $hidden = [
+        'updated_at',
+    ];
+
     public function obra()
     {
         return $this->belongsTo(Obra::class);
@@ -29,9 +33,14 @@ class ObraStage extends Model
     {
         return $this->belongsTo(User::class, 'created_by_id');
     }
-
-    public function obraStageTask()
+    
+    public function subStages()
     {
-        return $this->hasMany(ObraStageTask::class);
+        return $this->hasMany(ObraStageSubStage::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(ObraStageSubStageTask::class);
     }
 }

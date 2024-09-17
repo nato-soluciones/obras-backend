@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Requests\User\UpdatePassUserRequest;
+use App\Http\Services\NotificationSettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
@@ -38,13 +39,6 @@ class UserController extends Controller
         return response($users, 200);
     }
 
-    /**
-     * Create a user
-     * and verify the email
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function store(CreateUserRequest $request)
     {
         $data = $request->all();
@@ -88,6 +82,30 @@ class UserController extends Controller
             $user->roles->makeHidden('pivot');
         }
         return response($user, 200);
+    }
+
+    public function settings(int $userId, NotificationSettingsService $notificationSettingsService)
+    {
+        $user = User::with(['roles' => function ($q) {
+            $q->select("name", "description");
+        }])->find($userId);
+
+        if ($user) {
+            // aplana los datos del usuario
+            $user = $user->toArray();
+            $user['role_name'] = $user['roles'][0]['name'];
+            $user['role_description'] = $user['roles'][0]['description'];
+            unset($user['roles']);
+
+            $notifications = $notificationSettingsService->getUserNotificationSettings($userId);
+        }
+
+        $response = [
+            'profile' => $user,
+            'notificationsList' => $notifications
+        ];
+
+        return response($response, 200);
     }
 
     /**
@@ -159,8 +177,11 @@ class UserController extends Controller
 
         $user = Auth::user();
         if ($debug) Log::debug('User: ' . json_encode($user));
-        
-        if (strtoupper($user->getRoleNames()[0]) === 'SUPERADMIN') {
+
+        $roles = $user->getRoleNames();
+
+        // Verificar si el usuario tiene roles antes de acceder al índice 0
+        if ($roles->isNotEmpty() && strtoupper($roles[0]) === 'SUPERADMIN') {
             if ($debug) Log::debug('RETURN Superadmin');
             return response(['full'], 200);
         }

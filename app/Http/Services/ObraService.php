@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Http\Services;
 
 use App\Models\Obra;
 use App\Models\ObraStage;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\ErrorHandler\Debug;
+use Illuminate\Validation\ValidationException;
 
 class ObraService
 {
@@ -23,10 +23,10 @@ class ObraService
 
       $obra->progress = round($progress, 2);
       $obra->save();
-      return ['status' => 'success'];
+      return $obra->progress;
     } catch (\Exception $e) {
       Log::error("Error al actualizar el porcentaje de la obra {$obra->name}: {$e->getMessage()}");
-      return ['status' => 'error', 'message' => "Error al actualizar el porcentaje de la obra {$obra->name}"];
+      throw ValidationException::withMessages(['message' => "Error al actualizar el porcentaje de la obra {$obra->name}"]);
     }
   }
 }

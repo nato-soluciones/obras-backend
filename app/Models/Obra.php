@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Obra\ObraPlanCharge;
 
 class Obra extends Model
 {
@@ -21,6 +22,7 @@ class Obra extends Model
         'client_id',
         'covered_area',
         'semi_covered_area',
+        'uncovered_area',
         'currency',
         'total',
         'total_cost',
@@ -80,5 +82,14 @@ class Obra extends Model
     public function dailyLogs()
     {
         return $this->hasMany(ObraDailyLog::class);
+    }
+
+    public function stages()
+    {
+        return $this->hasMany(ObraStage::class);
+    }
+
+    public function planChanges(){
+        return $this->hasMany(ObraPlanCharge::class);
     }
 }
