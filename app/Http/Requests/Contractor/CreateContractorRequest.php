@@ -24,7 +24,7 @@ class CreateContractorRequest extends FormRequest
     {
         return [
             'zip' => ['regex:/^([0-9]{4}|[a-zA-Z]{1}[0-9]{4}[a-zA-Z]{3})$/'],
-            'phone' => ['regex:/^(|^[0-9\+]{1,20})$/'],
+            'phone' => ['nullable', 'regex:/^(|^[0-9\+]{1,20})$/'],
             'email' => 'nullable|email',
             'cuit' => ['regex:/^(|[0-9]{11})$/', Rule::unique('contractors', 'cuit')],
             'bank_account' => ['nullable', 'regex:/^[0-9\/ -]{0,22}$/'],
