@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Services\Obra\ObraStageSubStageTaskEventService;
 use App\Http\Services\ObraStageSubStageTaskService;
 use App\Models\Obra;
 use App\Models\ObraStageSubStageTask;
@@ -12,20 +11,29 @@ use Illuminate\Validation\ValidationException;
 
 class MyTaskController extends Controller
 {
-    public function obrasList()
+    public function obrasList(Request $request)
     {
         $user_id = auth()->id();
+        $tasksPending = $request->input('tasksPending');
+        $perPage = 10;
+        $page = $request->input('page', 1);
 
         $obras = Obra::distinct()
             ->join('obra_stages as os', 'obras.id', '=', 'os.obra_id')
             ->join('obra_stage_sub_stages as oss', 'os.id', '=', 'oss.obra_stage_id')
             ->join('obra_stage_sub_stage_tasks as osst', 'oss.id', '=', 'osst.obra_stage_sub_stage_id')
             ->where('osst.responsible_id', $user_id)
-            ->where('osst.is_completed', '=', false)
+            ->when($tasksPending, function ($query) use ($tasksPending) {
+                if ($tasksPending === 'WITH') {
+                    $query->where('osst.is_completed', false);
+                } elseif ($tasksPending === 'WITHOUT') {
+                    $query->where('osst.is_completed', true);
+                }
+            })
             ->select('obras.id', 'obras.name', 'obras.image', 'obras.address', 'obras.phone', 'obras.start_date', 'obras.end_date', 'obras.status', 'obras.progress')
             ->get();
 
-        $obrasConTareasPendientes = $obras->map(function ($obra) use ($user_id) {
+        $obrasConTareasPendientes = $obras->map(function ($obra) use ($user_id, $tasksPending) {
             $tareasPendientesCount = ObraStageSubStageTask::whereHas('obraStageSubStage.obraStage', function ($query) use ($obra) {
                 $query->where('obra_id', $obra->id);
             })
@@ -33,13 +41,28 @@ class MyTaskController extends Controller
                 ->where('responsible_id', $user_id)
                 ->count();
 
+            if ($tasksPending === 'WITHOUT' && $tareasPendientesCount > 0) {
+                return null;
+            }
             // Agrega el conteo de tareas pendientes a cada obra
             $obra->tasks_pending = $tareasPendientesCount;
 
             return $obra;
-        });
+        })->filter()->values(); // Elimina las entradas nulas del resultado
 
-        return response($obrasConTareasPendientes, 200);
+        // Paginar manualmente la colección filtrada
+        $total = $obrasConTareasPendientes->count();
+        $startingPoint = ($page - 1) * $perPage;
+        $itemsForCurrentPage = $obrasConTareasPendientes->slice($startingPoint, $perPage)->values();
+
+        // Crear la estructura de paginación manualmente
+        $paginatedData = [
+            'data' => $itemsForCurrentPage,
+            'current_page' => intval($page),
+            'last_page' => ceil($total / $perPage),
+        ];
+
+        return response($paginatedData, 200);
     }
 
     public function myTasksInObra(int $obraId)
