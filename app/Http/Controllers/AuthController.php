@@ -13,14 +13,15 @@ class AuthController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string'
         ]);
-
+        
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'The provided credentials are incorrect.'
             ], 401);
         }
-
+        
         $user = Auth::user();
+        /** @var Illuminate\Foundation\Auth\User $user */
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
