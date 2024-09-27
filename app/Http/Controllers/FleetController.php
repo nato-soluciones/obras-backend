@@ -17,13 +17,21 @@ class FleetController extends Controller
     {
         $perPage = 20;
         $status = $request->input('status', 'ALL');
-        $query = Fleet::with('last_movement', 'next_movement')
-            ->orderBy('purchase_date', 'desc');
-        if ($status !== 'ALL') {
-            $query->where('status', $status);
-        }
-        $fleets = $query->paginate($perPage);
-        return response($fleets, 200);
+
+        $fleets = Fleet::with('last_movement', 'next_movement')
+            ->when($status !== 'ALL', function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->orderBy('purchase_date', 'desc')
+            ->paginate($perPage);
+
+        $response = [
+            'data' => $fleets->items(),
+            'current_page' => $fleets->currentPage(),
+            'last_page' => $fleets->lastPage(),
+            'total' => $fleets->total(),
+        ];
+        return response($response, 200);
     }
 
 

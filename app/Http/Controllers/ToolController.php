@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
-
 use App\Models\Tool;
-use App\Models\ToolCategory;
-
 use App\Http\Requests\CreateToolRequest;
 
 class ToolController extends Controller
@@ -28,7 +25,14 @@ class ToolController extends Controller
             $query->where('status', $status);
         }
         $tools = $query->paginate($perPage);
-        return response($tools, 200);
+
+        $response = [
+            'data' => $tools->items(),
+            'current_page' => $tools->currentPage(),
+            'last_page' => $tools->lastPage(),
+            'total' => $tools->total(),
+        ];
+        return response($response, 200);
     }
 
     /**
