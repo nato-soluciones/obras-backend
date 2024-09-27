@@ -18,11 +18,16 @@ class ToolController extends Controller
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $tools = Tool::with(['category', 'last_location'])
-            ->orderBy('name', 'asc')
-            ->get();
+        $perPage = 20;
+        $status = $request->input('status', 'ALL');
+        $query = Tool::with(['category', 'last_location'])
+            ->orderBy('name', 'asc');
+        if ($status !== 'ALL') {
+            $query->where('status', $status);
+        }
+        $tools = $query->paginate($perPage);
         return response($tools, 200);
     }
 
