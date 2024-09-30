@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
-
 use App\Models\Tool;
-use App\Models\ToolCategory;
-
 use App\Http\Requests\CreateToolRequest;
 
 class ToolController extends Controller
@@ -18,12 +15,24 @@ class ToolController extends Controller
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $tools = Tool::with(['category', 'last_location'])
-            ->orderBy('name', 'asc')
-            ->get();
-        return response($tools, 200);
+        $perPage = 20;
+        $status = $request->input('status', 'ALL');
+        $query = Tool::with(['category', 'last_location'])
+            ->orderBy('name', 'asc');
+        if ($status !== 'ALL') {
+            $query->where('status', $status);
+        }
+        $tools = $query->paginate($perPage);
+
+        $response = [
+            'data' => $tools->items(),
+            'current_page' => $tools->currentPage(),
+            'last_page' => $tools->lastPage(),
+            'total' => $tools->total(),
+        ];
+        return response($response, 200);
     }
 
     /**

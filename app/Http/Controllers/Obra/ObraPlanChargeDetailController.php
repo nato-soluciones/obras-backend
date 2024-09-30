@@ -22,7 +22,7 @@ class ObraPlanChargeDetailController extends Controller
 
     public function index(Request $request, int $obraId)
     {
-        $per_page = 10;
+        $per_page = 20;
         $payment_status = $request->input('paymentStatus');
 
         $details = ObraPlanChargeDetail::whereHas('planCharge', function ($query) use ($obraId) {

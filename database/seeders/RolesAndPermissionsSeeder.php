@@ -116,11 +116,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Agenda",
             ],
             [
-                "name" => "navbar_calendars",
-                "guard_name" => "api",
-                "description" => "Menú Calendario",
-            ],
-            [
                 "name" => "navbar_exchangeRates",
                 "guard_name" => "api",
                 "description" => "Menú Cotizaciones",
@@ -860,13 +855,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Contacto",
             ],
         ];
-        $calendars_permissions = [
-            [
-                "name" => "calendars_list",
-                "guard_name" => "api",
-                "description" => "Ver Calendario",
-            ],
-        ];
         $exchangeRates_permissions = [
             [
                 "name" => "exchangeRates_list",
@@ -1014,7 +1002,6 @@ class RolesAndPermissionsSeeder extends Seeder
             $index_cac_permission,
             $users_permission,
             $contacts_permission,
-            $calendars_permissions,
             $exchangeRates_permissions,
             $notes_permission,
             $fleets_permission,
