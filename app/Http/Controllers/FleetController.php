@@ -13,13 +13,27 @@ use App\Http\Requests\Fleet\UpdateFleetRequest;
 
 class FleetController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $perPage = 20;
+        $status = $request->input('status', 'ALL');
+
         $fleets = Fleet::with('last_movement', 'next_movement')
+            ->when($status !== 'ALL', function ($query, $status) {
+                $query->where('status', $status);
+            })
             ->orderBy('purchase_date', 'desc')
-            ->get();
-        return response($fleets, 200);
+            ->paginate($perPage);
+
+        $response = [
+            'data' => $fleets->items(),
+            'current_page' => $fleets->currentPage(),
+            'last_page' => $fleets->lastPage(),
+            'total' => $fleets->total(),
+        ];
+        return response($response, 200);
     }
+
 
     public function store(CreateFleetRequest $request): Response
     {
