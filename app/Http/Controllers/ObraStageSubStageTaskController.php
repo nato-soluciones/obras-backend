@@ -28,18 +28,6 @@ class ObraStageSubStageTaskController extends Controller
         $this->obraStageSubStageTaskService = $obraStageSubStageTaskService;
     }
 
-    // public function index(Request $request, int $obraId, int $stageId)
-    // {
-    //     $obraStageTasks = ObraStageSubStageTask::with(['responsible' => function ($query) {
-    //         $query->select('id', 'firstname', 'lastname', 'deleted_at')
-    //             ->withTrashed();
-    //     }])->where('obra_stage_id', $stageId)
-    //         ->orderBy('start_date', 'asc')
-    //         ->orderBy('id', 'asc')
-    //         ->get();
-    //     return response($obraStageTasks, 200);
-    // }
-
     public function store(StoreTaskRequest $request, int $obraId, int $stageId, int $subStageId)
     {
         try {

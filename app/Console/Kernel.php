@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('app:example-command')->everyFiveMinutes();
+        $schedule->command('app:example-command')->everyMinute();
     }
 
     /**

@@ -71,6 +71,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Obras",
             ],
             [
+                "name" => "navbar_myTasks",
+                "guard_name" => "api",
+                "description" => "Menú Mis Tareas",
+            ],
+            [
                 "name" => "navbar_contractors",
                 "guard_name" => "api",
                 "description" => "Menú Contratistas",
@@ -111,12 +116,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Agenda",
             ],
             [
-                "name" => "navbar_calendar",
-                "guard_name" => "api",
-                "description" => "Menú Calendario",
-            ],
-            [
-                "name" => "navbar_exchange_rate",
+                "name" => "navbar_exchangeRates",
                 "guard_name" => "api",
                 "description" => "Menú Cotizaciones",
             ],
@@ -129,6 +129,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "navbar_fleets",
                 "guard_name" => "api",
                 "description" => "Menú Flotas",
+            ],
+            [
+                "name" => "navbar_companies",
+                "guard_name" => "api",
+                "description" => "Menú Empresas",
             ]
         ];
         $obras_permission = [
@@ -234,7 +239,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver sub-etapa",
             ],
         ];
-
         $obras_stage_subStage_tasks_permission = [
             [
                 "name" => "obraStageSubStageTasks_list",
@@ -265,6 +269,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "obraStageSubStageTasks_changeProgress",
                 "guard_name" => "api",
                 "description" => "Actualizar avance de tarea",
+            ],
+            [
+                "name" => "obraStageSubStageTasks_listEvents",
+                "guard_name" => "api",
+                "description" => "Ver los eventos de la tarea",
             ],
         ];
         $obras_incomes_permission = [
@@ -422,6 +431,28 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "obraMaterials_display",
                 "guard_name" => "api",
                 "description" => "Ver material de la obra",
+            ],
+        ];
+        $my_tasks_permission = [
+            [
+                "name" => "myTasks_list",
+                "guard_name" => "api",
+                "description" => "Ver mis tareas de la obra",
+            ],
+            [
+                "name" => "myTasks_changeProgress",
+                "guard_name" => "api",
+                "description" => "Actualizar avance de tarea",
+            ],
+            [
+                "name" => "myTasks_listEvents",
+                "guard_name" => "api",
+                "description" => "Lista los eventos de mi tarea",
+            ],
+            [
+                "name" => "myTasks_insertEvent",
+                "guard_name" => "api",
+                "description" => "Agregar Evento a mi tarea",
             ],
         ];
         $contractors_permission = [
@@ -824,13 +855,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Contacto",
             ],
         ];
-        $calendars_permissions = [
-            [
-                "name" => "calendars_list",
-                "guard_name" => "api",
-                "description" => "Ver Calendario",
-            ],
-        ];
         $exchangeRates_permissions = [
             [
                 "name" => "exchangeRates_list",
@@ -865,7 +889,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Nota",
             ],
         ];
-
         $fleets_permission = [
             [
                 "name" => "fleets_list",
@@ -893,6 +916,62 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Flota",
             ],
         ];
+        $company_costs_permission = [
+            [
+                "name" => "companyCosts_list",
+                "guard_name" => "api",
+                "description" => "Ver Costos de la Empresa",
+            ],
+            [
+                "name" => "companyCosts_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Costo",
+            ],
+            [
+                "name" => "companyCosts_update",
+                "guard_name" => "api",
+                "description" => "Modificar Costo",
+            ],
+            [
+                "name" => "companyCosts_display",
+                "guard_name" => "api",
+                "description" => "Ver Costo",
+            ],
+            [
+                "name" => "companyCosts_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Costo",
+            ],
+        ];
+        $obra_plan_charges_permission = [
+            [
+                "name" => "obraPlanCharges_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Plan de cobros",
+            ],
+        ];
+        $obra_plan_charge_details_permission = [
+            [
+                "name" => "obraPlanChargeDetails_list",
+                "guard_name" => "api",
+                "description" => "Ver detalle del plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_insert",
+                "guard_name" => "api",
+                "description" => "Agregar detalle al plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_charge",
+                "guard_name" => "api",
+                "description" => "Cobrar detalle del plan de cobros",
+            ],
+            [
+                "name" => "obraPlanChargeDetails_display",
+                "guard_name" => "api",
+                "description" => "Ver detalle del plan de cobros",
+            ]
+        ];
 
         $permissions = array_merge(
             $navbar_permissions,
@@ -907,6 +986,7 @@ class RolesAndPermissionsSeeder extends Seeder
             $obras_contractors_permission,
             $obras_documents_permission,
             $obras_materials_permission,
+            $my_tasks_permission,
             $contractors_permission,
             $provider_current_accounts_permission,
             $provider_current_accounts_movements_permission,
@@ -922,10 +1002,12 @@ class RolesAndPermissionsSeeder extends Seeder
             $index_cac_permission,
             $users_permission,
             $contacts_permission,
-            $calendars_permissions,
             $exchangeRates_permissions,
             $notes_permission,
-            $fleets_permission
+            $fleets_permission,
+            $company_costs_permission,
+            $obra_plan_charges_permission,
+            $obra_plan_charge_details_permission
         );
 
         foreach ($permissions as $permission) {

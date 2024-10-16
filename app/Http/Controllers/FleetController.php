@@ -13,11 +13,27 @@ use App\Http\Requests\Fleet\UpdateFleetRequest;
 
 class FleetController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $fleets = Fleet::with('last_movement', 'next_movement')->get();
-        return response($fleets, 200);
+        $perPage = 20;
+        $status = $request->input('status', 'ALL');
+
+        $fleets = Fleet::with('last_movement', 'next_movement')
+            ->when($status !== 'ALL', function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->orderBy('purchase_date', 'desc')
+            ->paginate($perPage);
+
+        $response = [
+            'data' => $fleets->items(),
+            'current_page' => $fleets->currentPage(),
+            'last_page' => $fleets->lastPage(),
+            'total' => $fleets->total(),
+        ];
+        return response($response, 200);
     }
+
 
     public function store(CreateFleetRequest $request): Response
     {
@@ -26,12 +42,12 @@ class FleetController extends Controller
         $fleet = Fleet::create($request->all());
 
         if ($image) {
-            $directory = 'public/uploads/fleets/'.$fleet->id;
+            $directory = 'public/uploads/fleets/' . $fleet->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $fleet->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $fleet->save();
@@ -41,7 +57,7 @@ class FleetController extends Controller
 
     public function show(int $id): Response
     {
-        $fleet = Fleet::with(['movements' => function($q){
+        $fleet = Fleet::with(['movements' => function ($q) {
             $q->orderBy('date', 'desc')->orderBy('id', 'desc');
         }, 'documents', 'last_movement', 'next_movement'])->find($id);
         return response($fleet, 200);
@@ -55,12 +71,12 @@ class FleetController extends Controller
         $fleet->update($request->all());
 
         if ($new_image) {
-            $directory = 'public/uploads/fleets/'.$fleet->id;
+            $directory = 'public/uploads/fleets/' . $fleet->id;
             $imageName = 'image.' . $new_image->extension();
             $imagePath = Storage::putFileAs($directory, $new_image, $imageName, 'public');
             $fleet->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $fleet->save();

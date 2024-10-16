@@ -9,6 +9,8 @@ use App\Models\Obra;
 use App\Models\Budget;
 use App\Models\Ipc;
 use App\Models\Cac;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -19,56 +21,65 @@ class DashboardController extends Controller
      */
     public function index(): Response
     {
-        $overdueObras = Obra::where('end_date', '<', now())->count();
-        $upcomingObras = Obra::where('start_date', '>', now())->count();
-        $onDayObras = Obra::where('start_date', '<', now())
-            ->where('end_date', '>', now())
-            ->count();
+        $now = now();
 
-        $inProgressObras = Obra::where('status', 'IN_PROGRESS')->count();
+        $obraStats = Obra::selectRaw("
+                COUNT(CASE WHEN end_date < ? THEN 1 END) as overdue_obras,
+                COUNT(CASE WHEN start_date > ? THEN 1 END) as upcoming_obras,
+                COUNT(CASE WHEN start_date < ? AND end_date > ? THEN 1 END) as on_day_obras,
+                COUNT(CASE WHEN status = 'IN_PROGRESS' THEN 1 END) as in_progress_obras
+            ", [$now, $now, $now, $now])
+            ->first();
 
-        $pendingBudgets = Budget::where('status', 'PENDING')->count();
-        $revisionBudgets = Budget::where('status', 'REVISION')->count();
+        $budgetStats = Budget::selectRaw("
+            COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending_budgets,
+            COUNT(CASE WHEN status = 'REVISION' THEN 1 END) as revision_budgets")
+            ->first();
 
-        // Get the IPC data
         $IPCs = Ipc::orderByDesc('period')
             ->take(13)
             ->get(['period', 'value'])
             ->sortBy('period');
-        $uniqueDates = $IPCs->pluck('period');
+
+        $IPC_labels = $IPCs->pluck('period')->map(function ($period) {
+            $date = Carbon::createFromFormat('Y-m', $period);
+            return $date->format('m/y');
+        })->values()->all();
+
         $ipcData = [
-            'labels' => $uniqueDates->values()->all(),
-            'data' => []
+            'labels' => $IPC_labels,
+            'data' => $IPCs->pluck('value')->values()->all()
         ];
-        foreach ($uniqueDates as $date) {
-            $ipc = $IPCs->where('period', $date)->first();
-            $ipcData['data'][] = $ipc ? $ipc->value : null;
-        }
 
         // Get the CAC data
         $CACs = Cac::orderByDesc('period')
             ->take(13)
             ->get(['period', 'general', 'materials', 'labour'])
             ->sortBy('period');
+
+        $CAC_labels = $CACs->pluck('period')->map(function ($period) {
+            return Carbon::createFromFormat('Y-m', $period)->format('m/y');
+        })->values()->all();
+
         $cacData = [
-            'labels' => $CACs->pluck('period')->all(),
+            'labels' => $CAC_labels,
             'data' => [
-                'general' => $CACs->pluck('general')->all(),
-                'materials' => $CACs->pluck('materials')->all(),
-                'labor' => $CACs->pluck('labour')->all(),
+                'general' => $CACs->pluck('general')->values()->all(),
+                'materials' => $CACs->pluck('materials')->values()->all(),
+                'labor' => $CACs->pluck('labour')->values()->all(),
             ]
         ];
 
         $data = [
             'obras' => [
-                'upcoming' => $upcomingObras,
-                'overdue' => $overdueObras,
-                'on_day' => $onDayObras,
-                'in_progress' => $inProgressObras,
+                'upcoming' => $obraStats->upcoming_obras,
+                'overdue' => $obraStats->overdue_obras,
+                'on_day' => $obraStats->on_day_obras,
+                'in_progress' => $obraStats->in_progress_obras,
             ],
             'budgets' => [
-                'pending' => $pendingBudgets,
-                'revision' => $revisionBudgets,
+                'pending' => $budgetStats->pending_budgets,
+                'revision' => $budgetStats->revision_budgets,
             ],
             'graphs' => [
                 'ipc' => $ipcData,

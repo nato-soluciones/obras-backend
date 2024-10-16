@@ -118,7 +118,7 @@ class ObraStageSubStageTaskService
         $stageProgress = $this->obraStageService->updateStageProgress($task->obraStageSubStage->obraStage);
         // Actualiza el progreso de la Obra
         $this->obraService->updateObraProgress($task->obraStageSubStage->obraStage->obra);
-        
+
         return [
           'stageProgress' => $stageProgress,
           'subStageProgress' => $subStageProgress,
@@ -154,7 +154,7 @@ class ObraStageSubStageTaskService
         'progress' => $request->progress
       ];
 
-      if($request->progress === 100) {
+      if ($request->progress === 100) {
         $taskUpdate['is_completed'] = true;
       }
 
@@ -196,4 +196,91 @@ class ObraStageSubStageTaskService
 
     return $response;
   }
+
+  public function updateProgressBulk(Request $request, int $obraId)
+  {
+    $taskList = $request->all();
+    // Validamos la existencia de las tareas en la obra
+    $taskIds = array_column($taskList, 'id');
+
+    $ObraTasksValid = Obra::select('obras.id as obraId', 'obra_stage_sub_stage_tasks.id as taskId')
+      ->join('obra_stages', 'obras.id', '=', 'obra_stages.obra_id')
+      ->join('obra_stage_sub_stages', 'obra_stages.id', '=', 'obra_stage_sub_stages.obra_stage_id')
+      ->join('obra_stage_sub_stage_tasks', 'obra_stage_sub_stages.id', '=', 'obra_stage_sub_stage_tasks.obra_stage_sub_stage_id')
+      ->where('obras.id', $obraId)
+      ->whereIn('obra_stage_sub_stage_tasks.id', $taskIds)
+      ->get();
+
+    // Obtener los IDs de las tareas que se encontraron en la consulta
+    $foundTaskIds = $ObraTasksValid->pluck('taskId')->toArray();
+    // Encuentra las tareas que faltan.
+    $missingTaskIds = array_diff($taskIds, $foundTaskIds);
+
+    if (!empty($missingTaskIds)) {
+      $taskTitles = array_column($taskList, 'title', 'id');
+      $missingTasksInfo = array_map(
+        function ($id) use ($taskTitles) {
+          return "{$taskTitles[$id]}";
+        },
+        $missingTaskIds
+      );
+      $errorMessage = "Las siguientes tareas no se encontraron en la obra: " . implode(', ', $missingTasksInfo);
+      throw ValidationException::withMessages(['tasks' => $errorMessage]);
+    }
+
+    // Recorre las tareas y actualiza el progreso
+    DB::transaction(function () use ($taskList) {
+      foreach ($taskList as $task) {
+        $taskDb = ObraStageSubStageTask::find($task['id']);
+        if ($taskDb->progress_type === 'percentage') {
+          if ($task['progress'] < 0 || $task['progress'] > 100) {
+            throw ValidationException::withMessages(['progress' => 'El avance debe ser entre 0 y 100.']);
+          }
+          if ($task['progress'] < $taskDb->progress) {
+            throw ValidationException::withMessages(['current_quantity' => "El avance ({$task['progress']}) debe ser mayor al valor anterior ({$taskDb->progress})."]);
+          }
+
+          $taskUpdate = [
+            'progress' => $task['progress']
+          ];
+
+          if ($task['progress'] === 100) {
+            $taskUpdate['is_completed'] = true;
+          }
+
+          $taskDb->update($taskUpdate);
+        } else if ($taskDb->progress_type === 'quantity') {
+          if (!is_int($task['progress'])) {
+            throw ValidationException::withMessages(['current_quantity' => 'El avance debe ser un valor entero.']);
+          }
+          if ($task['progress'] < 0 || $task['progress'] > $taskDb->max_quantity) {
+            throw ValidationException::withMessages(['current_quantity' => 'El avance debe ser entre 0 y la cantidad máxima.']);
+          }
+          if ($task['progress'] < $taskDb->current_quantity) {
+            throw ValidationException::withMessages(['current_quantity' => "El avance ({$task['progress']}) debe ser mayor al valor anterior ({$taskDb->current_quantity})."]);
+          }
+
+          $taskUpdate = [
+            'current_quantity' => $task['progress']
+          ];
+
+          if ($task['progress'] === $taskDb->max_quantity) {
+            $taskUpdate['is_completed'] = true;
+          }
+
+          $taskDb->update($taskUpdate);
+        }
+
+        // Actualiza el progreso de la SubEtapa
+        $this->obraStageSubStageService->updateSubStageProgress($taskDb->obraStageSubStage);
+        // Actualiza el proceso de la Etapa
+        $this->obraStageService->updateStageProgress($taskDb->obraStageSubStage->obraStage);
+        // Actualiza el progreso de la Obra
+        $this->obraService->updateObraProgress($taskDb->obraStageSubStage->obraStage->obra);
+      }
+    });
+
+    return true;
+  }
+
 }

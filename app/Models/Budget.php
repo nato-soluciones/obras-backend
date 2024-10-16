@@ -17,6 +17,7 @@ class Budget extends Model
         'expiration_date',
         'covered_area',
         'semi_covered_area',
+        'uncovered_area',
         'status',
         'currency',
         'comments',

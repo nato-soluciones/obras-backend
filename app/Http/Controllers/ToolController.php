@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
-
 use App\Models\Tool;
-use App\Models\ToolCategory;
-
 use App\Http\Requests\CreateToolRequest;
 
 class ToolController extends Controller
@@ -18,10 +15,24 @@ class ToolController extends Controller
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $tools = Tool::with(['category', 'last_location'])->get();
-        return response($tools, 200);
+        $perPage = 20;
+        $status = $request->input('status', 'ALL');
+        $query = Tool::with(['category', 'last_location'])
+            ->orderBy('name', 'asc');
+        if ($status !== 'ALL') {
+            $query->where('status', $status);
+        }
+        $tools = $query->paginate($perPage);
+
+        $response = [
+            'data' => $tools->items(),
+            'current_page' => $tools->currentPage(),
+            'last_page' => $tools->lastPage(),
+            'total' => $tools->total(),
+        ];
+        return response($response, 200);
     }
 
     /**
@@ -37,12 +48,12 @@ class ToolController extends Controller
         $tool = Tool::create($request->all());
 
         if ($image) {
-            $directory = 'public/uploads/tools/'.$tool->id;
+            $directory = 'public/uploads/tools/' . $tool->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $tool->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $tool->save();
@@ -58,7 +69,7 @@ class ToolController extends Controller
      */
     public function show(int $id): Response
     {
-        $tool = Tool::with(['locations' => function($query){
+        $tool = Tool::with(['locations' => function ($query) {
             $query->orderBy('date', 'desc');
         }])->find($id);
         return response($tool, 200);
@@ -74,17 +85,17 @@ class ToolController extends Controller
     public function update(Request $request, int $id): Response
     {
         $tool = Tool::find($id);
-        
+
         $new_image = $request->file('new_image');
         $tool->update($request->all());
 
         if ($new_image) {
-            $directory = 'public/uploads/tools/'.$tool->id;
+            $directory = 'public/uploads/tools/' . $tool->id;
             $imageName = 'image.' . $new_image->extension();
             $imagePath = Storage::putFileAs($directory, $new_image, $imageName, 'public');
             $tool->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
         $tool->save();
