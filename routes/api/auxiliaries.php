@@ -27,5 +27,5 @@ Route::prefix('index_types')->middleware('auth:sanctum')->controller(IndexTypeCo
 
 Route::prefix('quality_control_templates')->middleware('auth:sanctum')->controller(QualityControlTemplateController::class)->group(function () {
   Route::get('/', 'index');
-  // Route::post('/', 'store');
+  Route::post('/', 'store');
 });
