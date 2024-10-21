@@ -10,8 +10,8 @@ use App\Http\Controllers\UserController;
 // Authentication requests
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
   Route::post('/login', 'login');
-  Route::post('/forgot', 'forgotPassword');
-  Route::post('/reset', 'resetPassword');
+  Route::post('/forgot-password', 'forgotPassword');
+  Route::post('/reset-password', 'resetPassword');
 
   Route::middleware('auth:sanctum')->post('/logout', 'logout');
 });

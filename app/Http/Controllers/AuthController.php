@@ -6,6 +6,7 @@ use App\Http\Requests\Auth\ForgotRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\ResetRequest;
 use App\Http\Services\AuthService;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -49,12 +50,15 @@ class AuthController extends Controller
      */
     public function forgotPassword(ForgotRequest $request)
     {
-        $data = $request->validated();
-        $success = $this->authService->forgotPassword($data);
+        try {
+            $data = $request->validated();
+            $this->authService->forgotPassword($data);
 
-        return $success
-            ? response(['message' => 'Successfully sent password reset email!'], 200)
-            : response(['message' => 'There was a problem sending the email!'], 500);
+            return response()->json(['message' => 'Se ha enviado un correo para restablecer la contraseña!'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error in forgotPassword: ' . $e->getMessage());
+            return response()->json(['message' => 'No se ha podido enviar el correo!'], 500);
+        }
     }
 
     /**

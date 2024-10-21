@@ -2,11 +2,15 @@
 
 namespace App\Http\Services;
 
+
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
@@ -38,11 +42,17 @@ class AuthService
    *
    * @return Boolean success
    */
-  public function forgotPassword($data)
+  public function forgotPassword(array $data)
   {
-    $status = Password::sendResetLink($data);
+    $status = Password::sendResetLink(['email' => $data['email']]);
 
-    return $status === Password::RESET_LINK_SENT;
+    if ($status != Password::RESET_LINK_SENT) {
+      throw ValidationException::withMessages([
+        'email' => [__($status)],
+      ]);
+    }
+
+    return true;
   }
 
   /**
