@@ -6,6 +6,7 @@ use App\Http\Requests\Obra\Stage\SubStage\Task\StoreTaskRequest;
 use App\Http\Requests\Obra\Stage\SubStage\Task\UpdateTaskRequest;
 use App\Models\Obra;
 use App\Models\ObraStageSubStageTask;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,12 +17,14 @@ class ObraStageSubStageTaskService
   protected $obraStageSubStageService;
   protected $obraStageService;
   protected $obraService;
+  protected $qualityControlService;
 
-  public function __construct(ObraService $obraService,  ObraStageService $obraStageService, ObraStageSubStageService $obraStageSubStageService)
+  public function __construct(ObraService $obraService,  ObraStageService $obraStageService, ObraStageSubStageService $obraStageSubStageService, QualityControlService $qualityControlService)
   {
     $this->obraStageSubStageService = $obraStageSubStageService;
     $this->obraStageService = $obraStageService;
     $this->obraService = $obraService;
+    $this->qualityControlService = $qualityControlService;
   }
 
   private function validateRelationships(int $obraId, int $stageId, int $subStageId)
@@ -65,6 +68,11 @@ class ObraStageSubStageTaskService
       $response = DB::transaction(function () use ($request) {
         $task = ObraStageSubStageTask::create($request->all());
 
+        // Si tiene control de calidad, lo guarda
+        if ($request->has_quality_control) {
+          $this->qualityControlService->store($task, $request->quality_control_id);
+        }
+
         // Actualiza el progreso de la SubEtapa
         $subStageProgress = $this->obraStageSubStageService->updateSubStageProgress($task->obraStageSubStage);
         // Actualiza el proceso de la Etapa
@@ -79,8 +87,8 @@ class ObraStageSubStageTaskService
       });
       return $response;
     } catch (\Exception $e) {
-      Log::error('Error en la transacción: ' . $e->getMessage());
-      return $e;
+      Log::error('TASK SERVICE - Error en la transacción: ' . $e->getMessage());
+      throw new Exception("Error al crear la tarea.");
     }
   }
 
@@ -110,6 +118,13 @@ class ObraStageSubStageTaskService
 
     try {
       $response = DB::transaction(function () use ($task) {
+        // Eliminar el control de calidad y sus ítems asociados
+        $qualityControls = $task->qualityControls;
+        foreach ($qualityControls as $control) {
+          $control->items()->delete();
+          $control->delete();
+        }
+
         $task->delete();
 
         // Actualiza el progreso de la SubEtapa
@@ -283,4 +298,41 @@ class ObraStageSubStageTaskService
     return true;
   }
 
+  public function getQualityControl(int $obraId, int $stageId, int $subStageId, int $taskId)
+  {
+    // Validamos las relaciones
+    $this->validateRelationships($obraId, $stageId, $subStageId);
+
+    $task = ObraStageSubStageTask::with('qualityControls.items.templateItem', 'qualityControls.template')->find($taskId);
+
+    if (!$task) {
+      throw ValidationException::withMessages(['task' => 'La tarea no existe.']);
+    }
+
+    if (!$task->has_quality_control) {
+      return [];
+    }
+
+    // Estructurar la respuesta aplanada
+    $qualityControls = $task->qualityControls->map(function ($control) {
+      return [
+        'id' => $control->id,
+        'template_id' => $control->template_id,
+        'name' => $control->template->name,
+        'status' => $control->status,
+        'percentage' => $control->percentage,
+        'comments' => $control->comments,
+        'items' => $control->items->map(function ($item) {
+          return [
+            'id' => $item->id,
+            'template_item_id' => $item->template_item_id,
+            'name' => $item->templateItem->name,
+            'passed' => $item->passed,
+          ];
+        }),
+      ];
+    });
+
+    return $qualityControls;
+  }
 }

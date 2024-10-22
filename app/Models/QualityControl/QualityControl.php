@@ -7,5 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class QualityControl extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'entity_type',
+        'entity_id',
+        'template_id',
+        'status',
+        'percentage',
+        'comments',
+        'made_by_id',
+    ];
+
+    public function entity()
+    {
+        return $this->morphTo();
+    }
+
+    public function items()
+    {
+        return $this->hasMany(QualityControlItem::class);
+    }
+
+    public function template()
+    {
+        return $this->belongsTo(QualityControlTemplate::class, 'template_id');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\QualityControl\QualityControl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,6 +24,7 @@ class ObraStageSubStageTask extends Model
         'obra_stage_id',
         'obra_stage_sub_stage_id',
         'created_by_id',
+        'has_quality_control',
     ];
 
     protected $hidden = [
@@ -54,5 +56,10 @@ class ObraStageSubStageTask extends Model
     public function taskEvents()
     {
         return $this->hasMany(ObraStageSubStageTaskEvent::class);
+    }
+
+    public function qualityControls()
+    {
+        return $this->morphMany(QualityControl::class, 'entity');
     }
 }
