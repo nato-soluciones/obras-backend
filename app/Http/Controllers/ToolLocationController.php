@@ -25,12 +25,12 @@ class ToolLocationController extends Controller
         $location = ToolLocation::create(array_merge($data, ['created_by' => $created_by]));
 
         if ($image) {
-            $directory = 'public/uploads/tools/locations/'.$location->id;
+            $directory = 'public/uploads/tools/' . $id . '/locations/' . $location->id;
             $imageName = 'image.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $location->image = Storage::url($imagePath);
 
-            $absolutePathToDirectory = storage_path('app/'.$directory);
+            $absolutePathToDirectory = storage_path('app/' . $directory);
             chmod($absolutePathToDirectory, 0755);
         }
 
@@ -43,8 +43,8 @@ class ToolLocationController extends Controller
     {
         $location = ToolLocation::find($locationId);
         $data = $request->all();
-        unset($data['image']);    
-        $location->update($data);   
+        unset($data['image']);
+        $location->update($data);
 
         return response($location, 200);
     }
@@ -52,8 +52,16 @@ class ToolLocationController extends Controller
     public function destroy(int $id, int $locationId): Response
     {
         $location = ToolLocation::find($locationId);
-        $location->delete();
+        if (is_null($location)) {
+            return response(['message' => 'Ubicación de la Herramienta no encontrado'], 404);
+        }
+        $directory = 'public/uploads/tools/' . $id . '/locations/' . $location->id;
 
-        return response(['message' => 'Movimiento de Herramienta eliminado'], 204);
+        if (Storage::deleteDirectory($directory)) {
+            $location->delete();
+            return response(null, 204);
+        } else {
+            return response(['status' => 422, 'message' => 'No se pudo borrar la ubicación de la herramienta'], 422);
+        }
     }
 }

@@ -10,11 +10,6 @@ use App\Models\Manufacturer;
 
 class ManufacturerController extends Controller
 {
-    /**
-     * Get all manufacturers
-     *
-     * @return Response
-     */
     public function index(): Response
     {
         $manufacturers = Manufacturer::with('category')
@@ -23,12 +18,6 @@ class ManufacturerController extends Controller
         return response($manufacturers, 200);
     }
 
-    /**
-     * Create a manufacturer
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function store(Request $request): Response
     {
         $data = $request->all();
@@ -49,25 +38,12 @@ class ManufacturerController extends Controller
         return response($manufacturer, 201);
     }
 
-    /**
-     * Get a manufacturer by id
-     *
-     * @param int $id
-     * @return Response
-     */
     public function show(int $id): Response
     {
         $manufacturer = Manufacturer::with('category', 'files')->find($id);
         return response($manufacturer, 200);
     }
 
-    /**
-     * Update a manufacturer by id
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
     public function update(Request $request, int $id): Response
     {
         $manufacturer = Manufacturer::find($id);
@@ -89,17 +65,19 @@ class ManufacturerController extends Controller
         return response($manufacturer, 200);
     }
 
-    /**
-     * Delete a manufacturer by id
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy(int $id): Response
     {
         $manufacturer = Manufacturer::find($id);
-        $manufacturer->delete();
+        if (is_null($manufacturer)) {
+            return response(['status' => 404, 'message' => 'Producto no encontrado'], 404);
+        }
+        $directory = 'public/uploads/manufacturers/' . $manufacturer->id;
 
-        return response(['message' => 'Manufacturer deleted'], 204);
+        if (Storage::deleteDirectory($directory)) {
+            $manufacturer->delete();
+            return response(null, 204);
+        } else {
+            return response(['status' => 422, 'message' => 'No se pudo borrar el producto'], 422);
+        }
     }
 }

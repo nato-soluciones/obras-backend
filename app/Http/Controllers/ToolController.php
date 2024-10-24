@@ -112,8 +112,17 @@ class ToolController extends Controller
     public function destroy(int $id): Response
     {
         $tool = Tool::find($id);
-        $tool->delete();
+        if (is_null($tool)) {
+            return response(['status' => 404, 'message' => 'Herramienta no encontrada'], 404);
+        }
+        $directory = 'public/uploads/tools/' . $id;
 
-        return response(['message' => 'Tool deleted'], 204);
+        if (Storage::deleteDirectory($directory)) {
+            $tool->delete();
+            return response(null, 204);
+        } else {
+            return response(['status' => 422, 'message' => 'No se pudo borrar la herramienta'], 422);
+        }
+
     }
 }
