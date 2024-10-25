@@ -60,6 +60,6 @@ class ObraStageSubStageTask extends Model
 
     public function qualityControls()
     {
-        return $this->morphMany(QualityControl::class, 'entity');
+        return $this->morphOne(QualityControl::class, 'entity');
     }
 }

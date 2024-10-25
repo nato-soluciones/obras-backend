@@ -25,7 +25,7 @@ class QualityControlService
             $qualityControl = new QualityControl($qualityControlData);
 
             $entityFather->qualityControls()->save($qualityControl);
-            
+
             // Crear los ítems del control de calidad
             foreach ($qualityControlItems as $itemData) {
                 QualityControlItem::create([
@@ -37,7 +37,16 @@ class QualityControlService
         } catch (\Exception $e) {
             Log::error('QUALITY SERVICE - Error en la transacción: ' . $e->getMessage());
             throw new Exception("Error al crear el control de calidad");
-            
+        }
+    }
+
+    public function show($entityFather, $qualityControlId)
+    {
+        try {
+            return $entityFather->qualityControls()->where('id', $qualityControlId)->first();
+        } catch (\Exception $e) {
+            Log::error('QUALITY SERVICE - Error en la transacción: ' . $e->getMessage());
+            throw new Exception("Error al mostrar el control de calidad");
         }
     }
 }

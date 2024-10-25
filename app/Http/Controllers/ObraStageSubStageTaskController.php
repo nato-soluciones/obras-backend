@@ -97,4 +97,17 @@ class ObraStageSubStageTaskController extends Controller
             return response()->json(['message' => 'Error al obtener el control de calidad'], 500);
         }
     }
+
+    public function updateQualityControl(Request $request, int $obraId, int $stageId, int $subStageId, int $taskId)
+    {
+        try {
+            $this->obraStageSubStageTaskService->updateQualityControl($request, $obraId, $stageId, $subStageId, $taskId);
+            return response()->json(['message' => 'Control de calidad actualizado correctamente'], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al actualizar el control de calidad'], 500);
+        }
+    }
 }
