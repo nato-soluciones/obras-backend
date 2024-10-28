@@ -61,7 +61,7 @@ class OutcomeController extends Controller
             $outcome = Outcome::create($request->all());
 
             if ($file) {
-                $directory = 'public/uploads/outcomes/' . $outcome->id;
+                $directory = 'public/uploads/obras/' . $obraId . '/outcomes/' . $outcome->id;
                 $fileName = 'file.' . $file->extension();
                 $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
                 $outcome->file = Storage::url($filePath);
@@ -147,7 +147,7 @@ class OutcomeController extends Controller
 
             $file = $request->file('file');
             if ($file) {
-                $directory = 'public/uploads/outcomes/' . $outcome->id;
+                $directory = 'public/uploads/obras/' . $obraId . '/outcomes/' . $outcome->id;
                 $fileName = 'file.' . $file->extension();
                 $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
                 $outcome->file = Storage::url($filePath);
@@ -235,7 +235,6 @@ class OutcomeController extends Controller
     public function exportList(int $obraId)
     {
         $outcomes = Outcome::where('obra_id', $obraId)
-            ->withTrashed()
             ->orderBy('date', 'desc')
             ->get();
         $f = fopen('php://memory', 'r+');
