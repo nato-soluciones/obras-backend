@@ -120,10 +120,10 @@ class ObraStageSubStageTaskService
 		try {
 			$response = DB::transaction(function () use ($task) {
 				// Eliminar el control de calidad y sus ítems asociados
-				$qualityControls = $task->qualityControls ?? [];
-				foreach ($qualityControls as $control) {
-					$control->items()->delete();
-					$control->delete();
+				$qualityControl = $task->qualityControls;
+				if ($qualityControl) {
+					$qualityControl->items()->delete();
+					$qualityControl->delete();
 				}
 
 				$task->delete();
@@ -381,7 +381,6 @@ class ObraStageSubStageTaskService
 			}
 		}
 		$percentage = $totalItems > 0 ? round(($passedItems / $totalItems) * 100, 2) : 0;
-		Log::debug("Porcentaje {$percentage} Total Items {$totalItems} Passed Items {$passedItems}");
 
 		$qualityControl->percentage = $percentage;
 		$qualityControl->status = $percentage < 100 ? 'CONTROLLED_WITH_ERRORS' : 'CONTROLLED_OK';
