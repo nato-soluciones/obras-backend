@@ -120,7 +120,7 @@ class ObraStageSubStageTaskService
 		try {
 			$response = DB::transaction(function () use ($task) {
 				// Eliminar el control de calidad y sus ítems asociados
-				$qualityControls = $task->qualityControls;
+				$qualityControls = $task->qualityControls ?? [];
 				foreach ($qualityControls as $control) {
 					$control->items()->delete();
 					$control->delete();
@@ -169,17 +169,18 @@ class ObraStageSubStageTaskService
 			$taskUpdate = [
 				'progress' => $request->progress
 			];
-			
+
 			if (intval($request->progress) === 100) {
 				$taskUpdate['is_completed'] = true;
 			}
 			$task->update($taskUpdate);
 		} else if ($task->progress_type === 'quantity') {
-			if (!is_int($request->progress)) {
-				throw ValidationException::withMessages(['current_quantity' => 'El avance debe ser un valor entero.']);
+			if ($request->progress <= 0) {
+				throw ValidationException::withMessages(['current_quantity' => 'El avance debe ser mayor a 0 (cero).']);
 			}
-			if ($request->progress < 0 || $request->progress > $task->max_quantity) {
-				throw ValidationException::withMessages(['current_quantity' => 'El avance debe ser entre 0 y la cantidad máxima.']);
+			// }
+			if ($request->progress > $task->max_quantity) {
+				throw ValidationException::withMessages(['current_quantity' => "El avance debe ser menor o igual a {$task->max_quantity} (cantidad máxima)."]);
 			}
 			if ($request->progress < $task->current_quantity) {
 				throw ValidationException::withMessages(['current_quantity' => "El avance ({$request->progress}) debe ser mayor al valor anterior ({$task->current_quantity})."]);
@@ -189,7 +190,7 @@ class ObraStageSubStageTaskService
 				'current_quantity' => $request->progress
 			];
 
-			if ($request->progress === $task->max_quantity) {
+			if (intval($request->progress) === intval($task->max_quantity)) {
 				$taskUpdate['is_completed'] = true;
 			}
 
@@ -380,8 +381,10 @@ class ObraStageSubStageTaskService
 			}
 		}
 		$percentage = $totalItems > 0 ? round(($passedItems / $totalItems) * 100, 2) : 0;
+		Log::debug("Porcentaje {$percentage} Total Items {$totalItems} Passed Items {$passedItems}");
+
 		$qualityControl->percentage = $percentage;
-		$qualityControl->status = $percentage === 100 ? 'CONTROLLED_OK' : 'CONTROLLED_WITH_ERRORS';
+		$qualityControl->status = $percentage < 100 ? 'CONTROLLED_WITH_ERRORS' : 'CONTROLLED_OK';
 		$qualityControl->comments = $request->comments ?? null;
 		$qualityControl->save();
 
