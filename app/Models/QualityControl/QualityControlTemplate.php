@@ -17,4 +17,9 @@ class QualityControlTemplate extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function items()
+    {
+        return $this->hasMany(QualityControlTemplateItem::class, 'template_id');
+    }
 }

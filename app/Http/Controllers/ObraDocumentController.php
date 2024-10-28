@@ -14,7 +14,7 @@ class ObraDocumentController extends Controller
     {
         $documents = Document::from('obra_documents as od')
             ->join('obra_documents_categories as odc', 'od.category_id', '=', 'odc.id')
-            ->select('od.id', 'od.name', 'od.storage_type', 'od.link','od.path', 'od.category_id', 'odc.name as category_name')
+            ->select('od.id', 'od.name', 'od.storage_type', 'od.link', 'od.path', 'od.category_id', 'odc.name as category_name')
             ->where('od.obra_id', $obraId)
             ->orderBy('od.category_id', 'asc')
             ->orderBy('od.name', 'asc')
@@ -65,12 +65,18 @@ class ObraDocumentController extends Controller
         if (is_null($document)) {
             return response(['status' => 404, 'message' => 'Documento no encontrado'], 404);
         }
-        $directory = 'public/uploads/obras/' . $obraId . '/' . basename($document->path);
-        if (Storage::delete($directory)) {
+        if ($document->storage_type === 'link') {
             $document->delete();
             return response(null, 204);
-        } else {
-            return response(['status' => 422, 'message' => 'No se pudo borrar el documento'], 422);
+            
+        } else if ($document->storage_type === 'file') {
+            $directory = 'public/uploads/obras/' . $obraId . '/' . basename($document->path);
+            if (Storage::delete($directory)) {
+                $document->delete();
+                return response(null, 204);
+            } else {
+                return response(['status' => 422, 'message' => 'No se pudo borrar el documento'], 422);
+            }
         }
     }
 }

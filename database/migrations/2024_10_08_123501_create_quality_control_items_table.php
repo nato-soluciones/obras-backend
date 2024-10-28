@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('quality_control_items', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('control_id');
+            $table->unsignedBigInteger('quality_control_id');
             $table->unsignedBigInteger('template_item_id');
             $table->boolean('passed')->default(false);
             $table->timestamps();
 
-            $table->foreign('control_id')->references('id')->on('quality_controls')->onDelete('cascade');
+            $table->foreign('quality_control_id')->references('id')->on('quality_controls')->onDelete('cascade');
             $table->foreign('template_item_id')->references('id')->on('quality_control_template_items')->onDelete('restrict');
         });
     }

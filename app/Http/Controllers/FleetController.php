@@ -87,7 +87,16 @@ class FleetController extends Controller
     public function destroy(int $id): Response
     {
         $fleet = Fleet::find($id);
-        $fleet->delete();
-        return response(null, 204);
+        if (is_null($fleet)) {
+            return response(['status' => 404, 'message' => 'Vehículo no encontrado'], 404);
+        }
+        $directory = 'public/uploads/fleets/' . $fleet->id;
+
+        if (Storage::deleteDirectory($directory)) {
+            $fleet->delete();
+            return response(null, 204);
+        } else {
+            return response(['status' => 422, 'message' => 'No se pudo borrar el vehículo'], 422);
+        }
     }
 }

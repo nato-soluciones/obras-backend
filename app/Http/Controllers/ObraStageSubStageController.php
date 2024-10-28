@@ -48,7 +48,8 @@ class ObraStageSubStageController extends Controller
                     $q1->select('id', 'firstname', 'lastname', 'deleted_at')
                         ->withTrashed();
                 }])
-                ->withCount('taskEvents');
+                ->withCount('taskEvents')
+                ->with('qualityControls'); 
         }])
             ->where('obra_stage_id', $stageId)
             ->orderBy('start_date', 'asc')
@@ -63,7 +64,7 @@ class ObraStageSubStageController extends Controller
     {
         try {
             $subStage = $this->obraStageSubStageService->store($request, $obraId, $stageId);
-            
+
             if ($subStage instanceof \Exception) {
                 throw $subStage;
             }

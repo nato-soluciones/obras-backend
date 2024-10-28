@@ -2,10 +2,29 @@
 
 namespace App\Http\Services;
 
-
+use App\Models\AppSetting;
 
 class AppSettingService
 {
+
+  public function getSettingsByModule(string $module)
+  {
+    $settings = AppSetting::where('module', $module)
+      ->select("key", "value", "type")
+      ->get();
+
+    if (!$settings) {
+      return [];
+    }
+
+    $settingsArray = [];
+    foreach ($settings as $setting) {
+      $settingsArray[$setting->key] = $this->transformValueByType($setting->value, $setting->type);
+    }
+
+    return $settingsArray;
+  }
+
 
   public function transformValueByType($value, $type)
   {
