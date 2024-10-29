@@ -382,9 +382,13 @@ class ObraStageSubStageTaskService
 		}
 		$percentage = $totalItems > 0 ? round(($passedItems / $totalItems) * 100, 2) : 0;
 
+		if($qualityControl->status === 'UNCONTROLLED' && $percentage < 100) {
+			$qualityControl->required_reverification = true;
+		}
 		$qualityControl->percentage = $percentage;
 		$qualityControl->status = $percentage < 100 ? 'CONTROLLED_WITH_ERRORS' : 'CONTROLLED_OK';
 		$qualityControl->comments = $request->comments ?? null;
+		$qualityControl->made_by_id = auth()->id();
 		$qualityControl->save();
 
 		return true;

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('status', ['UNCONTROLLED', 'CONTROLLED_OK', 'CONTROLLED_WITH_ERRORS'])->default('UNCONTROLLED');
             $table->decimal('percentage', 5, 2)->default(0.00);
             $table->text('comments')->nullable();
+            $table->boolean('required_reverification')->default(false);
             $table->unsignedInteger('made_by_id')->comment('Usuario que realizo el ultimo control');
             $table->timestamps();
 
