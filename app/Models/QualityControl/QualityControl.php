@@ -14,6 +14,7 @@ class QualityControl extends Model
         'status',
         'percentage',
         'comments',
+        'required_reverification',
         'made_by_id',
     ];
 

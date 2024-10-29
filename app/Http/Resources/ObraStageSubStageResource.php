@@ -40,6 +40,7 @@ class ObraStageSubStageResource extends JsonResource
                     'task_events_count' => $task->task_events_count,
                     'has_quality_control' => $task->has_quality_control,
                     'quality_control_status' => $task->has_quality_control ? $task->qualityControls->status ?? null : null,
+                    'quality_control_reverification' => $task->has_quality_control ? $task->qualityControls->required_reverification ?? null : null,
                     'quality_control_template_id' => $task->has_quality_control ? $task->qualityControls->template_id ?? null : null,
                 ];
             }),
