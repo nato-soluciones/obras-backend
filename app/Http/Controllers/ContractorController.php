@@ -49,10 +49,10 @@ class ContractorController extends Controller
      */
     public function store(CreateContractorRequest $request): Response
     {
-        // Check cuit is unique
-        if (Contractor::where('cuit', $request->cuit)->exists()) {
-            return response(['message' => 'El CUIT ya está en uso'], 409);
-        }
+        // // Check cuit is unique
+        // if (Contractor::where('cuit', $request->cuit)->exists()) {
+        //     return response(['message' => 'El CUIT ya está en uso'], 409);
+        // }
 
         $contractor = Contractor::create($request->all());
         return response([
@@ -70,10 +70,10 @@ class ContractorController extends Controller
      */
     public function update(UpdateContractorRequest $request, int $id): Response
     {
-        // Ckeck cuit is unique
-        if (Contractor::where('cuit', $request->cuit)->where('id', '!=', $id)->exists()) {
-            return response(['message' => 'El CUIT ya está en uso'], 409);
-        }
+        // // Ckeck cuit is unique
+        // if (Contractor::where('cuit', $request->cuit)->where('id', '!=', $id)->exists()) {
+        //     return response(['message' => 'El CUIT ya está en uso'], 409);
+        // }
 
         $contractor = Contractor::find($id);
         $contractor->update($request->all());
