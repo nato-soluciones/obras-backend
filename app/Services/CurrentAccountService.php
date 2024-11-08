@@ -151,7 +151,6 @@ class CurrentAccountService
 
   public function CAMovementUpdateByReference($CAData, $CAMovementData)
   {
-
     // Obtiene la cuenta corriente
     $RespCurrentAccount = $this->CurrentAccountGet($CAData['entity_type'], $CAData['entity_id'], $CAData['project_id'], $CAData['currency']);
 
@@ -160,7 +159,7 @@ class CurrentAccountService
     }
     $currentAccount = $RespCurrentAccount['currentAccount'];
 
-    // Recuperar el movimiento de referencia
+    // Recuperar el movimiento de referencia (movimiento a actualizar)
     $referenceEntity = $CAMovementData['reference_entity'];
     $referenceId = $CAMovementData['reference_id'];
     $referenceMovement = CurrentAccountMovement::where('current_account_id', $currentAccount->id)
@@ -182,8 +181,8 @@ class CurrentAccountService
       unset($CAMovementData['date']);
 
       $newBalance = ($referenceMovement->movementType->type === 'DEBIT'
-        ? $currentAccount->balance + $referenceMovement->amount + $CAMovementData['amount']
-        : $currentAccount->balance - $referenceMovement->amount - $CAMovementData['amount']);
+        ? $currentAccount->balance - $referenceMovement->amount + $CAMovementData['amount']
+        : $currentAccount->balance + $referenceMovement->amount - $CAMovementData['amount']);
 
 
       // Log::info("newBalance");
@@ -204,7 +203,6 @@ class CurrentAccountService
   }
   public function CAMovementDeleteByReference($CAData, $CAMovementData)
   {
-
     // Obtiene la cuenta corriente
     $RespCurrentAccount = $this->CurrentAccountGet($CAData['entity_type'], $CAData['entity_id'], $CAData['project_id'], $CAData['currency']);
 
@@ -213,7 +211,7 @@ class CurrentAccountService
     }
     $currentAccount = $RespCurrentAccount['currentAccount'];
 
-    // Recupera el movimiento de referencia
+    // Recupera el movimiento de referencia (movimiento a eliminar)
     $referenceEntity = $CAMovementData['reference_entity'];
     $referenceId = $CAMovementData['reference_id'];
     $referenceMovement = CurrentAccountMovement::where('current_account_id', $currentAccount->id)
@@ -225,14 +223,10 @@ class CurrentAccountService
       return ['status' => 422, 'message'  => 'El movimiento de referencia (' . $CAMovementData['reference_id'] . ') no existe.'];
     }
 
-    $movementType = CurrentAccountMovementType::find($CAMovementData['movement_type_id']);
-    if (!$movementType) {
-      return ['status' => 422, 'message'  => 'El tipo de movimiento (' . $CAMovementData['movement_type_id'] . ') no existe.'];
-    }
-
-    $newBalance = ($movementType->type === 'DEBIT'
-      ? $currentAccount->balance - $referenceMovement->amount
-      : $currentAccount->balance + $referenceMovement->amount);
+    // Calcula el nuevo saldo
+    $newBalance = ($referenceMovement->movementType->type === 'DEBIT'
+    ? $currentAccount->balance - $referenceMovement->amount
+    : $currentAccount->balance + $referenceMovement->amount);
 
     // Log::info("DLT - CAData");
     // Log::info($currentAccount);
@@ -248,7 +242,6 @@ class CurrentAccountService
     // Actualiza el saldo de la cuenta corriente
     $currentAccount->balance = $newBalance;
     $currentAccount->save();
-
 
     return ['status' => 200, 'message' => 'Movimiento eliminado ok'];
   }
