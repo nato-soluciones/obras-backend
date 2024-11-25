@@ -14,6 +14,7 @@ use App\Http\Controllers\CacController;
 use App\Http\Controllers\IpcController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeveloperController;
+use App\Http\Controllers\InitialSettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
 
@@ -37,15 +38,8 @@ include_once __DIR__ . '/api/fleets.php';
 include_once __DIR__ . '/api/permissions.php';
 include_once __DIR__ . '/api/companies.php';
 
-Route::post('/clear-cookies', function () {
-    $cookieNames = array_keys($_COOKIE);
-    $response = response(['message' => 'Cookies borradas']);
-
-    foreach ($cookieNames as $cookieName) {
-        $response->headers->setCookie(cookie($cookieName, '', -3600, '/', '.nato-app.com.ar', true, true));
-    }
-
-    return $response;
+Route::prefix('initial_settings')->middleware('auth:sanctum')->controller(InitialSettingController::class)->group(function () {
+    Route::get('/', 'index');
 });
 
 // Notes endpoints

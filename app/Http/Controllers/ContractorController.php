@@ -36,7 +36,7 @@ class ContractorController extends Controller
             ->join('contractor_industries as i', 'c.industry', '=', 'i.code')
             ->leftJoin('banks as b', 'c.bank', '=', 'b.code')
             ->where('c.id', $id)
-            ->select('c.*', 'i.name as industry_name', 'b.name as bank_name')
+            ->select('c.*', 'i.name as industry_name', 'b.name as bank_title_name')
             ->first();
         return response($contractor, 200);
     }

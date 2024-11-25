@@ -31,7 +31,7 @@ class CreateToolRequest extends FormRequest
             'last_maintenance' => ['nullable', 'date'],
 
             'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp'],
         ];
     }
 }

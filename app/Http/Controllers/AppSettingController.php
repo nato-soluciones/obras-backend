@@ -6,6 +6,7 @@ use App\Http\Services\AppSettingService;
 use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AppSettingController extends Controller
 {
@@ -18,21 +19,15 @@ class AppSettingController extends Controller
     
     public function getSettingsByModule(string $module)
     {
-        $settings = AppSetting::where('module', $module)
-            ->select("key", "value", "type")
-            ->get();
-
-        if (!$settings) {
-            return response()->json(["message" => "El modulo no existe"], 404);
+        try {
+            $settingsArray =  $this->appSettingService->getSettingsByModule($module);
+            return response()->json($settingsArray);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al recuperar las configuraciones'], 500);
         }
-
-        $settingsArray = [];
-        foreach ($settings as $setting) {
-            // Log::debug($setting);
-            $settingsArray[$setting->key] = $this->appSettingService->transformValueByType($setting->value, $setting->type);
-        }
-
-        return response()->json($settingsArray);
     }
 
     public function getSettingsByKeys(Request $request)

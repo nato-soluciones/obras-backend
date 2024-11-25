@@ -10,13 +10,13 @@ use App\Models\FleetDocument;
 
 class FleetDocumentController extends Controller
 {
-    public function store(Request $request): Response
+    public function store(Request $request, int $fleetId): Response
     {
         $file = $request->file('file');
         $document = FleetDocument::create($request->all());
 
         if ($file) {
-            $directory = 'public/uploads/fleet_documents/' . $document->id;
+            $directory = 'public/uploads/fleets/' . $fleetId . '/documents/' . $document->id;
             $fileName = 'file.' . $file->extension();
             $filePath = Storage::putFileAs($directory, $file, $fileName, 'public');
             $document->file = Storage::url($filePath);
@@ -35,14 +35,13 @@ class FleetDocumentController extends Controller
         if (is_null($document)) {
             return response(['status' => 404, 'message' => 'Documento no encontrado'], 404);
         }
-        
-        $directory = 'public/uploads/fleet_documents/' . $documentId;
+
+        $directory = 'public/uploads/fleets/' . $fleetId . '/documents/' . $documentId;
         if (Storage::deleteDirectory($directory)) {
             $document->delete();
             return response(null, 204);
         } else {
             return response(['status' => 422, 'message' => 'No se pudo borrar el documento'], 422);
         }
-
     }
 }

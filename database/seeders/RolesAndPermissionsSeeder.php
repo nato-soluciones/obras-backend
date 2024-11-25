@@ -271,6 +271,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Actualizar avance de tarea",
             ],
             [
+                "name" => "obraStageSubStageTasks_qualityControl",
+                "guard_name" => "api",
+                "description" => "Actualizar el control de calidad de la tarea",
+            ],
+            [
                 "name" => "obraStageSubStageTasks_listEvents",
                 "guard_name" => "api",
                 "description" => "Ver los eventos de la tarea",

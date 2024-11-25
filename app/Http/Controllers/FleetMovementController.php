@@ -19,14 +19,14 @@ class FleetMovementController extends Controller
         return response($movements, 200);
     }
 
-    public function store(CreateFleetMovementRequest $request): Response
+    public function store(CreateFleetMovementRequest $request, int $fleetId): Response
     {
         $image = $request->file('image');
         $movement = FleetMovement::create($request->all());
 
         if ($image) {
-            $directory = 'public/uploads/fleet_movements/'.$movement->id;
-            $imageName = 'image.' . $image->extension();
+            $directory = 'public/uploads/fleets/' . $fleetId . '/movements/'.$movement->id;
+            $imageName = 'file.' . $image->extension();
             $imagePath = Storage::putFileAs($directory, $image, $imageName, 'public');
             $movement->image = Storage::url($imagePath);
 
@@ -58,7 +58,16 @@ class FleetMovementController extends Controller
     public function destroy(int $fleetId, int $movementId): Response
     {
         $movement = FleetMovement::find($movementId);
-        $movement->delete();
-        return response(null, 204);
+        if (is_null($movement)) {
+            return response(['status' => 404, 'message' => 'Movimiento no encontrado'], 404);
+        }
+
+        $directory = 'public/uploads/fleets/' . $fleetId . '/movements/' . $movementId;
+        if (Storage::deleteDirectory($directory)) {
+            $movement->delete();
+            return response(null, 204);
+        } else {
+            return response(['status' => 422, 'message' => 'No se pudo borrar el movimiento'], 422);
+        }
     }
 }

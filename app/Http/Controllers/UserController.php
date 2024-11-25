@@ -6,8 +6,8 @@ use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Requests\User\UpdatePassUserRequest;
 use App\Http\Services\NotificationSettingsService;
+use App\Http\Services\User\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
@@ -16,11 +16,6 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-    /**
-     * Get all the users
-     *
-     * @return Response
-     */
     public function index()
     {
         $users = User::with(['roles' => function ($q) {
@@ -108,13 +103,6 @@ class UserController extends Controller
         return response($response, 200);
     }
 
-    /**
-     * Update a user by id
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
     public function update(UpdateUserRequest $request, int $id)
     {
         $data = $request->all();
@@ -128,13 +116,6 @@ class UserController extends Controller
         return response($user, 200);
     }
 
-    /**
-     * Update a user password by id
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
     public function password(UpdatePassUserRequest $request, int $id)
     {
         $data = $request->all();
@@ -145,12 +126,6 @@ class UserController extends Controller
         return response($user, 200);
     }
 
-    /**
-     * Delete a user by id
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy(int $id)
     {
         $user = User::findOrFail($id);
@@ -161,45 +136,20 @@ class UserController extends Controller
     public function permissionsCheck(Request $request)
     {
         $permission = $request->input('permission', '');
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $userPermission = $user->hasPermissionTo($permission);
         return response($userPermission, 200);
     }
 
-    public function entityCheck(Request $request)
+    public function entityCheck(Request $request, UserService $userService)
     {
-        $debug = false;
-        if ($debug) {
-            Log::debug('---------- entityCheck INICIO ----------');
-            Log::debug('Request: ' . json_encode($request->all()));
+        try {
+            $entity = $request->input('entity', '');
+            $actions = $userService->entityCheck($entity);
+            return response($actions, 200);
+        } catch (\Exception $e) {
+            return response(['message' => 'Error al obtener los permisos.'], 500);
         }
-        $entity = $request->input('entity', '');
-
-        $user = Auth::user();
-        if ($debug) Log::debug('User: ' . json_encode($user));
-
-        $roles = $user->getRoleNames();
-
-        // Verificar si el usuario tiene roles antes de acceder al índice 0
-        if ($roles->isNotEmpty() && strtoupper($roles[0]) === 'SUPERADMIN') {
-            if ($debug) Log::debug('RETURN Superadmin');
-            return response(['full'], 200);
-        }
-
-        $permissions = $user->getAllPermissions();
-        // Filtra los permisos por entidad
-        $entityPermissions = $permissions->filter(function ($permission) use ($entity) {
-            return strpos($permission->name, $entity . '_') === 0;
-        })->pluck('name')->toArray();
-
-        if ($debug) Log::debug('ENTITY Permissions: ' . json_encode($entityPermissions));
-        // Obtiene solo la acción de los permisos
-        $actions = array_map(function ($permission) use ($entity) {
-            return substr($permission, strlen($entity) + 1);
-        }, $entityPermissions);
-
-        if ($debug) Log::debug('RETURN Actions: ' . json_encode($actions));
-        if ($debug) Log::debug('---------------- FIN ---------------------');
-        return response(array_unique($actions), 200);
     }
 }

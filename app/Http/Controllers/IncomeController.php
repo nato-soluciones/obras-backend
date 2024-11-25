@@ -191,7 +191,6 @@ class IncomeController extends Controller
     public function exportList(int $obraId)
     {
         $incomes = Income::where('obra_id', $obraId)
-            ->withTrashed()
             ->orderBy('receipt_number', 'desc')
             ->get();
         $f = fopen('php://memory', 'r+');

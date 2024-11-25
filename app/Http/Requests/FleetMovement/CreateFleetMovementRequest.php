@@ -28,7 +28,7 @@ class CreateFleetMovementRequest extends FormRequest
             'responsible' => ['required', 'string'],
             'mileage' => ['required', 'integer'],
             'service' => ['required', 'string'],
-            'image' => ['nullable', 'image'],
+            'image' => ['nullable'],
             'comments' => ['nullable', 'string'],
             'fleet_id' => ['required', 'exists:fleets,id'],
         ];

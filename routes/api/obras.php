@@ -129,9 +129,11 @@ Route::prefix('obras/{obraId}/stages/{stageId}/sub_stages/{subStageId}/tasks/{ta
 Route::prefix('obras/{obraId}/stages/{stageId}/sub_stages/{subStageId}/tasks')->middleware('auth:sanctum')->controller(ObraStageSubStageTaskController::class)->group(function () {
   // Route::get('/', 'index')->middleware('permission:obraStageSubStageTasks_list');
   Route::get('/{taskId}', 'show')->middleware('permission:obraStageSubStageTasks_display');
+  Route::get('/{taskId}/quality_controls', 'getQualityControl')->middleware('permission:obraStageSubStageTasks_display');
   Route::post('/', 'store')->middleware('permission:obraStageSubStageTasks_insert');
-  Route::post('/{taskId}', 'update')->middleware('permission:obraStageSubStageTasks_update');
   Route::post('/{taskId}/update_progress', 'updateProgress')->middleware('permission:obraStageSubStageTasks_changeProgress');
+  Route::post('/{taskId}', 'update')->middleware('permission:obraStageSubStageTasks_update');
+  Route::put('/{taskId}/quality_controls', 'updateQualityControl')->middleware('permission:obraStageSubStageTasks_qualityControl');
   Route::delete('/{taskId}', 'destroy')->middleware('permission:obraStageSubStageTasks_delete');
 });
 

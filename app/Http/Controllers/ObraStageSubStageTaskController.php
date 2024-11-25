@@ -4,11 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Obra\Stage\SubStage\Task\StoreTaskRequest;
 use App\Http\Requests\Obra\Stage\SubStage\Task\UpdateTaskRequest;
-use App\Http\Services\ObraService;
 use App\Http\Services\ObraStageService;
 use App\Http\Services\ObraStageSubStageTaskService;
-use App\Models\ObraStage;
-use App\Models\ObraStageSubStage;
 use App\Models\ObraStageSubStageTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -31,8 +28,8 @@ class ObraStageSubStageTaskController extends Controller
     public function store(StoreTaskRequest $request, int $obraId, int $stageId, int $subStageId)
     {
         try {
-            $task = $this->obraStageSubStageTaskService->store($request, $obraId, $stageId, $subStageId);
-            return response()->json($task, 201);
+            $this->obraStageSubStageTaskService->store($request, $obraId, $stageId, $subStageId);
+            return response()->json(['message' => 'Tarea creada correctamente'], 201);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         } catch (\Exception $e) {
@@ -41,9 +38,9 @@ class ObraStageSubStageTaskController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(int $obraId, int $stageId, int $subStageId, int $taskId)
     {
-        $obraStageTask = ObraStageSubStageTask::with('responsible')->find($id);
+        $obraStageTask = ObraStageSubStageTask::with('responsible')->find($taskId);
         return response($obraStageTask, 200);
     }
 
@@ -85,6 +82,32 @@ class ObraStageSubStageTaskController extends Controller
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json(['message' => 'Error al eliminar la tarea'], 500);
+        }
+    }
+
+    public function getQualityControl(int $obraId, int $stageId, int $subStageId, int $taskId)
+    {
+        try {
+            $response = $this->obraStageSubStageTaskService->getQualityControl($obraId, $stageId, $subStageId, $taskId);
+            return response()->json($response, 200);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al obtener el control de calidad'], 500);
+        }
+    }
+
+    public function updateQualityControl(Request $request, int $obraId, int $stageId, int $subStageId, int $taskId)
+    {
+        try {
+            $this->obraStageSubStageTaskService->updateQualityControl($request, $obraId, $stageId, $subStageId, $taskId);
+            return response()->json(['message' => 'Control de calidad actualizado correctamente'], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al actualizar el control de calidad'], 500);
         }
     }
 }
