@@ -19,6 +19,5 @@ class Store extends Model
         'name',
         'address',
         'description',
-        'created_at',
     ];
 }
