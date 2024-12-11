@@ -7,4 +7,5 @@ Route::prefix('stores')->middleware('auth:sanctum')->controller(StoreController:
   Route::get('/', 'index');
   Route::get('/{id}', 'show');
   Route::post('/', 'store');
+  Route::delete('/{id}', 'destroy');
 });
