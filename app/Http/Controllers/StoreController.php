@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Store\CreateStoreRequest;
 use Illuminate\Http\Request;
 use App\Models\Store;
 
@@ -18,19 +19,12 @@ class StoreController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateStoreRequest $request)
     {
-        //
+        $store = Store::create($request->validated());
+        return response($store, 201);
     }
 
     /**
