@@ -10,11 +10,8 @@ class MaterialController extends Controller
 {
     public function index(): Response
     {
-        $materials = Material::from('materials as m')
-            ->join('measurement_units as mu', 'm.measurement_unit_id', '=', 'mu.id')
-            ->select('m.id', 'm.name', 'mu.id as unit_id', 'mu.name as unit_name')
-            ->orderBy('name')
-            ->get();
+        $materials = Material::select('id', 'name', 'description', 'measurement_unit_id')->get();
+
         return response($materials, 200);
     }
 
@@ -51,17 +48,21 @@ class MaterialController extends Controller
     }
 
     /**
-     * Update a manufacturer category by id
+     * Update the specified resource in storage.
      *
      * @param Request $request
      * @param int $id
      * @return Response
      */
-    public function update(Request $request, int $id): Response
+    public function update(Request $request, string $id)
     {
-        $material = Material::find($id);
-        $material->update($request->all());
-        return response($material, 200);
+        try {
+            $material = Material::findOrFail($id);
+            $material->update($request->all());
+            return response($material, 200);
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Material no encontrado'], 404);
+        }
     }
 
     /**

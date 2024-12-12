@@ -15,9 +15,13 @@ class Material extends Model
         'measurement_unit_id',
     ];
 
-
+    public function storeMaterials()
+    {
+        return $this->hasMany(StoreMaterial::class);
+    }
+    
     public function movements()
     {
-        return $this->hasMany(ObraMaterialMovement::class);
+        return $this->hasMany(Movement::class);
     }
 }

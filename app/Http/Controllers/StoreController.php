@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Store\CreateStoreRequest;
+use App\Http\Requests\Store\UpdateStoreRequest;
 use Illuminate\Http\Request;
 use App\Models\Store;
 use Illuminate\Http\Response;
@@ -43,15 +44,20 @@ class StoreController extends Controller
      */
     public function edit(string $id)
     {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateStoreRequest $request, string $id)
     {
-        //
+        try {
+            $store = Store::findOrFail($id);
+            $store->update($request->all());
+            return response($store, 200);
+        } catch (ModelNotFoundException $e) {
+            return response(['error' => 'Almacén no encontrado'], 404);
+        }
     }
 
     /**
