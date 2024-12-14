@@ -17,6 +17,7 @@ use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\InitialSettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MaterialStoreController;
 
 /*
 |--------------------------------------------------------------------------
@@ -145,3 +146,11 @@ Route::prefix('app_settings')->middleware('auth:sanctum')->controller(AppSetting
 // Route::prefix('developer')->middleware('auth:sanctum')->controller(DeveloperController::class)->group(function() {
 //     Route::get('/', 'index');
 // });
+
+Route::prefix('material_store')->middleware('auth:sanctum')->controller(MaterialStoreController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});

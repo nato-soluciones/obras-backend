@@ -10,6 +10,8 @@ class StoreMaterial extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'materials_store';
+
     /**
      * The attributes that are mass assignable.
      *
