@@ -20,4 +20,21 @@ class Store extends Model
         'address',
         'description',
     ];
+
+     public function materialsStore()
+     {
+         return $this->hasMany(StoreMaterial::class, 'store_id');
+     }
+ 
+     public function materials()
+     {
+         return $this->hasManyThrough(
+             Material::class,
+             StoreMaterial::class, 
+             'store_id', 
+             'id', 
+             'id', 
+             'material_id'
+         );
+     }
 }
