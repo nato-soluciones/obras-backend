@@ -128,11 +128,11 @@ Route::prefix('notifications')->middleware('auth:sanctum')->controller(Notificat
     Route::delete('/{id}', 'destroy');
 });
 
-Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
+/* Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
-});
+}); */
 
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function () {
     Route::get('/', 'index');
@@ -147,10 +147,3 @@ Route::prefix('app_settings')->middleware('auth:sanctum')->controller(AppSetting
 //     Route::get('/', 'index');
 // });
 
-Route::prefix('material_store')->middleware('auth:sanctum')->controller(MaterialStoreController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
