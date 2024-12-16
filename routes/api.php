@@ -40,6 +40,7 @@ include_once __DIR__ . '/api/permissions.php';
 include_once __DIR__ . '/api/companies.php';
 include_once __DIR__ . '/api/stores.php';
 include_once __DIR__ . '/api/materials.php';
+include_once __DIR__ . '/api/movements.php';
 
 Route::prefix('initial_settings')->middleware('auth:sanctum')->controller(InitialSettingController::class)->group(function () {
     Route::get('/', 'index');
