@@ -20,6 +20,10 @@ class Movement extends Model
         'status'
     ];
 
+    protected $casts = [
+        'quantity' => 'float',
+    ];
+
     /**
      * Get the user that created the movement.
      */
