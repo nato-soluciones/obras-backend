@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Movement extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'created_by_id',
@@ -17,6 +18,10 @@ class Movement extends Model
         'material_id',
         'quantity',
         'status'
+    ];
+
+    protected $casts = [
+        'quantity' => 'float',
     ];
 
     /**

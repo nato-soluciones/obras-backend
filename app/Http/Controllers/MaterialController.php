@@ -5,13 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MaterialController extends Controller
 {
     public function index(): Response
     {
-        $materials = Material::select('id', 'name', 'description', 'measurement_unit_id')->get();
-
+        $materials = Material::with('measurementUnit')->get()->map(function ($material) {
+            return [
+                'id' => $material->id,
+                'name' => $material->name,
+                'description' => $material->description,
+                'measurement_unit' => $material->measurementUnit
+            ];
+        });
+        
         return response($materials, 200);
     }
 
@@ -41,10 +49,18 @@ class MaterialController extends Controller
      * @param int $id
      * @return Response
      */
-    public function show(int $id): Response
+    public function show(string $id): Response
     {
-        $material = Material::find($id);
-        return response($material, 200);
+        $material = Material::with('measurementUnit')->findOrFail($id);
+        
+        $formatted = [
+            'id' => $material->id,
+            'name' => $material->name,
+            'description' => $material->description,
+            'measurement_unit' => $material->measurementUnit
+        ];
+        
+        return response($formatted, 200);
     }
 
     /**

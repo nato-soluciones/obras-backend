@@ -17,6 +17,7 @@ use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\InitialSettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MaterialStoreController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,7 @@ include_once __DIR__ . '/api/permissions.php';
 include_once __DIR__ . '/api/companies.php';
 include_once __DIR__ . '/api/stores.php';
 include_once __DIR__ . '/api/materials.php';
+include_once __DIR__ . '/api/movements.php';
 
 Route::prefix('initial_settings')->middleware('auth:sanctum')->controller(InitialSettingController::class)->group(function () {
     Route::get('/', 'index');
@@ -127,11 +129,11 @@ Route::prefix('notifications')->middleware('auth:sanctum')->controller(Notificat
     Route::delete('/{id}', 'destroy');
 });
 
-Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
+/* Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
     Route::post('/', 'store');
-});
+}); */
 
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function () {
     Route::get('/', 'index');
@@ -145,3 +147,4 @@ Route::prefix('app_settings')->middleware('auth:sanctum')->controller(AppSetting
 // Route::prefix('developer')->middleware('auth:sanctum')->controller(DeveloperController::class)->group(function() {
 //     Route::get('/', 'index');
 // });
+

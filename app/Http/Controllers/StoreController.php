@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Store\CreateStoreRequest;
 use App\Http\Requests\Store\UpdateStoreRequest;
-use Illuminate\Http\Request;
 use App\Models\Store;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,9 +14,27 @@ class StoreController extends Controller
      */
     public function index(): Response
     {
-        $stores = Store::select('id', 'name', 'address', 'description', 'created_at')->get();
+        $stores = Store::with(['materialsStore.material'])->get();
 
-        return response($stores, 200);
+        $formatted = $stores->map(function ($store) {
+            return [
+                'id' => $store->id,
+                'name' => $store->name,
+                'address' => $store->address,
+                'materials' => $store->materialsStore->map(function ($materialStore) {
+                    return [
+                        'material_id' => $materialStore->material_id,
+                        'name' => $materialStore->material->name,
+                        'description' => $materialStore->material->description,
+                        'quantity' => $materialStore->quantity,
+                        'minimum_limit' => $materialStore->minimum_limit,
+                        'critical_limit' => $materialStore->critical_limit
+                    ];
+                })
+            ];
+        });
+
+        return response($formatted, 200);
     }
 
     /**
@@ -34,9 +51,29 @@ class StoreController extends Controller
      */
     public function show(string $id): Response
     {
-        $store = Store::select('id', 'name', 'address', 'description', 'created_at')->find($id);
+        $store = Store::with(['materialsStore.material'])->find($id);
 
-        return response($store, 200);
+    if (!$store) {
+        return response()->json(['error' => 'Almacén no encontrado'], 404);
+    }
+
+    $formatted = [
+        'id' => $store->id,
+        'name' => $store->name,
+        'address' => $store->address,
+        'materials' => $store->materialsStore->map(function ($materialStore) {
+            return [
+                'material_id' => $materialStore->material_id,
+                'material_name' => $materialStore->material->name,
+                'description' => $materialStore->material->description,
+                'quantity' => $materialStore->quantity,
+                'minimum_limit' => $materialStore->minimum_limit,
+                'critical_limit' => $materialStore->critical_limit
+            ];
+        }),
+    ];
+
+        return response($formatted, 200);
     }
 
     /**

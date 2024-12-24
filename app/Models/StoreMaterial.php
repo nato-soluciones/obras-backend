@@ -10,6 +10,8 @@ class StoreMaterial extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'materials_store';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -29,9 +31,9 @@ class StoreMaterial extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'quantity' => 'integer',
-        'minimum_limit' => 'integer',
-        'critical_limit' => 'integer',
+        'quantity' => 'float',
+        'minimum_limit' => 'float',
+        'critical_limit' => 'float',
     ];
 
     /**
