@@ -15,14 +15,17 @@ class StoreMovementConceptSeeder extends Seeder
     {
         $concepts = [
             [
+                'movement_type_id' => 2,
                 'name' => 'Ingreso de material adquirido a proveedor',
                 'description' => 'Se abastece stock de almacén con materiales nuevos',
             ],
             [
+                'movement_type_id' => 3,
                 'name' => 'Devolución',
                 'description' => 'Material devuelto al proveedor',
             ],
             [
+                'movement_type_id' => 1,
                 'name' => 'Transferencia interna',
                 'description' => 'Material trasladado entre almacenes internos',
             ],
