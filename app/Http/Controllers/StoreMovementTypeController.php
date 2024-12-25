@@ -9,7 +9,7 @@ class StoreMovementTypeController extends Controller
 {
     public function index()
     {
-        $movementTypes = StoreMovementType::all();
+        $movementTypes = StoreMovementType::get();
 
         return response($movementTypes, 200);
     }

@@ -9,7 +9,7 @@ class StoreMovementStatusController extends Controller
 {
     public function index()
     {
-        $movementStatuses = StoreMovementStatus::all();
+        $movementStatuses = StoreMovementStatus::get();
 
         return response($movementStatuses, 200);
     }

@@ -9,7 +9,7 @@ class StoreMovementConceptController extends Controller
 {
     public function index()
     {
-        $movementConcepts = StoreMovementConcept::all();
+        $movementConcepts = StoreMovementConcept::get();
 
         return response($movementConcepts, 200);
     }
