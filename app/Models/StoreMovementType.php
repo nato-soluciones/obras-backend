@@ -13,4 +13,9 @@ class StoreMovementType extends Model
     public $timestamps = false; // Desactiva created_at y updated_at
 
     protected $fillable = ['name', 'description'];
+
+    public function concepts()
+    {
+        return $this->hasMany(StoreMovementConcept::class, 'movement_type_id');
+    }
 }

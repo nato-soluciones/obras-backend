@@ -14,9 +14,16 @@ class StoreMovementTypeController extends Controller
         return response($movementTypes, 200);
     }
 
+    public function indexWithConcepts()
+    {
+        $types = StoreMovementType::with('concepts')->get();
+
+        return response($types, 200);
+    }
+
     public function show($id)
     {
-        $storeMovementType = StoreMovementType::find($id);
+        $storeMovementType = StoreMovementType::with('concepts')->find($id);
         if (!$storeMovementType) {
             return response()->json(['error' => 'No se encontró el tipo de movimiento'], 404);
         }

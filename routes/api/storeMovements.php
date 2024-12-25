@@ -18,7 +18,7 @@ Route::prefix('/store-movement-concepts')->middleware('auth:sanctum')->controlle
 });
 
 Route::prefix('/store-movement-types')->middleware('auth:sanctum')->controller(StoreMovementTypeController::class)->group(function () {
-  Route::get('/', 'index');
+  Route::get('/', 'indexWithConcepts');
   Route::get('/{id}', 'show');
 });
 
