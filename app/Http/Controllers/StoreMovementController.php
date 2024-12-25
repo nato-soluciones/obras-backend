@@ -10,6 +10,9 @@ use App\Models\Store;
 use App\Models\Material;
 use App\Models\StoreMaterial;
 use App\Models\StoreMovement;
+use App\Models\StoreMovementConcept;
+use App\Models\StoreMovementStatus;
+use App\Models\StoreMovementType;
 use Illuminate\Support\Facades\DB;
 
 class StoreMovementController extends Controller
@@ -33,6 +36,9 @@ class StoreMovementController extends Controller
             $fromStore = Store::findOrFail($request->from_store_id);
             $toStore = Store::findOrFail($request->to_store_id);
             $material = Material::findOrFail($request->material_id);
+            // $type = StoreMovementType::findOrFail($request->store_movement_type_id);
+            // $status = StoreMovementStatus::findOrFail($request->store_movement_status_id);
+            // $concept = StoreMovementConcept::findOrFail($request->store_movement_concept_id);
 
             $fromStoreMaterial = StoreMaterial::where('store_id', $fromStore->id)
                 ->where('material_id', $material->id)
