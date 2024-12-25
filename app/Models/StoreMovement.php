@@ -17,7 +17,10 @@ class StoreMovement extends Model
         'to_store_id',
         'material_id',
         'quantity',
-        'status'
+        'store_movement_type_id',
+        'store_movement_status_id',
+        'store_movement_concept_id',
+
     ];
 
     protected $casts = [
@@ -54,5 +57,29 @@ class StoreMovement extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class, 'material_id');
+    }
+
+    /**
+     * Get the status associated with the movement.
+     */
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(StoreMovementStatus::class, 'store_movement_status_id');
+    }
+
+    /**
+     * Get the type associated with the movement.
+     */
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(StoreMovementType::class, 'store_movement_type_id');
+    }
+
+    /**
+     * Get the type associated with the movement.
+     */
+    public function concept(): BelongsTo
+    {
+        return $this->belongsTo(StoreMovementConcept::class, 'store_movement_concept_id');
     }
 }
