@@ -12,17 +12,17 @@ Route::prefix('store-movements')->middleware('auth:sanctum')->controller(StoreMo
   Route::post('/', 'store');
 });
 
-Route::prefix('store-movements/concepts')->middleware('auth:sanctum')->controller(StoreMovementConceptController::class)->group(function () {
+Route::prefix('/store-movement-concepts')->middleware('auth:sanctum')->controller(StoreMovementConceptController::class)->group(function () {
   Route::get('/', 'index');
   Route::get('/{id}', 'show');
 });
 
-Route::prefix('store-movements/types')->middleware('auth:sanctum')->controller(StoreMovementTypeController::class)->group(function () {
+Route::prefix('/store-movement-types')->middleware('auth:sanctum')->controller(StoreMovementTypeController::class)->group(function () {
   Route::get('/', 'index');
   Route::get('/{id}', 'show');
 });
 
-Route::prefix('store-movements/statuses')->middleware('auth:sanctum')->controller(StoreMovementStatusController::class)->group(function () {
+Route::prefix('/store-movement-statuses')->middleware('auth:sanctum')->controller(StoreMovementStatusController::class)->group(function () {
   Route::get('/', 'index');
   Route::get('/{id}', 'show');
 });
