@@ -4,22 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Movement\StoreMovementRequest;
 use Illuminate\Http\Request;
-use App\Models\Movement;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Store;
 use App\Models\Material;
 use App\Models\StoreMaterial;
+use App\Models\StoreMovement;
+use App\Models\StoreMovementConcept;
+use App\Models\StoreMovementStatus;
+use App\Models\StoreMovementType;
 use Illuminate\Support\Facades\DB;
 
-class MovementController extends Controller
+class StoreMovementController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(): Response
     {
-        $movements = Movement::select('id', 'from_store_id', 'to_store_id', 'material_id', 'quantity', 'status')->get();
+        $movements = StoreMovement::select('id', 'from_store_id', 'to_store_id', 'material_id', 'quantity', 'status')->get();
 
         return response($movements, 200);
     }
@@ -33,6 +36,9 @@ class MovementController extends Controller
             $fromStore = Store::findOrFail($request->from_store_id);
             $toStore = Store::findOrFail($request->to_store_id);
             $material = Material::findOrFail($request->material_id);
+            // $type = StoreMovementType::findOrFail($request->store_movement_type_id);
+            // $status = StoreMovementStatus::findOrFail($request->store_movement_status_id);
+            // $concept = StoreMovementConcept::findOrFail($request->store_movement_concept_id);
 
             $fromStoreMaterial = StoreMaterial::where('store_id', $fromStore->id)
                 ->where('material_id', $material->id)
@@ -48,7 +54,7 @@ class MovementController extends Controller
 
             DB::beginTransaction();
             try {
-                $movement = Movement::create($request->all());
+                $movement = StoreMovement::create($request->all());
                 $fromStoreMaterial->quantity -= $request->quantity;
                 $fromStoreMaterial->save();
 
@@ -92,7 +98,7 @@ class MovementController extends Controller
      */
     public function show(string $id): Response
     {
-        $movement = Movement::select('id', 'from_store_id', 'to_store_id', 'material_id', 'quantity', 'status')->find($id);
+        $movement = StoreMovement::select('id', 'from_store_id', 'to_store_id', 'material_id', 'quantity', 'status')->find($id);
 
         return response($movement, 200);
     }
