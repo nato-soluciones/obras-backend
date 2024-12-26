@@ -21,5 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(IndicesSeeder::class);
         $this->call(MeasurementUnitsSeeder::class);
         $this->call(ObraDailyLogTagsSeeder::class);
+        $this->call(UserStoreSeeder::class);
     }
 }
