@@ -28,5 +28,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StoreMovementTypeSeeder::class);
         $this->call(StoreMovementConceptSeeder::class);
         $this->call(StoreMovementSeeder::class);
+        $this->call(StoreMaterialSeeder::class);
     }
 }
