@@ -10,6 +10,8 @@ Route::prefix('store-movements')->middleware('auth:sanctum')->controller(StoreMo
   Route::get('/', 'index');
   Route::get('/{id}', 'show');
   Route::post('/', 'store');
+  Route::post('/input', 'storeInput');
+  Route::post('/output', 'storeOutput');
 });
 
 Route::prefix('/store-movement-concepts')->middleware('auth:sanctum')->controller(StoreMovementConceptController::class)->group(function () {

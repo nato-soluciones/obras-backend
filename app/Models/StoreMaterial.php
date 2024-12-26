@@ -57,6 +57,6 @@ class StoreMaterial extends Model
      */
     public function movements()
     {
-        return $this->hasMany(Movement::class);
+        return $this->hasMany(StoreMovement::class);
     }
 }

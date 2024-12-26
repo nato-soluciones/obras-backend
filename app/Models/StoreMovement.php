@@ -56,7 +56,7 @@ class StoreMovement extends Model
      */
     public function material(): BelongsTo
     {
-        return $this->belongsTo(Material::class, 'material_id');
+        return $this->belongsTo(Material::class);
     }
 
     /**

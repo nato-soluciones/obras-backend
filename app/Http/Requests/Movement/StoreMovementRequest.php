@@ -27,7 +27,6 @@ class StoreMovementRequest extends FormRequest
             'to_store_id' => 'required|exists:stores,id|different:from_store_id',
             'material_id' => 'required|exists:materials,id',
             'quantity' => 'required|numeric|min:0.01',
-            'store_movement_type_id' => 'required|exists:store_movement_types,id',
             'store_movement_concept_id' => 'required|exists:store_movement_concepts,id',
         ];
     }
