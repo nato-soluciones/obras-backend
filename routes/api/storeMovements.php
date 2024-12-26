@@ -28,3 +28,7 @@ Route::prefix('/store-movement-statuses')->middleware('auth:sanctum')->controlle
   Route::get('/', 'index');
   Route::get('/{id}', 'show');
 });
+
+Route::prefix('stores/{storeId}/movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
+    Route::get('/', 'indexByStore');
+});

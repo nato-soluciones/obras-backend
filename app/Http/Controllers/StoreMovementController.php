@@ -285,4 +285,51 @@ class StoreMovementController extends Controller
 
         return response($formatted, 200);
     }
+
+    public function indexByStore(string $storeId): Response
+    {
+        $movements = StoreMovement::with([
+            'movementMaterials.material.measurementUnit',
+            'status',
+            'type',
+            'concept',
+            'fromStore',
+            'toStore',
+            'createdBy'
+        ])
+        ->where('from_store_id', $storeId)
+        ->orWhere('to_store_id', $storeId)
+        ->get()
+        ->map(function ($movement) {
+            return [
+                'id' => $movement->id,
+                'created_at' => $movement->created_at,
+                'created_by' => $movement->createdBy,
+                'from_store' => $movement->fromStore,
+                'to_store' => $movement->toStore,
+                'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
+                    return [
+                        'id' => $movementMaterial->material->id,
+                        'name' => $movementMaterial->material->name,
+                        'measurement_unit' => $movementMaterial->material->measurementUnit,
+                        'quantity' => $movementMaterial->quantity
+                    ];
+                }),
+                'type' => [
+                    'id' => $movement->type->id,
+                    'name' => $movement->type->name,
+                ],
+                'status' => [
+                    'id' => $movement->status->id,
+                    'name' => $movement->status->name,
+                ],
+                'concept' => [
+                    'id' => $movement->concept->id,
+                    'name' => $movement->concept->name,
+                ],
+            ];
+        });
+
+        return response($movements, 200);
+    }
 }
