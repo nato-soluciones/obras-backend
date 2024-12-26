@@ -37,4 +37,14 @@ class Store extends Model
              'material_id'
          );
      }
+
+     public function users()
+     {
+        return $this->belongsToMany(User::class, 'user_store');
+     }
+
+     public function userStores()
+     {
+         return $this->hasMany(UserStore::class);
+     }
 }
