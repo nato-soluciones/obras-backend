@@ -66,4 +66,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserNotificationSetting::class);
     }
+
+    public function stores()
+    {
+        return $this->belongsToMany(Store::class, 'user_store');
+    }
+
+    public function userStores()
+    {
+        return $this->hasMany(UserStore::class);
+    }
 }

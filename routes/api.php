@@ -18,6 +18,7 @@ use App\Http\Controllers\InitialSettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MaterialStoreController;
+use App\Http\Controllers\UserStoreController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,7 @@ include_once __DIR__ . '/api/companies.php';
 include_once __DIR__ . '/api/stores.php';
 include_once __DIR__ . '/api/materials.php';
 include_once __DIR__ . '/api/storeMovements.php';
+include_once __DIR__ . '/api/userStores.php';
 
 Route::prefix('initial_settings')->middleware('auth:sanctum')->controller(InitialSettingController::class)->group(function () {
     Route::get('/', 'index');
@@ -147,4 +149,3 @@ Route::prefix('app_settings')->middleware('auth:sanctum')->controller(AppSetting
 // Route::prefix('developer')->middleware('auth:sanctum')->controller(DeveloperController::class)->group(function() {
 //     Route::get('/', 'index');
 // });
-
