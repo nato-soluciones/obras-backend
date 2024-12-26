@@ -128,7 +128,7 @@ class StoreMovementController extends Controller
     public function storeInput(StoreMovementInputRequest $request): Response
     {
         // busco status y type por defecto
-        $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
+        $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
         $inputType = StoreMovementType::where('name', 'Ingreso')->firstOrFail();
 
         DB::beginTransaction();
@@ -140,7 +140,7 @@ class StoreMovementController extends Controller
                 'to_store_id' => $request->store_id,
                 'store_movement_type_id' => $inputType->id,
                 'store_movement_concept_id' => $request->store_movement_concept_id,
-                'store_movement_status_id' => $pendingStatus->id
+                'store_movement_status_id' => $acceptedStatus->id
             ]);
 
             // proceso cada material
@@ -197,7 +197,7 @@ class StoreMovementController extends Controller
         }
 
         // busco status y type por defecto
-        $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
+        $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
         $outputType = StoreMovementType::where('name', 'Salida')->firstOrFail();
 
         DB::beginTransaction();
@@ -209,7 +209,7 @@ class StoreMovementController extends Controller
                 'to_store_id' => $request->store_id,
                 'store_movement_type_id' => $outputType->id,
                 'store_movement_concept_id' => $request->store_movement_concept_id,
-                'store_movement_status_id' => $pendingStatus->id
+                'store_movement_status_id' => $acceptedStatus->id
             ]);
 
             // proceso cada material
@@ -284,5 +284,137 @@ class StoreMovementController extends Controller
         ];
 
         return response($formatted, 200);
+    }
+
+    /**
+     * Accept a pending transfer movement
+     */
+    public function acceptTransfer(string $id): Response
+    {
+        DB::beginTransaction();
+        try {
+            $movement = StoreMovement::with(['movementMaterials.material', 'type'])
+                ->findOrFail($id);
+
+            // checkeo que sea una transferencia
+            if ($movement->type->name !== 'Transferencia') {
+                return response([
+                    'message' => 'El movimiento no es una transferencia'
+                ], 400);
+            }
+
+            $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
+            $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
+
+            // checkeo que esté pending
+            if ($movement->store_movement_status_id !== $pendingStatus->id) {
+                return response([
+                    'message' => 'La transferencia no está en estado pendiente'
+                ], 400);
+            }
+
+            // ciclo cada material
+            foreach ($movement->movementMaterials as $movementMaterial) {
+                // Creo o actualizo el StoreMaterial en store destino
+                $toStoreMaterial = StoreMaterial::firstOrCreate(
+                    [
+                        'store_id' => $movement->to_store_id,
+                        'material_id' => $movementMaterial->material_id
+                    ],
+                    [
+                        'quantity' => 0,
+                        'minimum_limit' => 0,
+                        'critical_limit' => 0
+                    ]
+                );
+
+                // Sumo la cantidad al store destino
+                $toStoreMaterial->quantity += $movementMaterial->quantity;
+                $toStoreMaterial->save();
+            }
+
+            $movement->store_movement_status_id = $acceptedStatus->id;
+            $movement->save();
+
+            DB::commit();
+            return response($movement->load([
+                'movementMaterials.material.measurementUnit',
+                'status',
+                'type',
+                'concept',
+                'fromStore',
+                'toStore',
+                'createdBy'
+            ]), 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => 'Error al procesar la aceptación de la transferencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject a pending transfer movement
+     */
+    public function rejectTransfer(string $id): Response
+    {
+        DB::beginTransaction();
+        try {
+            $movement = StoreMovement::with(['movementMaterials.material', 'type'])
+                ->findOrFail($id);
+
+            // checkeo que sea una transferencia
+            if ($movement->type->name !== 'Transferencia') {
+                return response([
+                    'message' => 'El movimiento no es una transferencia'
+                ], 400);
+            }
+
+            $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
+            $rejectedStatus = StoreMovementStatus::where('name', 'Rechazado')->firstOrFail();
+
+            // checkeo que esté pendiente
+            if ($movement->store_movement_status_id !== $pendingStatus->id) {
+                return response([
+                    'message' => 'La transferencia no está en estado pendiente'
+                ], 400);
+            }
+
+            foreach ($movement->movementMaterials as $movementMaterial) {
+                // busco el StoreMaterial en el store origen
+                $fromStoreMaterial = StoreMaterial::where('store_id', $movement->from_store_id)
+                    ->where('material_id', $movementMaterial->material_id)
+                    ->firstOrFail();
+
+                // Devuelvo la quantity al store origen
+                $fromStoreMaterial->quantity += $movementMaterial->quantity;
+                $fromStoreMaterial->save();
+            }
+
+            // Actualizo el estado del movimiento
+            $movement->store_movement_status_id = $rejectedStatus->id;
+            $movement->save();
+
+            DB::commit();
+            return response($movement->load([
+                'movementMaterials.material.measurementUnit',
+                'status',
+                'type',
+                'concept',
+                'fromStore',
+                'toStore',
+                'createdBy'
+            ]), 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => 'Error al procesar el rechazo de la transferencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
