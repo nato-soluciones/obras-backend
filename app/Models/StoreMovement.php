@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StoreMovement extends Model
 {
@@ -81,5 +82,10 @@ class StoreMovement extends Model
     public function concept(): BelongsTo
     {
         return $this->belongsTo(StoreMovementConcept::class, 'store_movement_concept_id');
+    }
+
+    public function movementMaterials(): HasMany
+    {
+        return $this->hasMany(StoreMovementMaterial::class);
     }
 }
