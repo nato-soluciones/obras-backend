@@ -12,6 +12,7 @@ use App\Models\StoreMovement;
 use App\Models\StoreMovementStatus;
 use App\Models\StoreMovementType;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class StoreMovementController extends Controller
 {
@@ -416,5 +417,61 @@ class StoreMovementController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+    public function indexByStore(string $storeId, Request $request): Response
+    {
+        $query = StoreMovement::with([
+            'movementMaterials.material.measurementUnit',
+            'status',
+            'type',
+            'concept',
+            'fromStore',
+            'toStore',
+            'createdBy'
+        ])
+        ->where(function($query) use ($storeId) {
+            $query->where('from_store_id', $storeId)
+                  ->orWhere('to_store_id', $storeId);
+        });
+
+        // Filter by status if status parameter is present
+        if ($request->has('status')) {
+            $query->whereHas('status', function($q) use ($request) {
+                $q->where('name', $request->status);
+            });
+        }
+
+        $movements = $query->get()
+            ->map(function ($movement) {
+                return [
+                    'id' => $movement->id,
+                    'created_at' => $movement->created_at,
+                    'created_by' => $movement->createdBy,
+                    'from_store' => $movement->fromStore,
+                    'to_store' => $movement->toStore,
+                    'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
+                        return [
+                            'id' => $movementMaterial->material->id,
+                            'name' => $movementMaterial->material->name,
+                            'measurement_unit' => $movementMaterial->material->measurementUnit,
+                            'quantity' => $movementMaterial->quantity
+                        ];
+                    }),
+                    'type' => [
+                        'id' => $movement->type->id,
+                        'name' => $movement->type->name,
+                    ],
+                    'status' => [
+                        'id' => $movement->status->id,
+                        'name' => $movement->status->name,
+                    ],
+                    'concept' => [
+                        'id' => $movement->concept->id,
+                        'name' => $movement->concept->name,
+                    ],
+                ];
+            });
+
+        return response($movements, 200);
     }
 }

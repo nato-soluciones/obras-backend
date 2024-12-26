@@ -3,16 +3,32 @@
 namespace Database\Seeders;
 
 use App\Models\Store;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class StoreSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Store::factory()->count(5)->create();
+        $stores = [
+            [
+                'name' => 'Depósito Central',
+                'description' => 'Almacén principal de materiales',
+                'address' => 'Dirección del depósito central',
+            ],
+            [
+                'name' => 'Depósito Secundario',
+                'description' => 'Almacén secundario de materiales',
+                'address' => 'Dirección del depósito secundario',
+            ],
+            [
+                'name' => 'Depósito de Obra',
+                'description' => 'Almacén temporal para obras en curso',
+                'address' => 'Dirección del depósito de obra',
+            ],
+        ];
+
+        foreach ($stores as $store) {
+            Store::firstOrCreate($store);
+        }
     }
 }
