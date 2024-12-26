@@ -21,7 +21,7 @@ class StoreMovementController extends Controller
     public function index(): Response
     {
         $movements = StoreMovement::with([
-            'material.measurementUnit',
+            'movementMaterials.material.measurementUnit',
             'status',
             'type',
             'concept',
@@ -35,8 +35,14 @@ class StoreMovementController extends Controller
                 'created_by' => $movement->createdBy,
                 'from_store' => $movement->fromStore,
                 'to_store' => $movement->toStore,
-                'material' => $movement->material,
-                'quantity' => $movement->quantity,
+                'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
+                    return [
+                        'id' => $movementMaterial->material->id,
+                        'name' => $movementMaterial->material->name,
+                        'measurement_unit' => $movementMaterial->material->measurementUnit,
+                        'quantity' => $movementMaterial->quantity
+                    ];
+                }),
                 'type' => [
                     'id' => $movement->type->id,
                     'name' => $movement->type->name,
@@ -60,44 +66,59 @@ class StoreMovementController extends Controller
      */
     public function store(StoreMovementRequest $request): Response
     {
-        // Verificar stock del store de origen
-        $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
-            ->where('material_id', $request->material_id)
-            ->first();
+        // checkeo stock de materiales
+        foreach ($request->materials as $materialData) {
+            $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
+                ->where('material_id', $materialData['material_id'])
+                ->first();
 
-        if (!$fromStoreMaterial || $fromStoreMaterial->quantity < $request->quantity) {
-            return response()->json([
-                'message' => 'No hay suficiente stock en el almacén de origen',
-                'available_quantity' => $fromStoreMaterial ? $fromStoreMaterial->quantity : 0
-            ], 400);
+            if (!$fromStoreMaterial || $fromStoreMaterial->quantity < $materialData['quantity']) {
+                return response([
+                    'message' => 'No hay suficiente stock del material en el almacén de origen',
+                    'material_id' => $materialData['material_id'],
+                    'available_quantity' => $fromStoreMaterial ? $fromStoreMaterial->quantity : 0
+                ], 400);
+            }
         }
 
-        // Buscar el status Pendiente y tipo Transferencia
+        // busco type y status por defecto
         $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
         $transferType = StoreMovementType::where('name', 'Transferencia')->firstOrFail();
 
         DB::beginTransaction();
         try {
+            // creo el movimiento
             $movement = StoreMovement::create([
                 'created_by_id' => $request->created_by_id,
                 'from_store_id' => $request->from_store_id,
                 'to_store_id' => $request->to_store_id,
-                'material_id' => $request->material_id,
-                'quantity' => $request->quantity,
                 'store_movement_type_id' => $transferType->id,
                 'store_movement_concept_id' => $request->store_movement_concept_id,
                 'store_movement_status_id' => $pendingStatus->id
             ]);
 
-            $fromStoreMaterial->quantity -= $request->quantity;
-            $fromStoreMaterial->save();
+            // creo los movimientos de materiales
+            foreach ($request->materials as $materialData) {
+                $movement->movementMaterials()->create([
+                    'material_id' => $materialData['material_id'],
+                    'quantity' => $materialData['quantity']
+                ]);
+
+                // actualizo stock store origen
+                $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
+                    ->where('material_id', $materialData['material_id'])
+                    ->first();
+
+                $fromStoreMaterial->quantity -= $materialData['quantity'];
+                $fromStoreMaterial->save();
+            }
 
             DB::commit();
-            return response($movement, 201);
+            return response($movement->load('movementMaterials.material'), 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
+            return response([
                 'message' => 'Error al procesar el movimiento',
                 'error' => $e->getMessage()
             ], 500);
@@ -106,41 +127,48 @@ class StoreMovementController extends Controller
 
     public function storeInput(StoreMovementInputRequest $request): Response
     {
-        // Buscar el status Pendiente y tipo Ingreso
+        // busco status y type por defecto
         $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
         $inputType = StoreMovementType::where('name', 'Ingreso')->firstOrFail();
 
         DB::beginTransaction();
         try {
+            // creo el movimiento
             $movement = StoreMovement::create([
                 'created_by_id' => $request->created_by_id,
                 'from_store_id' => $request->store_id,
                 'to_store_id' => $request->store_id,
-                'material_id' => $request->material_id,
-                'quantity' => $request->quantity,
                 'store_movement_type_id' => $inputType->id,
                 'store_movement_concept_id' => $request->store_movement_concept_id,
                 'store_movement_status_id' => $pendingStatus->id
             ]);
 
-            // Crear o actualizar el StoreMaterial
-            $storeMaterial = StoreMaterial::firstOrCreate(
-                [
-                    'store_id' => $request->store_id,
-                    'material_id' => $request->material_id
-                ],
-                [
-                    'quantity' => 0,
-                    'minimum_limit' => 0,
-                    'critical_limit' => 0
-                ]
-            );
+            // proceso cada material
+            foreach ($request->materials as $materialData) {
+                $movement->movementMaterials()->create([
+                    'material_id' => $materialData['material_id'],
+                    'quantity' => $materialData['quantity']
+                ]);
 
-            $storeMaterial->quantity += $request->quantity;
-            $storeMaterial->save();
+                // creo o actualizo el storeMaterial
+                $storeMaterial = StoreMaterial::firstOrCreate(
+                    [
+                        'store_id' => $request->store_id,
+                        'material_id' => $materialData['material_id']
+                    ],
+                    [
+                        'quantity' => 0,
+                        'minimum_limit' => 0,
+                        'critical_limit' => 0
+                    ]
+                );
+
+                $storeMaterial->quantity += $materialData['quantity'];
+                $storeMaterial->save();
+            }
 
             DB::commit();
-            return response($movement, 201);
+            return response($movement->load('movementMaterials.material'), 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -153,40 +181,55 @@ class StoreMovementController extends Controller
 
     public function storeOutput(StoreMovementOutputRequest $request): Response
     {
-        // Verificar stock del store
-        $storeMaterial = StoreMaterial::where('store_id', $request->store_id)
-            ->where('material_id', $request->material_id)
-            ->first();
+        // check stock de materiales
+        foreach ($request->materials as $materialData) {
+            $storeMaterial = StoreMaterial::where('store_id', $request->store_id)
+                ->where('material_id', $materialData['material_id'])
+                ->first();
 
-        if (!$storeMaterial || $storeMaterial->quantity < $request->quantity) {
-            return response([
-                'message' => 'No hay suficiente stock en el almacén',
-                'available_quantity' => $storeMaterial ? $storeMaterial->quantity : 0
-            ], 400);
+            if (!$storeMaterial || $storeMaterial->quantity < $materialData['quantity']) {
+                return response([
+                    'message' => 'No hay suficiente stock del material en el almacén',
+                    'material_id' => $materialData['material_id'],
+                    'available_quantity' => $storeMaterial ? $storeMaterial->quantity : 0
+                ], 400);
+            }
         }
 
-        // Buscar el status Pendiente y tipo Salida
+        // busco status y type por defecto
         $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
         $outputType = StoreMovementType::where('name', 'Salida')->firstOrFail();
 
         DB::beginTransaction();
         try {
+            // creo el movimiento
             $movement = StoreMovement::create([
                 'created_by_id' => $request->created_by_id,
                 'from_store_id' => $request->store_id,
                 'to_store_id' => $request->store_id,
-                'material_id' => $request->material_id,
-                'quantity' => $request->quantity,
                 'store_movement_type_id' => $outputType->id,
                 'store_movement_concept_id' => $request->store_movement_concept_id,
                 'store_movement_status_id' => $pendingStatus->id
             ]);
 
-            $storeMaterial->quantity -= $request->quantity;
-            $storeMaterial->save();
+            // proceso cada material
+            foreach ($request->materials as $materialData) {
+                $movement->movementMaterials()->create([
+                    'material_id' => $materialData['material_id'],
+                    'quantity' => $materialData['quantity']
+                ]);
+
+                // actualizo stock
+                $storeMaterial = StoreMaterial::where('store_id', $request->store_id)
+                    ->where('material_id', $materialData['material_id'])
+                    ->first();
+
+                $storeMaterial->quantity -= $materialData['quantity'];
+                $storeMaterial->save();
+            }
 
             DB::commit();
-            return response($movement, 201);
+            return response($movement->load('movementMaterials.material'), 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -203,7 +246,7 @@ class StoreMovementController extends Controller
     public function show(string $id): Response
     {
         $movement = StoreMovement::with([
-            'material.measurementUnit',
+            'movementMaterials.material.measurementUnit',
             'status',
             'type',
             'concept',
@@ -218,8 +261,14 @@ class StoreMovementController extends Controller
             'created_by' => $movement->createdBy,
             'from_store' => $movement->fromStore,
             'to_store' => $movement->toStore,
-            'material' => $movement->material,
-            'quantity' => $movement->quantity,
+            'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
+                return [
+                    'id' => $movementMaterial->material->id,
+                    'name' => $movementMaterial->material->name,
+                    'measurement_unit' => $movementMaterial->material->measurementUnit,
+                    'quantity' => $movementMaterial->quantity
+                ];
+            }),
             'type' => [
                 'id' => $movement->type->id,
                 'name' => $movement->type->name,
