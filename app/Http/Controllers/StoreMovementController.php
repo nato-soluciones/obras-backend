@@ -3,16 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Movement\StoreMovementRequest;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Models\Store;
-use App\Models\Material;
 use App\Models\StoreMaterial;
 use App\Models\StoreMovement;
-use App\Models\StoreMovementConcept;
 use App\Models\StoreMovementStatus;
-use App\Models\StoreMovementType;
 use Illuminate\Support\Facades\DB;
 
 class StoreMovementController extends Controller
@@ -30,63 +24,48 @@ class StoreMovementController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): Response
+    public function store(StoreMovementRequest $request): Response
     {
+        // Verificar stock del store de origen
+        $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
+            ->where('material_id', $request->material_id)
+            ->first();
+
+        if (!$fromStoreMaterial || $fromStoreMaterial->quantity < $request->quantity) {
+            return response()->json([
+                'message' => 'No hay suficiente stock en el almacén de origen',
+                'available_quantity' => $fromStoreMaterial ? $fromStoreMaterial->quantity : 0
+            ], 400);
+        }
+
+        // Buscar el status Pendiente
+        $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
+
+        DB::beginTransaction();
+
         try {
-            $fromStore = Store::findOrFail($request->from_store_id);
-            $toStore = Store::findOrFail($request->to_store_id);
-            $material = Material::findOrFail($request->material_id);
-            // $type = StoreMovementType::findOrFail($request->store_movement_type_id);
-            // $status = StoreMovementStatus::findOrFail($request->store_movement_status_id);
-            // $concept = StoreMovementConcept::findOrFail($request->store_movement_concept_id);
+            // Crear el movimiento
+            $movement = StoreMovement::create([
+                'created_by_id' => $request->created_by_id,
+                'from_store_id' => $request->from_store_id,
+                'to_store_id' => $request->to_store_id,
+                'material_id' => $request->material_id,
+                'quantity' => $request->quantity,
+                'store_movement_type_id' => $request->store_movement_type_id,
+                'store_movement_concept_id' => $request->store_movement_concept_id,
+                'store_movement_status_id' => $pendingStatus->id
+            ]);
 
-            $fromStoreMaterial = StoreMaterial::where('store_id', $fromStore->id)
-                ->where('material_id', $material->id)
-                ->first();
+            // actualizar stock en store origen restando quantity
+            $fromStoreMaterial->quantity -= $request->quantity;
+            $fromStoreMaterial->save();
 
-            // check si hay suficiente stock
-            if (!$fromStoreMaterial || $fromStoreMaterial->quantity < $request->quantity) {
-                return response([
-                    'message' => 'No hay suficiente stock en el almacén de origen',
-                    'available_quantity' => $fromStoreMaterial ? $fromStoreMaterial->quantity : 0
-                ], 400);
-            }
+            DB::commit();
+            return response($movement, 201);
 
-            DB::beginTransaction();
-            try {
-                $movement = StoreMovement::create($request->all());
-                $fromStoreMaterial->quantity -= $request->quantity;
-                $fromStoreMaterial->save();
-
-                $toStoreMaterial = StoreMaterial::firstOrCreate(
-                    [
-                        'store_id' => $toStore->id,
-                        'material_id' => $material->id
-                    ],
-                    [
-                        'quantity' => 0,
-                        'minimum_limit' => 0,
-                        'critical_limit' => 0
-                    ]
-                );
-                
-                $toStoreMaterial->quantity += $request->quantity;
-                $toStoreMaterial->save();
-
-                DB::commit();
-                return response($movement, 201);
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                throw $e;
-            }
-
-        } catch (ModelNotFoundException $e) {
-            return response([
-                'message' => 'No se encontró alguno de los elementos necesarios para el movimiento'
-            ], 404);
         } catch (\Exception $e) {
-            return response([
+            DB::rollBack();
+            return response()->json([
                 'message' => 'Error al procesar el movimiento',
                 'error' => $e->getMessage()
             ], 500);

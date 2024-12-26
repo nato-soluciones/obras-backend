@@ -22,11 +22,21 @@ class StoreMovementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'from_store_id' => 'required|integer|exists:stores,id',
-            'to_store_id' => 'required|integer|exists:stores,id',
-            'material_id' => 'required|integer|exists:materials,id',
-            'quantity' => 'required|numeric|min:1',
-            'status' => 'required|string|in:pending,completed,canceled',
+            'created_by_id' => 'required|exists:users,id',
+            'from_store_id' => 'required|exists:stores,id',
+            'to_store_id' => 'required|exists:stores,id|different:from_store_id',
+            'material_id' => 'required|exists:materials,id',
+            'quantity' => 'required|numeric|min:0.01',
+            'store_movement_type_id' => 'required|exists:store_movement_types,id',
+            'store_movement_concept_id' => 'required|exists:store_movement_concepts,id',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'to_store_id.different' => 'El almacén de destino debe ser diferente al almacén de origen',
+            'quantity.min' => 'La cantidad debe ser mayor a 0',
         ];
     }
 }
