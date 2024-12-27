@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Store\CreateStoreRequest;
 use App\Http\Requests\Store\UpdateStoreRequest;
 use App\Models\Store;
+use App\Models\StoreMovement;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 class StoreController extends Controller
 {
+
+    
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function indexWithMaterials(): Response
     {
         $stores = Store::with(['materialsStore.material'])->get();
 
@@ -109,5 +112,32 @@ class StoreController extends Controller
         } catch (ModelNotFoundException $e) {
             return response(['error' => 'Almacén no encontrado'], 404);
         }
+    }
+
+    /**
+     * Display a listing of stores with their last movement date.
+     */
+    public function index(): Response
+    {
+        $stores = Store::select('id', 'name', 'address')
+            ->get()
+            ->map(function ($store) {
+                // Buscar el último movimiento para este store
+                $lastMovement = StoreMovement::where(function($query) use ($store) {
+                    $query->where('from_store_id', $store->id)
+                          ->orWhere('to_store_id', $store->id);
+                })
+                ->latest('created_at')
+                ->first();
+
+                return [
+                    'id' => $store->id,
+                    'name' => $store->name,
+                    'address' => $store->address,
+                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null
+                ];
+            });
+
+        return response($stores, 200);
     }
 }

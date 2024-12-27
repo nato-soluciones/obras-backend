@@ -6,20 +6,35 @@ use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\StoreMovementMaterial;
 
 class MaterialController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index(): Response
     {
-        $materials = Material::with('measurementUnit')->get()->map(function ($material) {
-            return [
-                'id' => $material->id,
-                'name' => $material->name,
-                'description' => $material->description,
-                'measurement_unit' => $material->measurementUnit
-            ];
-        });
-        
+        $materials = Material::with(['measurementUnit', 'storeMaterials'])
+            ->get()
+            ->map(function ($material) {
+                // Calcular stock total sumando todos los store_materials
+                $totalStock = $material->storeMaterials->sum('quantity');
+
+                // Buscar el último movimiento que involucre este material
+                $lastMovement = StoreMovementMaterial::where('material_id', $material->id)
+                    ->latest('created_at')
+                    ->first();
+
+                return [
+                    'id' => $material->id,
+                    'name' => $material->name,
+                    'unit' => $material->measurementUnit->name,
+                    'stock' => $totalStock,
+                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null
+                ];
+            });
+
         return response($materials, 200);
     }
 

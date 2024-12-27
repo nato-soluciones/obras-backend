@@ -47,4 +47,19 @@ class Store extends Model
      {
          return $this->hasMany(UserStore::class);
      }
+
+     public function movements()
+     {
+         return $this->where(function($query) {
+             $query->where('from_store_id', $this->id)
+                   ->orWhere('to_store_id', $this->id);
+         });
+     }
+
+     public function lastMovement()
+     {
+         return $this->hasOne(StoreMovement::class, 'from_store_id')
+             ->orWhere('to_store_id', $this->id)
+             ->latest();
+     }
 }
