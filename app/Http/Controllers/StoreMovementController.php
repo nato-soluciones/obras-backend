@@ -28,12 +28,15 @@ class StoreMovementController extends Controller
             'concept',
             'fromStore',
             'toStore',
-            'createdBy'
+            'createdBy',
+            'updatedBy'
         ])->get()->map(function ($movement) {
             return [
                 'id' => $movement->id,
                 'created_at' => $movement->created_at,
                 'created_by' => $movement->createdBy,
+                'updated_at' => $movement->updated_at,
+                'updated_by' => $movement->updatedBy,
                 'from_store' => $movement->fromStore,
                 'to_store' => $movement->toStore,
                 'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
@@ -269,13 +272,16 @@ class StoreMovementController extends Controller
             'concept',
             'fromStore',
             'toStore',
-            'createdBy'
+            'createdBy',
+            'updatedBy'
         ])->findOrFail($id);
 
         $formatted = [
             'id' => $movement->id,
             'created_at' => $movement->created_at,
             'created_by' => $movement->createdBy,
+            'updated_at' => $movement->updated_at,
+            'updated_by' => $movement->updatedBy,
             'from_store' => $movement->fromStore,
             'to_store' => $movement->toStore,
             'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
