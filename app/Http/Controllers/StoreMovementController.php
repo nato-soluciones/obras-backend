@@ -6,13 +6,13 @@ use App\Http\Requests\Movement\StoreMovementRequest;
 use App\Http\Requests\Movement\StoreMovementInputRequest;
 use App\Http\Requests\Movement\StoreMovementOutputRequest;
 use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
 use App\Models\StoreMaterial;
 use App\Models\StoreMovement;
 use App\Models\StoreMovementStatus;
 use App\Models\StoreMovementType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\UserStore;
 
 class StoreMovementController extends Controller
 {
@@ -67,6 +67,22 @@ class StoreMovementController extends Controller
      */
     public function store(StoreMovementRequest $request): Response
     {
+        // checkeo que el usuario actual sea encargado de alguno de los almacenes
+        $userId = auth()->id();
+        $isFromStoreManager = UserStore::where('user_id', $userId)
+            ->where('store_id', $request->from_store_id)
+            ->exists();
+        
+        $isToStoreManager = UserStore::where('user_id', $userId)
+            ->where('store_id', $request->to_store_id)
+            ->exists();
+
+        if (!$isFromStoreManager && !$isToStoreManager) {
+            return response([
+                'message' => 'No tienes permisos para crear esta transferencia. Debes ser encargado de al menos uno de los almacenes involucrados.'
+            ], 403);
+        }
+
         // checkeo stock de materiales
         foreach ($request->materials as $materialData) {
             $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
@@ -90,7 +106,7 @@ class StoreMovementController extends Controller
         try {
             // creo el movimiento
             $movement = StoreMovement::create([
-                'created_by_id' => $request->created_by_id,
+                'created_by_id' => $userId, 
                 'from_store_id' => $request->from_store_id,
                 'to_store_id' => $request->to_store_id,
                 'store_movement_type_id' => $transferType->id,
@@ -98,7 +114,7 @@ class StoreMovementController extends Controller
                 'store_movement_status_id' => $pendingStatus->id
             ]);
 
-            // creo los movimientos de materiales
+            // creo los movementMaterials
             foreach ($request->materials as $materialData) {
                 $movement->movementMaterials()->create([
                     'material_id' => $materialData['material_id'],
@@ -294,6 +310,9 @@ class StoreMovementController extends Controller
     {
         DB::beginTransaction();
         try {
+            $userId = auth()->id();
+            
+            // Busco el movimiento y sus materiales
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
@@ -304,6 +323,18 @@ class StoreMovementController extends Controller
                 ], 400);
             }
 
+            // Verifico que el usuario actual sea encargado del almacén destino
+            $isStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $movement->to_store_id)
+                ->exists();
+
+            if (!$isStoreManager) {
+                return response([
+                    'message' => 'No tienes permisos para aceptar esta transferencia. Solo el encargado del almacén destino puede aceptarla.'
+                ], 403);
+            }
+
+            // Busco los estados
             $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
             $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
 
@@ -334,7 +365,9 @@ class StoreMovementController extends Controller
                 $toStoreMaterial->save();
             }
 
+            // Actualizo el estado del movimiento y registro quién lo aceptó
             $movement->store_movement_status_id = $acceptedStatus->id;
+            $movement->updated_by_id = $userId;
             $movement->save();
 
             DB::commit();
@@ -345,7 +378,8 @@ class StoreMovementController extends Controller
                 'concept',
                 'fromStore',
                 'toStore',
-                'createdBy'
+                'createdBy',
+                'updatedBy'
             ]), 200);
 
         } catch (\Exception $e) {
@@ -364,6 +398,9 @@ class StoreMovementController extends Controller
     {
         DB::beginTransaction();
         try {
+            $userId = auth()->id();
+            
+            // Busco el movimiento y sus materiales
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
@@ -374,6 +411,18 @@ class StoreMovementController extends Controller
                 ], 400);
             }
 
+            // Verifico que el usuario actual sea encargado del almacén destino
+            $isStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $movement->to_store_id)
+                ->exists();
+
+            if (!$isStoreManager) {
+                return response([
+                    'message' => 'No tienes permisos para rechazar esta transferencia. Solo el encargado del almacén destino puede rechazarla.'
+                ], 403);
+            }
+
+            // Busco los estados
             $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
             $rejectedStatus = StoreMovementStatus::where('name', 'Rechazado')->firstOrFail();
 
@@ -395,8 +444,9 @@ class StoreMovementController extends Controller
                 $fromStoreMaterial->save();
             }
 
-            // Actualizo el estado del movimiento
+            // Actualizo el estado del movimiento y registro quién lo rechazó
             $movement->store_movement_status_id = $rejectedStatus->id;
+            $movement->updated_by_id = $userId;
             $movement->save();
 
             DB::commit();
@@ -407,7 +457,8 @@ class StoreMovementController extends Controller
                 'concept',
                 'fromStore',
                 'toStore',
-                'createdBy'
+                'createdBy',
+                'updatedBy'
             ]), 200);
 
         } catch (\Exception $e) {

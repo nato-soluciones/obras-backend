@@ -16,12 +16,11 @@ class StoreMovement extends Model
         'created_by_id',
         'from_store_id',
         'to_store_id',
-        'material_id',
-        'quantity',
         'store_movement_type_id',
         'store_movement_status_id',
         'store_movement_concept_id',
-
+        'updated_at',
+        'updated_by_id'
     ];
 
     protected $casts = [
@@ -34,6 +33,14 @@ class StoreMovement extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_id');
+    }
+
+    /**
+     * Get the user that updated the movement.
+     */
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by_id');
     }
 
     /**
