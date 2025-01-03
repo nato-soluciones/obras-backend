@@ -22,7 +22,6 @@ class StoreMovementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'created_by_id' => 'required|exists:users,id',
             'from_store_id' => 'required|exists:stores,id',
             'to_store_id' => 'required|exists:stores,id|different:from_store_id',
             'materials' => 'required|array|min:1',
