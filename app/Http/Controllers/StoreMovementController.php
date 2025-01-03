@@ -310,6 +310,8 @@ class StoreMovementController extends Controller
     {
         DB::beginTransaction();
         try {
+            $userId = auth()->id();
+            
             // Busco el movimiento y sus materiales
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
@@ -322,7 +324,6 @@ class StoreMovementController extends Controller
             }
 
             // Verifico que el usuario actual sea encargado del almacén destino
-            $userId = auth()->id();
             $isStoreManager = UserStore::where('user_id', $userId)
                 ->where('store_id', $movement->to_store_id)
                 ->exists();
@@ -364,7 +365,9 @@ class StoreMovementController extends Controller
                 $toStoreMaterial->save();
             }
 
+            // Actualizo el estado del movimiento y registro quién lo aceptó
             $movement->store_movement_status_id = $acceptedStatus->id;
+            $movement->updated_by_id = $userId;
             $movement->save();
 
             DB::commit();
@@ -375,7 +378,8 @@ class StoreMovementController extends Controller
                 'concept',
                 'fromStore',
                 'toStore',
-                'createdBy'
+                'createdBy',
+                'updatedBy'
             ]), 200);
 
         } catch (\Exception $e) {
@@ -394,6 +398,8 @@ class StoreMovementController extends Controller
     {
         DB::beginTransaction();
         try {
+            $userId = auth()->id();
+            
             // Busco el movimiento y sus materiales
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
@@ -406,7 +412,6 @@ class StoreMovementController extends Controller
             }
 
             // Verifico que el usuario actual sea encargado del almacén destino
-            $userId = auth()->id();
             $isStoreManager = UserStore::where('user_id', $userId)
                 ->where('store_id', $movement->to_store_id)
                 ->exists();
@@ -439,8 +444,9 @@ class StoreMovementController extends Controller
                 $fromStoreMaterial->save();
             }
 
-            // Actualizo el estado del movimiento
+            // Actualizo el estado del movimiento y registro quién lo rechazó
             $movement->store_movement_status_id = $rejectedStatus->id;
+            $movement->updated_by_id = $userId;
             $movement->save();
 
             DB::commit();
@@ -451,7 +457,8 @@ class StoreMovementController extends Controller
                 'concept',
                 'fromStore',
                 'toStore',
-                'createdBy'
+                'createdBy',
+                'updatedBy'
             ]), 200);
 
         } catch (\Exception $e) {
