@@ -21,6 +21,8 @@ class Store extends Model
         'description',
     ];
 
+    protected $hidden = ['deleted_at'];
+
      public function materialsStore()
      {
          return $this->hasMany(StoreMaterial::class, 'store_id');
