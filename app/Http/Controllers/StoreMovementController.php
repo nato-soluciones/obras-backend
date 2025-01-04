@@ -475,6 +475,90 @@ class StoreMovementController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Cancel a pending transfer movement
+     */
+    public function cancelTransfer(string $id): Response
+    {
+        DB::beginTransaction();
+        try {
+            $userId = auth()->id();
+            
+            // Busco el movimiento y sus materiales
+            $movement = StoreMovement::with(['movementMaterials.material', 'type'])
+                ->findOrFail($id);
+
+            // Verifico que sea una transferencia
+            if ($movement->type->name !== 'Transferencia') {
+                return response([
+                    'message' => 'El movimiento no es una transferencia'
+                ], 400);
+            }
+
+            // Verifico que el usuario actual sea encargado del store origen o destino
+            $isFromStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $movement->from_store_id)
+                ->exists();
+            $isToStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $movement->to_store_id)
+                ->exists();
+
+            if (!$isFromStoreManager && !$isToStoreManager) {
+                return response([
+                    'message' => 'No tienes permisos para cancelar esta transferencia. Solo el encargado del almacén origen puede cancelarla.'
+                ], 403);
+            }
+
+            // Busco los estados
+            $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
+            $canceledStatus = StoreMovementStatus::where('name', 'Cancelado')->firstOrFail();
+
+            // Verifico que esté pendiente
+            if ($movement->store_movement_status_id !== $pendingStatus->id) {
+                return response([
+                    'message' => 'La transferencia no está en estado pendiente'
+                ], 400);
+            }
+
+            // Proceso cada material
+            foreach ($movement->movementMaterials as $movementMaterial) {
+                // Busco el StoreMaterial en el almacén origen
+                $fromStoreMaterial = StoreMaterial::where('store_id', $movement->from_store_id)
+                    ->where('material_id', $movementMaterial->material_id)
+                    ->firstOrFail();
+
+                // Devuelvo la cantidad al almacén origen
+                $fromStoreMaterial->quantity += $movementMaterial->quantity;
+                $fromStoreMaterial->save();
+            }
+
+            // Actualizo el estado del movimiento y registro quién lo canceló
+            $movement->store_movement_status_id = $canceledStatus->id;
+            $movement->updated_by_id = $userId;
+            $movement->save();
+
+            DB::commit();
+            return response($movement->load([
+                'movementMaterials.material.measurementUnit',
+                'status',
+                'type',
+                'concept',
+                'fromStore',
+                'toStore',
+                'createdBy',
+                'updatedBy'
+            ]), 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => 'Error al procesar la cancelación de la transferencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function indexByStore(string $storeId, Request $request): Response
     {
         $query = StoreMovement::with([

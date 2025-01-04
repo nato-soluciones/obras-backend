@@ -10,7 +10,7 @@ class StoreMovementStatus extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public $timestamps = false; // Desactiva created_at y updated_at
-
     protected $fillable = ['name', 'description'];
+
+    protected $hidden = ['deleted_at'];
 }
