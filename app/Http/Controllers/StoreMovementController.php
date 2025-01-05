@@ -70,8 +70,16 @@ class StoreMovementController extends Controller
      */
     public function store(StoreMovementRequest $request): Response
     {
-        // checkeo que el usuario actual sea encargado de alguno de los almacenes
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return response([
+                'message' => 'Usuario no autenticado.'
+            ], 401);
+        }
+
         $userId = auth()->id();
+
+        // Check if current user is manager of any of the stores
         $isFromStoreManager = UserStore::where('user_id', $userId)
             ->where('store_id', $request->from_store_id)
             ->exists();
@@ -86,7 +94,7 @@ class StoreMovementController extends Controller
             ], 403);
         }
 
-        // checkeo stock de materiales
+        // Check materials stock
         foreach ($request->materials as $materialData) {
             $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
                 ->where('material_id', $materialData['material_id'])
@@ -101,13 +109,13 @@ class StoreMovementController extends Controller
             }
         }
 
-        // busco type y status por defecto
+        // Get default type and status
         $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
         $transferType = StoreMovementType::where('name', 'Transferencia')->firstOrFail();
 
         DB::beginTransaction();
         try {
-            // creo el movimiento
+            // Create movement
             $movement = StoreMovement::create([
                 'created_by_id' => $userId, 
                 'from_store_id' => $request->from_store_id,
@@ -117,14 +125,14 @@ class StoreMovementController extends Controller
                 'store_movement_status_id' => $pendingStatus->id
             ]);
 
-            // creo los movementMaterials
+            // Create movement materials
             foreach ($request->materials as $materialData) {
                 $movement->movementMaterials()->create([
                     'material_id' => $materialData['material_id'],
                     'quantity' => $materialData['quantity']
                 ]);
 
-                // actualizo stock store origen
+                // Update source store stock
                 $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
                     ->where('material_id', $materialData['material_id'])
                     ->first();
@@ -147,15 +155,35 @@ class StoreMovementController extends Controller
 
     public function storeInput(StoreMovementInputRequest $request): Response
     {
-        // busco status y type por defecto
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return response([
+                'message' => 'Usuario no autenticado.'
+            ], 401);
+        }
+
+        $userId = auth()->id();
+
+        // Check if current user is store manager
+        $isStoreManager = UserStore::where('user_id', $userId)
+            ->where('store_id', $request->store_id)
+            ->exists();
+
+        if (!$isStoreManager) {
+            return response([
+                'message' => 'No tienes permisos para crear este ingreso. Debes ser encargado del almacén.'
+            ], 403);
+        }
+
+        // Get default status and type
         $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
         $inputType = StoreMovementType::where('name', 'Ingreso')->firstOrFail();
 
         DB::beginTransaction();
         try {
-            // creo el movimiento
+            // Create movement
             $movement = StoreMovement::create([
-                'created_by_id' => $request->created_by_id,
+                'created_by_id' => $userId,
                 'from_store_id' => $request->store_id,
                 'to_store_id' => $request->store_id,
                 'store_movement_type_id' => $inputType->id,
@@ -163,14 +191,14 @@ class StoreMovementController extends Controller
                 'store_movement_status_id' => $acceptedStatus->id
             ]);
 
-            // proceso cada material
+            // Process each material
             foreach ($request->materials as $materialData) {
                 $movement->movementMaterials()->create([
                     'material_id' => $materialData['material_id'],
                     'quantity' => $materialData['quantity']
                 ]);
 
-                // creo o actualizo el storeMaterial
+                // Create or update store material
                 $storeMaterial = StoreMaterial::firstOrCreate(
                     [
                         'store_id' => $request->store_id,
@@ -201,7 +229,27 @@ class StoreMovementController extends Controller
 
     public function storeOutput(StoreMovementOutputRequest $request): Response
     {
-        // check stock de materiales
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return response([
+                'message' => 'Usuario no autenticado.'
+            ], 401);
+        }
+
+        $userId = auth()->id();
+
+        // Check if current user is store manager
+        $isStoreManager = UserStore::where('user_id', $userId)
+            ->where('store_id', $request->store_id)
+            ->exists();
+
+        if (!$isStoreManager) {
+            return response([
+                'message' => 'No tienes permisos para crear esta salida. Debes ser encargado del almacén.'
+            ], 403);
+        }
+
+        // Check materials stock
         foreach ($request->materials as $materialData) {
             $storeMaterial = StoreMaterial::where('store_id', $request->store_id)
                 ->where('material_id', $materialData['material_id'])
@@ -216,15 +264,15 @@ class StoreMovementController extends Controller
             }
         }
 
-        // busco status y type por defecto
+        // Get default status and type
         $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
         $outputType = StoreMovementType::where('name', 'Salida')->firstOrFail();
 
         DB::beginTransaction();
         try {
-            // creo el movimiento
+            // Create movement
             $movement = StoreMovement::create([
-                'created_by_id' => $request->created_by_id,
+                'created_by_id' => $userId,
                 'from_store_id' => $request->store_id,
                 'to_store_id' => $request->store_id,
                 'store_movement_type_id' => $outputType->id,
@@ -232,14 +280,14 @@ class StoreMovementController extends Controller
                 'store_movement_status_id' => $acceptedStatus->id
             ]);
 
-            // proceso cada material
+            // Process each material
             foreach ($request->materials as $materialData) {
                 $movement->movementMaterials()->create([
                     'material_id' => $materialData['material_id'],
                     'quantity' => $materialData['quantity']
                 ]);
 
-                // actualizo stock
+                // Update stock
                 $storeMaterial = StoreMaterial::where('store_id', $request->store_id)
                     ->where('material_id', $materialData['material_id'])
                     ->first();
@@ -318,18 +366,18 @@ class StoreMovementController extends Controller
         try {
             $userId = auth()->id();
             
-            // Busco el movimiento y sus materiales
+            // Find movement and its materials
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // checkeo que sea una transferencia
+            // Check if it's a transfer
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
-            // Verifico que el usuario actual sea encargado del almacén destino
+            // Check if current user is destination store manager
             $isStoreManager = UserStore::where('user_id', $userId)
                 ->where('store_id', $movement->to_store_id)
                 ->exists();
@@ -340,20 +388,20 @@ class StoreMovementController extends Controller
                 ], 403);
             }
 
-            // Busco los estados
+            // Get statuses
             $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
             $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
 
-            // checkeo que esté pending
+            // Check if pending
             if ($movement->store_movement_status_id !== $pendingStatus->id) {
                 return response([
                     'message' => 'La transferencia no está en estado pendiente'
                 ], 400);
             }
 
-            // ciclo cada material
+            // Process each material
             foreach ($movement->movementMaterials as $movementMaterial) {
-                // Creo o actualizo el StoreMaterial en store destino
+                // Create or update destination store material
                 $toStoreMaterial = StoreMaterial::firstOrCreate(
                     [
                         'store_id' => $movement->to_store_id,
@@ -366,12 +414,12 @@ class StoreMovementController extends Controller
                     ]
                 );
 
-                // Sumo la cantidad al store destino
+                // Add quantity to destination store
                 $toStoreMaterial->quantity += $movementMaterial->quantity;
                 $toStoreMaterial->save();
             }
 
-            // Actualizo el estado del movimiento y registro quién lo aceptó
+            // Update movement status and who accepted it
             $movement->store_movement_status_id = $acceptedStatus->id;
             $movement->updated_by_id = $userId;
             $movement->save();
@@ -406,18 +454,18 @@ class StoreMovementController extends Controller
         try {
             $userId = auth()->id();
             
-            // Busco el movimiento y sus materiales
+            // Find movement and its materials
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // checkeo que sea una transferencia
+            // Check if it's a transfer
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
-            // Verifico que el usuario actual sea encargado del almacén destino
+            // Check if current user is destination store manager
             $isStoreManager = UserStore::where('user_id', $userId)
                 ->where('store_id', $movement->to_store_id)
                 ->exists();
@@ -428,11 +476,11 @@ class StoreMovementController extends Controller
                 ], 403);
             }
 
-            // Busco los estados
+            // Get statuses
             $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
             $rejectedStatus = StoreMovementStatus::where('name', 'Rechazado')->firstOrFail();
 
-            // checkeo que esté pendiente
+            // Check if pending
             if ($movement->store_movement_status_id !== $pendingStatus->id) {
                 return response([
                     'message' => 'La transferencia no está en estado pendiente'
@@ -440,17 +488,17 @@ class StoreMovementController extends Controller
             }
 
             foreach ($movement->movementMaterials as $movementMaterial) {
-                // busco el StoreMaterial en el store origen
+                // Find source store material
                 $fromStoreMaterial = StoreMaterial::where('store_id', $movement->from_store_id)
                     ->where('material_id', $movementMaterial->material_id)
                     ->firstOrFail();
 
-                // Devuelvo la quantity al store origen
+                // Return quantity to source store
                 $fromStoreMaterial->quantity += $movementMaterial->quantity;
                 $fromStoreMaterial->save();
             }
 
-            // Actualizo el estado del movimiento y registro quién lo rechazó
+            // Update movement status and who rejected it
             $movement->store_movement_status_id = $rejectedStatus->id;
             $movement->updated_by_id = $userId;
             $movement->save();
@@ -485,18 +533,18 @@ class StoreMovementController extends Controller
         try {
             $userId = auth()->id();
             
-            // Busco el movimiento y sus materiales
+            // Find movement and its materials
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // Verifico que sea una transferencia
+            // Check if it's a transfer
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
-            // Verifico que el usuario actual sea encargado del store origen o destino
+            // Check if current user is source or destination store manager
             $isFromStoreManager = UserStore::where('user_id', $userId)
                 ->where('store_id', $movement->from_store_id)
                 ->exists();
@@ -510,30 +558,30 @@ class StoreMovementController extends Controller
                 ], 403);
             }
 
-            // Busco los estados
+            // Get statuses
             $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
             $canceledStatus = StoreMovementStatus::where('name', 'Cancelado')->firstOrFail();
 
-            // Verifico que esté pendiente
+            // Check if pending
             if ($movement->store_movement_status_id !== $pendingStatus->id) {
                 return response([
                     'message' => 'La transferencia no está en estado pendiente'
                 ], 400);
             }
 
-            // Proceso cada material
+            // Process each material
             foreach ($movement->movementMaterials as $movementMaterial) {
-                // Busco el StoreMaterial en el almacén origen
+                // Find source store material
                 $fromStoreMaterial = StoreMaterial::where('store_id', $movement->from_store_id)
                     ->where('material_id', $movementMaterial->material_id)
                     ->firstOrFail();
 
-                // Devuelvo la cantidad al almacén origen
+                // Return quantity to source store
                 $fromStoreMaterial->quantity += $movementMaterial->quantity;
                 $fromStoreMaterial->save();
             }
 
-            // Actualizo el estado del movimiento y registro quién lo canceló
+            // Update movement status and who canceled it
             $movement->store_movement_status_id = $canceledStatus->id;
             $movement->updated_by_id = $userId;
             $movement->save();

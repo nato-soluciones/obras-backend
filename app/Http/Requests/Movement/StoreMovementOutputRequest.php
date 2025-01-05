@@ -14,7 +14,6 @@ class StoreMovementOutputRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'created_by_id' => 'required|exists:users,id',
             'store_id' => 'required|exists:stores,id',
             'materials' => 'required|array|min:1',
             'materials.*.material_id' => 'required|exists:materials,id',
