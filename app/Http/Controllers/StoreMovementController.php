@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Movement\StoreMovementRequest;
 use App\Http\Requests\Movement\StoreMovementInputRequest;
 use App\Http\Requests\Movement\StoreMovementOutputRequest;
+use App\Http\Services\AppSettingService;
 use Illuminate\Http\Response;
 use App\Models\StoreMaterial;
 use App\Models\StoreMovement;
@@ -16,6 +17,16 @@ use App\Models\UserStore;
 
 class StoreMovementController extends Controller
 {
+    private AppSettingService $appSettingService;
+    private bool $isCriticalLimitBlock;
+
+    public function __construct(AppSettingService $appSettingService)
+    {
+        $this->appSettingService = $appSettingService;
+        $settings = $this->appSettingService->getSettingsByModule('STOCK');
+        $this->isCriticalLimitBlock = $settings['CRITICAL_LIMIT_BLOCK'] ?? false;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -90,11 +101,18 @@ class StoreMovementController extends Controller
 
         if (!$isFromStoreManager && !$isToStoreManager) {
             return response([
-                'message' => 'No tienes permisos para crear esta transferencia. Debes ser encargado de al menos uno de los almacenes involucrados.'
+                'success' => false,
+                'message' => 'No tienes permisos para crear esta transferencia. Debes ser encargado de al menos uno de los almacenes involucrados.',
+                'limits' => [],
+                'data' => null
             ], 403);
         }
 
-        // Check materials stock
+        // Arrays to track limit violations
+        $exceededLimits = [];
+        $criticalLimitsExceeded = [];
+
+        // Check stock and limits
         foreach ($request->materials as $materialData) {
             $fromStoreMaterial = StoreMaterial::where('store_id', $request->from_store_id)
                 ->where('material_id', $materialData['material_id'])
@@ -102,14 +120,55 @@ class StoreMovementController extends Controller
 
             if (!$fromStoreMaterial || $fromStoreMaterial->quantity < $materialData['quantity']) {
                 return response([
+                    'success' => false,
                     'message' => 'No hay suficiente stock del material en el almacén de origen',
-                    'material_id' => $materialData['material_id'],
-                    'available_quantity' => $fromStoreMaterial ? $fromStoreMaterial->quantity : 0
+                    'limits' => [],
+                    'data' => [
+                        'material_id' => $materialData['material_id'],
+                        'available_quantity' => $fromStoreMaterial ? $fromStoreMaterial->quantity : 0
+                    ]
                 ], 400);
+            }
+
+            // Calculate remaining stock after movement
+            $resultingStock = $fromStoreMaterial->quantity - $materialData['quantity'];
+
+            // Check if hitting any limits
+            if ($resultingStock < $fromStoreMaterial->critical_limit) {
+                if ($this->isCriticalLimitBlock) {
+                    $criticalLimitsExceeded[] = [
+                        'materialId' => $materialData['material_id'],
+                        'limitType' => 'critical',
+                        // 'materialName' => $fromStoreMaterial->material->name,
+                        // 'currentStock' => $fromStoreMaterial->quantity,
+                        // 'resultingStock' => $resultingStock,
+                        // 'criticalLimit' => $fromStoreMaterial->critical_limit
+                    ];
+                } else {
+                    $exceededLimits[] = [
+                        'materialId' => $materialData['material_id'],
+                        'limitType' => 'critical'
+                    ];
+                }
+            } elseif ($resultingStock < $fromStoreMaterial->minimum_limit) {
+                $exceededLimits[] = [
+                    'materialId' => $materialData['material_id'],
+                    'limitType' => 'minimum'
+                ];
             }
         }
 
-        // Get default type and status
+        // if critical limits are hit and blocking is on, return error
+        if ($this->isCriticalLimitBlock && !empty($criticalLimitsExceeded)) {
+            return response([
+                'success' => false,
+                'message' => 'No se puede realizar la transferencia. Los siguientes materiales caerían por debajo del límite crítico:',
+                'limits' => $criticalLimitsExceeded,
+                'data' => null
+            ], 400);
+        }
+
+        // create the movement
         $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
         $transferType = StoreMovementType::where('name', 'Transferencia')->firstOrFail();
 
@@ -117,7 +176,7 @@ class StoreMovementController extends Controller
         try {
             // Create movement
             $movement = StoreMovement::create([
-                'created_by_id' => $userId, 
+                'created_by_id' => $userId,
                 'from_store_id' => $request->from_store_id,
                 'to_store_id' => $request->to_store_id,
                 'store_movement_type_id' => $transferType->id,
@@ -142,13 +201,26 @@ class StoreMovementController extends Controller
             }
 
             DB::commit();
-            return response($movement->load('movementMaterials.material'), 201);
+
+            $message = 'Transferencia creada exitosamente';
+            if (!empty($exceededLimits)) {
+                $message .= '. Algunos materiales quedarán por debajo de sus límites establecidos';
+            }
+
+            return response([
+                'success' => true,
+                'message' => $message,
+                'limits' => $exceededLimits,
+                'data' => $movement->load('movementMaterials.material')
+            ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response([
-                'message' => 'Error al procesar el movimiento',
-                'error' => $e->getMessage()
+                'success' => false,
+                'message' => 'Error al procesar el movimiento: ' . $e->getMessage(),
+                'limits' => [],
+                'data' => null
             ], 500);
         }
     }
@@ -181,7 +253,7 @@ class StoreMovementController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create movement
+            // create movement
             $movement = StoreMovement::create([
                 'created_by_id' => $userId,
                 'from_store_id' => $request->store_id,
@@ -191,6 +263,7 @@ class StoreMovementController extends Controller
                 'store_movement_status_id' => $acceptedStatus->id
             ]);
 
+            // process each material
             // Process each material
             foreach ($request->materials as $materialData) {
                 $movement->movementMaterials()->create([
@@ -198,7 +271,7 @@ class StoreMovementController extends Controller
                     'quantity' => $materialData['quantity']
                 ]);
 
-                // Create or update store material
+                // create or update storeMaterial
                 $storeMaterial = StoreMaterial::firstOrCreate(
                     [
                         'store_id' => $request->store_id,
@@ -270,7 +343,7 @@ class StoreMovementController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create movement
+            // create movement
             $movement = StoreMovement::create([
                 'created_by_id' => $userId,
                 'from_store_id' => $request->store_id,
@@ -281,12 +354,14 @@ class StoreMovementController extends Controller
             ]);
 
             // Process each material
+            // Process each material
             foreach ($request->materials as $materialData) {
                 $movement->movementMaterials()->create([
                     'material_id' => $materialData['material_id'],
                     'quantity' => $materialData['quantity']
                 ]);
 
+                // update stock
                 // Update stock
                 $storeMaterial = StoreMaterial::where('store_id', $request->store_id)
                     ->where('material_id', $materialData['material_id'])
@@ -370,13 +445,14 @@ class StoreMovementController extends Controller
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // Check if it's a transfer
+            // validate for a transfer type
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
+            // Check if user is manager of destination store
             // Check if current user is destination store manager
             $isStoreManager = UserStore::where('user_id', $userId)
                 ->where('store_id', $movement->to_store_id)
@@ -400,6 +476,7 @@ class StoreMovementController extends Controller
             }
 
             // Process each material
+            // Process each material
             foreach ($movement->movementMaterials as $movementMaterial) {
                 // Create or update destination store material
                 $toStoreMaterial = StoreMaterial::firstOrCreate(
@@ -419,7 +496,7 @@ class StoreMovementController extends Controller
                 $toStoreMaterial->save();
             }
 
-            // Update movement status and who accepted it
+            // update movement status and track who accepted it
             $movement->store_movement_status_id = $acceptedStatus->id;
             $movement->updated_by_id = $userId;
             $movement->save();
@@ -458,7 +535,7 @@ class StoreMovementController extends Controller
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // Check if it's a transfer
+            // validate transfer type
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
@@ -487,6 +564,7 @@ class StoreMovementController extends Controller
                 ], 400);
             }
 
+            // Process each material
             foreach ($movement->movementMaterials as $movementMaterial) {
                 // Find source store material
                 $fromStoreMaterial = StoreMaterial::where('store_id', $movement->from_store_id)
@@ -498,7 +576,7 @@ class StoreMovementController extends Controller
                 $fromStoreMaterial->save();
             }
 
-            // Update movement status and who rejected it
+            // Update movement status and track who rejected it
             $movement->store_movement_status_id = $rejectedStatus->id;
             $movement->updated_by_id = $userId;
             $movement->save();
@@ -537,14 +615,14 @@ class StoreMovementController extends Controller
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // Check if it's a transfer
+            // Make sure its a transfer
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
-            // Check if current user is source or destination store manager
+            // Check if user manages the source store or destination
             $isFromStoreManager = UserStore::where('user_id', $userId)
                 ->where('store_id', $movement->from_store_id)
                 ->exists();
