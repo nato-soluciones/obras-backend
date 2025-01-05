@@ -7,31 +7,31 @@ use App\Http\Controllers\StoreMovementTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('store_movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
-  Route::get('/', 'index');
-  Route::get('/{id}', 'show');
-  Route::post('/', 'store');
-  Route::post('/input', 'storeInput');
-  Route::post('/output', 'storeOutput');
-  Route::post('/{id}/accept', 'acceptTransfer');
-  Route::post('/{id}/reject', 'rejectTransfer');
-  Route::post('/{id}/cancel', 'cancelTransfer');
+  Route::get('/', 'index')->middleware('permission:stockMovement_list');
+  Route::get('/{id}', 'show')->middleware('permission:stockMovement_display');
+  Route::post('/', 'store')->middleware('permission:stockMovement_create ');
+  Route::post('/input', 'storeInput')->middleware('permission:stockMovement_input_create ');
+  Route::post('/output', 'storeOutput')->middleware('permission:stockMovement_output_create ');
+  Route::post('/{id}/accept', 'acceptTransfer')->middleware('permission:stockMovement_approve');
+  Route::post('/{id}/reject', 'rejectTransfer')->middleware('permission:stockMovement_approve');
+  Route::post('/{id}/cancel', 'cancelTransfer')->middleware('permission:stockMovement_approve');
 });
 
 Route::prefix('/store_movement_concepts')->middleware('auth:sanctum')->controller(StoreMovementConceptController::class)->group(function () {
-  Route::get('/', 'index');
-  Route::get('/{id}', 'show');
+  Route::get('/', 'index')->middleware('permission:stockMovementConcept_list');
+  Route::get('/{id}', 'show')->middleware('permission:stockMovementConcept_display');
 });
 
 Route::prefix('/store_movement_types')->middleware('auth:sanctum')->controller(StoreMovementTypeController::class)->group(function () {
-  Route::get('/', 'indexWithConcepts');
-  Route::get('/{id}', 'show');
+  Route::get('/', 'indexWithConcepts')->middleware('permission:stockMovementType_list');
+  Route::get('/{id}', 'show')->middleware('permission:stockMovementType_display');
 });
 
 Route::prefix('/store_movement_statuses')->middleware('auth:sanctum')->controller(StoreMovementStatusController::class)->group(function () {
-  Route::get('/', 'index');
-  Route::get('/{id}', 'show');
+  Route::get('/', 'index')->middleware('permission:stockMovementStatus_list');
+  Route::get('/{id}', 'show')->middleware('permission:stockMovementStatus_display');
 });
 
 Route::prefix('stores/{storeId}/movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
-    Route::get('/', 'indexByStore');
+    Route::get('/', 'indexByStore')->middleware('permission:stockMovement_store_history_list');
 });

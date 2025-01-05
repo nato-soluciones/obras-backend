@@ -4,10 +4,10 @@ use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('stores')->middleware('auth:sanctum')->controller(StoreController::class)->group(function () {
-  Route::get('/', 'index');
-  Route::get('/with-materials', 'indexWithMaterials');
-  Route::get('/{id}', 'show');
-  Route::post('/', 'store');
-  Route::put('/{id}', 'update');
-  Route::delete('/{id}', 'destroy');
+  Route::get('/', 'index')->middleware('permission:stockStore_list');
+  Route::get('/with-materials', 'indexWithMaterials')->middleware('permission:stockStore_list');
+  Route::get('/{id}', 'show')->middleware('permission:stockStore_display');
+  Route::post('/', 'store')->middleware('permission:stockStore_insert');
+  Route::put('/{id}', 'update')->middleware('permission:stockStore_update');
+  Route::delete('/{id}', 'destroy')->middleware('permission:stockStore_delete');
 });
