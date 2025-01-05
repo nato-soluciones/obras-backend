@@ -84,28 +84,34 @@ class StoreMovementController extends Controller
         // Check if user is authenticated
         if (!auth()->check()) {
             return response([
-                'message' => 'Usuario no autenticado.'
+                'success' => false,
+                'message' => 'Usuario no autenticado.',
+                'limits' => [],
+                'data' => null
             ], 401);
         }
 
         $userId = auth()->id();
+        $user = auth()->user();
 
-        // Check if current user is manager of any of the stores
-        $isFromStoreManager = UserStore::where('user_id', $userId)
-            ->where('store_id', $request->from_store_id)
-            ->exists();
-        
-        $isToStoreManager = UserStore::where('user_id', $userId)
-            ->where('store_id', $request->to_store_id)
-            ->exists();
+        // Skip manager validation for SUPERADMIN
+        if (!$user->hasRole('SUPERADMIN')) {
+            $isFromStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $request->from_store_id)
+                ->exists();
+            
+            $isToStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $request->to_store_id)
+                ->exists();
 
-        if (!$isFromStoreManager && !$isToStoreManager) {
-            return response([
-                'success' => false,
-                'message' => 'No tienes permisos para crear esta transferencia. Debes ser encargado de al menos uno de los almacenes involucrados.',
-                'limits' => [],
-                'data' => null
-            ], 403);
+            if (!$isFromStoreManager && !$isToStoreManager) {
+                return response([
+                    'success' => false,
+                    'message' => 'No tienes permisos para crear esta transferencia. Debes ser encargado de al menos uno de los almacenes involucrados.',
+                    'limits' => [],
+                    'data' => null
+                ], 403);
+            }
         }
 
         // Arrays to track limit violations
@@ -235,16 +241,19 @@ class StoreMovementController extends Controller
         }
 
         $userId = auth()->id();
+        $user = auth()->user();
 
-        // Check if current user is store manager
-        $isStoreManager = UserStore::where('user_id', $userId)
-            ->where('store_id', $request->store_id)
-            ->exists();
+        // Skip manager validation for SUPERADMIN
+        if (!$user->hasRole('SUPERADMIN')) {
+            $isStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $request->store_id)
+                ->exists();
 
-        if (!$isStoreManager) {
-            return response([
-                'message' => 'No tienes permisos para crear este ingreso. Debes ser encargado del almacén.'
-            ], 403);
+            if (!$isStoreManager) {
+                return response([
+                    'message' => 'No tienes permisos para crear este ingreso. Debes ser encargado del almacén.'
+                ], 403);
+            }
         }
 
         // Get default status and type
@@ -310,16 +319,19 @@ class StoreMovementController extends Controller
         }
 
         $userId = auth()->id();
+        $user = auth()->user();
 
-        // Check if current user is store manager
-        $isStoreManager = UserStore::where('user_id', $userId)
-            ->where('store_id', $request->store_id)
-            ->exists();
+        // Skip manager validation for SUPERADMIN
+        if (!$user->hasRole('SUPERADMIN')) {
+            $isStoreManager = UserStore::where('user_id', $userId)
+                ->where('store_id', $request->store_id)
+                ->exists();
 
-        if (!$isStoreManager) {
-            return response([
-                'message' => 'No tienes permisos para crear esta salida. Debes ser encargado del almacén.'
-            ], 403);
+            if (!$isStoreManager) {
+                return response([
+                    'message' => 'No tienes permisos para crear esta salida. Debes ser encargado del almacén.'
+                ], 403);
+            }
         }
 
         // Check materials stock
@@ -440,28 +452,32 @@ class StoreMovementController extends Controller
         DB::beginTransaction();
         try {
             $userId = auth()->id();
+            $user = auth()->user();
             
-            // Find movement and its materials
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // validate for a transfer type
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
-            // Check if user is manager of destination store
-            // Check if current user is destination store manager
-            $isStoreManager = UserStore::where('user_id', $userId)
-                ->where('store_id', $movement->to_store_id)
-                ->exists();
+            // Skip manager validation for SUPERADMIN
+            if (!$user->hasRole('SUPERADMIN')) {
+                $isFromStoreManager = UserStore::where('user_id', $userId)
+                    ->where('store_id', $movement->from_store_id)
+                    ->exists();
+            
+                $isToStoreManager = UserStore::where('user_id', $userId)
+                    ->where('store_id', $movement->to_store_id)
+                    ->exists();
 
-            if (!$isStoreManager) {
-                return response([
-                    'message' => 'No tienes permisos para aceptar esta transferencia. Solo el encargado del almacén destino puede aceptarla.'
-                ], 403);
+                if (!$isFromStoreManager && !$isToStoreManager) {
+                    return response([
+                        'message' => 'No tienes permisos para aceptar esta transferencia. Solo el encargado del almacén destino puede aceptarla.'
+                    ], 403);
+                }
             }
 
             // Get statuses
@@ -530,27 +546,32 @@ class StoreMovementController extends Controller
         DB::beginTransaction();
         try {
             $userId = auth()->id();
+            $user = auth()->user();
             
-            // Find movement and its materials
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // validate transfer type
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
-            // Check if current user is destination store manager
-            $isStoreManager = UserStore::where('user_id', $userId)
-                ->where('store_id', $movement->to_store_id)
-                ->exists();
+            // Skip manager validation for SUPERADMIN
+            if (!$user->hasRole('SUPERADMIN')) {
+                $isFromStoreManager = UserStore::where('user_id', $userId)
+                    ->where('store_id', $movement->from_store_id)
+                    ->exists();
+            
+                $isToStoreManager = UserStore::where('user_id', $userId)
+                    ->where('store_id', $movement->to_store_id)
+                    ->exists();
 
-            if (!$isStoreManager) {
-                return response([
-                    'message' => 'No tienes permisos para rechazar esta transferencia. Solo el encargado del almacén destino puede rechazarla.'
-                ], 403);
+                if (!$isFromStoreManager && !$isToStoreManager) {
+                    return response([
+                        'message' => 'No tienes permisos para rechazar esta transferencia. Solo el encargado del almacén destino puede rechazarla.'
+                    ], 403);
+                }
             }
 
             // Get statuses
@@ -610,30 +631,32 @@ class StoreMovementController extends Controller
         DB::beginTransaction();
         try {
             $userId = auth()->id();
+            $user = auth()->user();
             
-            // Find movement and its materials
             $movement = StoreMovement::with(['movementMaterials.material', 'type'])
                 ->findOrFail($id);
 
-            // Make sure its a transfer
             if ($movement->type->name !== 'Transferencia') {
                 return response([
                     'message' => 'El movimiento no es una transferencia'
                 ], 400);
             }
 
-            // Check if user manages the source store or destination
-            $isFromStoreManager = UserStore::where('user_id', $userId)
-                ->where('store_id', $movement->from_store_id)
-                ->exists();
-            $isToStoreManager = UserStore::where('user_id', $userId)
-                ->where('store_id', $movement->to_store_id)
-                ->exists();
+            // Skip manager validation for SUPERADMIN
+            if (!$user->hasRole('SUPERADMIN')) {
+                $isFromStoreManager = UserStore::where('user_id', $userId)
+                    ->where('store_id', $movement->from_store_id)
+                    ->exists();
+            
+                $isToStoreManager = UserStore::where('user_id', $userId)
+                    ->where('store_id', $movement->to_store_id)
+                    ->exists();
 
-            if (!$isFromStoreManager && !$isToStoreManager) {
-                return response([
-                    'message' => 'No tienes permisos para cancelar esta transferencia. Solo el encargado del almacén origen puede cancelarla.'
-                ], 403);
+                if (!$isFromStoreManager && !$isToStoreManager) {
+                    return response([
+                        'message' => 'No tienes permisos para cancelar esta transferencia. Solo el encargado del almacén origen puede cancelarla.'
+                    ], 403);
+                }
             }
 
             // Get statuses
