@@ -18,4 +18,5 @@ Route::prefix('material_store')->middleware('auth:sanctum')->controller(Material
   Route::get('/{id}', 'show');
   Route::put('/{id}', 'update');
   Route::delete('/{id}', 'destroy');
+  Route::patch('/{id}/limits', 'updateLimits');
 });
