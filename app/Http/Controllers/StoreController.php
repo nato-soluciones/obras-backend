@@ -8,6 +8,9 @@ use App\Models\Store;
 use App\Models\StoreMovement;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+use App\Models\UserStore;
+
 class StoreController extends Controller
 {
 
@@ -17,13 +20,15 @@ class StoreController extends Controller
      */
     public function indexWithMaterials(): Response
     {
-        $stores = Store::with(['materialsStore.material'])->get();
+        $stores = Store::with(['materialsStore.material', 'userStores.user'])->get();
 
         $formatted = $stores->map(function ($store) {
             return [
                 'id' => $store->id,
                 'name' => $store->name,
                 'address' => $store->address,
+                'description' => $store->description,
+                'manager' => $store->userStores->first()?->user,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
                     return [
                         'material_id' => $materialStore->material_id,
@@ -45,8 +50,25 @@ class StoreController extends Controller
      */
     public function store(CreateStoreRequest $request): Response
     {
-        $store = Store::create($request->validated());
-        return response($store, 201);
+        DB::beginTransaction();
+        try {
+            $store = Store::create($request->only(['name', 'address', 'description']));
+            
+            // Create the manager relationship
+            UserStore::create([
+                'user_id' => $request->manager_id,
+                'store_id' => $store->id
+            ]);
+
+            DB::commit();
+            return response($store->load('userStores.user'), 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => 'Error al crear el almacén',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -54,27 +76,31 @@ class StoreController extends Controller
      */
     public function show(string $id): Response
     {
-        $store = Store::with(['materialsStore.material'])->find($id);
+        $store = Store::with(['materialsStore.material', 'userStores.user'])->find($id);
 
-    if (!$store) {
-        return response()->json(['error' => 'Almacén no encontrado'], 404);
-    }
+        if (!$store) {
+            return response([
+                'error' => 'Almacén no encontrado'
+            ], 404);
+        }
 
-    $formatted = [
-        'id' => $store->id,
-        'name' => $store->name,
-        'address' => $store->address,
-        'materials' => $store->materialsStore->map(function ($materialStore) {
-            return [
-                'material_id' => $materialStore->material_id,
-                'material_name' => $materialStore->material->name,
-                'description' => $materialStore->material->description,
-                'quantity' => $materialStore->quantity,
-                'minimum_limit' => $materialStore->minimum_limit,
-                'critical_limit' => $materialStore->critical_limit
-            ];
-        }),
-    ];
+        $formatted = [
+            'id' => $store->id,
+            'name' => $store->name,
+            'address' => $store->address,
+            'description' => $store->description,
+            'manager' => $store->userStores->first()?->user,
+            'materials' => $store->materialsStore->map(function ($materialStore) {
+                return [
+                    'material_id' => $materialStore->material_id,
+                    'material_name' => $materialStore->material->name,
+                    'description' => $materialStore->material->description,
+                    'quantity' => $materialStore->quantity,
+                    'minimum_limit' => $materialStore->minimum_limit,
+                    'critical_limit' => $materialStore->critical_limit
+                ];
+            }),
+        ];
 
         return response($formatted, 200);
     }
@@ -89,14 +115,36 @@ class StoreController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateStoreRequest $request, string $id)
+    public function update(UpdateStoreRequest $request, string $id): Response
     {
+        DB::beginTransaction();
         try {
             $store = Store::findOrFail($id);
-            $store->update($request->all());
-            return response($store, 200);
+            $store->update($request->only(['name', 'address', 'description']));
+
+            // Update manager if provided
+            if ($request->has('manager_id')) {
+                // Remove existing manager relationships
+                UserStore::where('store_id', $store->id)->delete();
+                
+                // Create new manager relationship
+                UserStore::create([
+                    'user_id' => $request->manager_id,
+                    'store_id' => $store->id
+                ]);
+            }
+
+            DB::commit();
+            return response($store->load('userStores.user'), 200);
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response(['error' => 'Almacén no encontrado'], 404);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => 'Error al actualizar el almacén',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -119,7 +167,8 @@ class StoreController extends Controller
      */
     public function index(): Response
     {
-        $stores = Store::select('id', 'name', 'address')
+        $stores = Store::with('userStores.user')
+            ->select('id', 'name', 'address', 'description')
             ->get()
             ->map(function ($store) {
                 // Buscar el último movimiento para este store
@@ -134,6 +183,8 @@ class StoreController extends Controller
                     'id' => $store->id,
                     'name' => $store->name,
                     'address' => $store->address,
+                    'description' => $store->description,
+                    'manager' => $store->userStores->first()?->user,
                     'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null
                 ];
             });
