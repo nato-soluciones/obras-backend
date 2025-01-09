@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StoreMovementType;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class StoreMovementTypeController extends Controller
 {
@@ -21,13 +22,16 @@ class StoreMovementTypeController extends Controller
         return response($types, 200);
     }
 
-    public function show($id)
+    public function show(string $id): Response
     {
-        $storeMovementType = StoreMovementType::with('concepts')->find($id);
-        if (!$storeMovementType) {
-            return response()->json(['error' => 'No se encontró el tipo de movimiento'], 404);
+        $type = StoreMovementType::find($id);
+
+        if (!$type) {
+            return response([
+                'error' => 'Tipo de movimiento no encontrado'
+            ], 404);
         }
 
-        return response()->json($storeMovementType, 200);
+        return response($type, 200);
     }
 }

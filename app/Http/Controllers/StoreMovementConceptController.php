@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StoreMovementConcept;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class StoreMovementConceptController extends Controller
 {
@@ -14,13 +15,16 @@ class StoreMovementConceptController extends Controller
         return response($movementConcepts, 200);
     }
 
-    public function show($id)
+    public function show(string $id): Response
     {
-        $storeMovementConcept = StoreMovementConcept::find($id);
-        if (!$storeMovementConcept) {
-            return response()->json(['error' => 'No se encontró el concepto de movimiento'], 404);
+        $concept = StoreMovementConcept::find($id);
+
+        if (!$concept) {
+            return response([
+                'error' => 'Concepto de movimiento no encontrado'
+            ], 404);
         }
 
-        return response()->json($storeMovementConcept, 200);
+        return response($concept, 200);
     }
 }

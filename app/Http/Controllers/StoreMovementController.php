@@ -14,6 +14,7 @@ use App\Models\StoreMovementType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\UserStore;
+use App\Models\Store;
 
 class StoreMovementController extends Controller
 {
@@ -81,6 +82,19 @@ class StoreMovementController extends Controller
      */
     public function store(StoreMovementRequest $request): Response
     {
+        // Check if stores exist
+        $fromStore = Store::find($request->from_store_id);
+        $toStore = Store::find($request->to_store_id);
+
+        if (!$fromStore || !$toStore) {
+            return response([
+                'success' => false,
+                'message' => !$fromStore ? 'El almacén de origen no existe' : 'El almacén de destino no existe',
+                'limits' => [],
+                'data' => null
+            ], 404);
+        }
+
         // Check if user is authenticated
         if (!auth()->check()) {
             return response([
@@ -233,6 +247,14 @@ class StoreMovementController extends Controller
 
     public function storeInput(StoreMovementInputRequest $request): Response
     {
+        // Check if store exists
+        $store = Store::find($request->store_id);
+        if (!$store) {
+            return response([
+                'message' => 'El almacén especificado no existe',
+            ], 404);
+        }
+
         // Check if user is authenticated
         if (!auth()->check()) {
             return response([
@@ -311,6 +333,14 @@ class StoreMovementController extends Controller
 
     public function storeOutput(StoreMovementOutputRequest $request): Response
     {
+        // Check if store exists
+        $store = Store::find($request->store_id);
+        if (!$store) {
+            return response([
+                'message' => 'El almacén especificado no existe',
+            ], 404);
+        }
+
         // Check if user is authenticated
         if (!auth()->check()) {
             return response([
@@ -366,7 +396,6 @@ class StoreMovementController extends Controller
             ]);
 
             // Process each material
-            // Process each material
             foreach ($request->materials as $materialData) {
                 $movement->movementMaterials()->create([
                     'material_id' => $materialData['material_id'],
@@ -374,7 +403,6 @@ class StoreMovementController extends Controller
                 ]);
 
                 // update stock
-                // Update stock
                 $storeMaterial = StoreMaterial::where('store_id', $request->store_id)
                     ->where('material_id', $materialData['material_id'])
                     ->first();
@@ -409,7 +437,13 @@ class StoreMovementController extends Controller
             'toStore',
             'createdBy',
             'updatedBy'
-        ])->findOrFail($id);
+        ])->find($id);
+
+        if (!$movement) {
+            return response([
+                'error' => 'Movimiento no encontrado'
+            ], 404);
+        }
 
         $formatted = [
             'id' => $movement->id,
