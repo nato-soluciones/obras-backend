@@ -31,6 +31,7 @@ class StoreController extends Controller
                 'manager' => $store->userStores->first()?->user,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
                     return [
+                        'material_store_id' => $materialStore->id,
                         'material_id' => $materialStore->material_id,
                         'name' => $materialStore->material->name,
                         'description' => $materialStore->material->description,
