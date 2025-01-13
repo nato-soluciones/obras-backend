@@ -23,12 +23,16 @@ class NoteController extends Controller
         return response($notes, 200);
     }
 
-    /**
-     * Create an note
-     *
-     * @param Request $request
-     * @return Response
-     */
+    public function indexLatest(): Response
+    {
+        $notes = Note::where('created_by', auth()->user()->id)
+            ->select('id', 'title', 'content')
+            ->orderBy('created_at', 'desc')
+            ->limit(1)
+            ->get();
+        return response($notes, 200);
+    }
+
     public function store(CreateNoteRequest $request): Response
     {
         $request->merge(['created_by' => auth()->user()->id]);
