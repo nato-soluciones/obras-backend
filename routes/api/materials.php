@@ -10,6 +10,7 @@ Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialContr
   Route::post('/', 'store')->middleware('permission:stockMaterial_insert');
   Route::put('/{id}', 'update')->middleware('permission:stockMaterial_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:stockMaterial_delete');
+  Route::get('/{id}/stores','getStoresByMaterial')->middleware('permission:stockMaterial_display');
 });
 
 Route::prefix('material_store')->middleware('auth:sanctum')->controller(MaterialStoreController::class)->group(function () {
@@ -18,5 +19,5 @@ Route::prefix('material_store')->middleware('auth:sanctum')->controller(Material
   Route::get('/{id}', 'show')->middleware('permission:stockMaterial_display');
   Route::put('/{id}', 'update')->middleware('permission:stockMaterial_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:stockMaterial_delete');
-  Route::patch('/{id}/limits', 'updateLimits')->middleware('permission:stockMaterial_update');
+  Route::post('/limits', 'updateLimits')->middleware('permission:stockMaterial_update');
 });
