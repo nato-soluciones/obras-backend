@@ -11,11 +11,22 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserStore;
 use App\Enums\MaterialLimitStatus;
+use App\Http\Services\AppSettingService;
 use App\Models\StoreMaterial;
 
 class StoreController extends Controller
 {
-    private float $almostPercentage = 0.10; 
+    
+    private AppSettingService $appSettingService;
+    private float $almostPercentage; 
+    
+    public function __construct(AppSettingService $appSettingService)
+    {
+        $this->appSettingService = $appSettingService;
+        $settings = $this->appSettingService->getSettingsByModule('STOCK');
+        $this->almostPercentage = $settings['LIMIT_PROXIMITY_PERCENTAGE'] ?? 0.10;
+    }
+
 
     /**
      * Display a listing of the resource.
