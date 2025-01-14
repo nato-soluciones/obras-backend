@@ -10,11 +10,24 @@ use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserStore;
+use App\Enums\MaterialLimitStatus;
+use App\Http\Services\AppSettingService;
+use App\Models\StoreMaterial;
 
 class StoreController extends Controller
 {
-
     
+    private AppSettingService $appSettingService;
+    private float $almostPercentage; 
+    
+    public function __construct(AppSettingService $appSettingService)
+    {
+        $this->appSettingService = $appSettingService;
+        $settings = $this->appSettingService->getSettingsByModule('STOCK');
+        $this->almostPercentage = $settings['LIMIT_PROXIMITY_PERCENTAGE'] ?? 0.10;
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -30,6 +43,8 @@ class StoreController extends Controller
                 'description' => $store->description,
                 'manager' => $store->userStores->first()?->user,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
+                    $limitStatus = $this->calculateLimitStatus($materialStore);
+                    
                     return [
                         'material_store_id' => $materialStore->id,
                         'material_id' => $materialStore->material_id,
@@ -37,13 +52,43 @@ class StoreController extends Controller
                         'description' => $materialStore->material->description,
                         'quantity' => $materialStore->quantity,
                         'minimum_limit' => $materialStore->minimum_limit,
-                        'critical_limit' => $materialStore->critical_limit
+                        'critical_limit' => $materialStore->critical_limit,
+                        'limit_status' => $limitStatus->value
                     ];
                 })
             ];
         });
 
         return response($formatted, 200);
+    }
+
+    private function calculateLimitStatus(StoreMaterial $materialStore): MaterialLimitStatus
+    {
+        $quantity = $materialStore->quantity;
+        $criticalLimit = $materialStore->critical_limit;
+        $minimumLimit = $materialStore->minimum_limit;
+        
+        // calculating ranges for almost_critical and almost_minimum
+        $criticalRange = ($minimumLimit - $criticalLimit) * $this->almostPercentage;
+        $minimumRange = $minimumLimit * $this->almostPercentage;
+        
+        if ($quantity <= $criticalLimit) {
+            return MaterialLimitStatus::CRITICAL;
+        }
+        
+        if ($quantity <= $criticalLimit + $criticalRange) {
+            return MaterialLimitStatus::ALMOST_CRITICAL;
+        }
+        
+        if ($quantity <= $minimumLimit) {
+            return MaterialLimitStatus::MINIMUM;
+        }
+        
+        if ($quantity <= $minimumLimit + $minimumRange) {
+            return MaterialLimitStatus::ALMOST_MINIMUM;
+        }
+        
+        return MaterialLimitStatus::NORMAL;
     }
 
     /**
