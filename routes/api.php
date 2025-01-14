@@ -17,6 +17,7 @@ use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\InitialSettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReminderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,7 @@ Route::prefix('initial_settings')->middleware('auth:sanctum')->controller(Initia
 // Notes endpoints
 Route::prefix('notes')->middleware('auth:sanctum')->controller(NoteController::class)->group(function () {
     Route::get('/', 'index')->middleware('permission:notes_list');
+    Route::get('/latest', 'indexLatest');
     Route::get('/{id}', 'show')->middleware('permission:notes_display');
     Route::post('/', 'store')->middleware('permission:notes_insert');
     Route::post('/{id}', 'update')->middleware('permission:notes_update');
@@ -118,11 +120,16 @@ Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::clas
 
 Route::prefix('notifications')->middleware('auth:sanctum')->controller(NotificationController::class)->group(function () {
     Route::get('/', 'index');
+    Route::get('/latest', 'indexLatest');
     Route::get('/newCount', 'notificationNewCount');
     Route::get('/{id}', 'show');
     Route::post('/mark_all_as_read', 'markAllAsRead');
     Route::post('/{id}/mark_as_read', 'markAsRead');
     Route::delete('/{id}', 'destroy');
+});
+
+Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderController::class)->group(function () {
+    Route::get('/latest', 'indexLatest');
 });
 
 Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {

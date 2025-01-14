@@ -18,6 +18,21 @@ class NotificationController extends Controller
         return response($notifications, 200);
     }
 
+    public function indexLatest(): Response
+    {
+        sleep(1);
+        // $notifications = Notification::where('user_id', auth()->user()->id)
+        //     ->orderBy('date', 'desc')
+        //     ->orderBy('id', 'desc')
+        //     ->limit(2)
+        //     ->get();
+        $notifications = [
+            // ["id" => 1, "text" => 'Nuevo proyecto asignado', "time" => 'Hace 2 horas'],
+            // ["id" => 2, "text" => 'Reunión programada para mañana', "time" => 'Hace 5 horas'],
+        ];
+        return response($notifications, 200);
+    }
+
     public function notificationNewCount(): Response
     {
         $notificationCount = Notification::where('user_id', auth()->user()->id)

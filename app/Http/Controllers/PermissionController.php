@@ -40,9 +40,17 @@ class PermissionController extends Controller
                 $entity = $parts[0];
                 $action = $parts[1];
 
-                $actionName = $entity === 'navbar'
-                    ? (array_key_exists($action, EnumsPermission::$entities) ? EnumsPermission::$entities[$action] : $action)
-                    : (array_key_exists($action, EnumsPermission::$actions) ? EnumsPermission::$actions[$action] : $action);
+                switch ($entity) {
+                    case 'navbar':
+                        $actionName = (array_key_exists($action, EnumsPermission::$entities) ? EnumsPermission::$entities[$action] : $action);
+                        break;
+                    case 'obraMenu':
+                        $actionName = (array_key_exists($action, EnumsPermission::$obraMenu) ? EnumsPermission::$obraMenu[$action] : $action);
+                        break;
+                    default:
+                        $actionName = (array_key_exists($action, EnumsPermission::$actions) ? EnumsPermission::$actions[$action] : $action);
+                        break;
+                }
 
                 $structuredPermissions[$entity][] = [
                     'action' => $actionName,
