@@ -1129,6 +1129,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Ver estado de movimiento",
             ],
+            [
+                "name" => "stockMovement_material_store_history_list",
+                "guard_name" => "api",
+                "description" => "Ver historial de movimientos de material en almacen",
+            ],
         ];
 
         $permissions = array_merge(

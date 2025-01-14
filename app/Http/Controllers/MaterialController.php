@@ -108,4 +108,24 @@ class MaterialController extends Controller
         $material->delete();
         return response(null, 204);
     }
+
+    public function getStoresByMaterial(int $id): Response
+    {
+        $material = Material::with('measurementUnit')->findOrFail($id);
+
+        $storesWithStock = $material->storeMaterials()->with('store')->get()->map(function ($storeMaterial) {
+            return [
+                'store_id' => $storeMaterial->store_id,
+                'store_name' => $storeMaterial->store->name,
+                'quantity' => $storeMaterial->quantity,
+                'minimum_limit' => $storeMaterial->minimum_limit,
+                'critical_limit' => $storeMaterial->critical_limit,
+            ];
+        });
+
+        return response([
+            'material' => $material,
+            'stores' => $storesWithStock,
+        ], 200);
+    }
 }

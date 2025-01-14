@@ -10,6 +10,8 @@ class StoreMovementType extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public $timestamps = false;
+
     protected $fillable = ['name', 'description'];
 
     protected $hidden = ['deleted_at'];

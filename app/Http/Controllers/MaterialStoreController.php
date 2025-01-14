@@ -42,10 +42,35 @@ class MaterialStoreController extends Controller
         return response(null, 204);
     }
 
-    public function updateLimits(UpdateMaterialStoreLimitsRequest $request, int $id): Response
+    public function updateLimits(Request $request): Response
     {
-        $materialStore = StoreMaterial::findOrFail($id);
-        $materialStore->update($request->validated());
-        return response($materialStore, 200);
+        $validatedData = $request->validate([
+            'store_id' => 'required|exists:stores,id',
+            'materials' => 'required|array',
+            'materials.*.material_id' => 'required|exists:materials,id',
+            'materials.*.limits' => 'required|array',
+            'materials.*.limits.minimum_limit' => 'required|numeric',
+            'materials.*.limits.critical_limit' => 'required|numeric',
+        ]);
+
+        foreach ($validatedData['materials'] as $materialData) {
+            // Buscar el material en el almacén
+            $storeMaterial = StoreMaterial::where('store_id', $validatedData['store_id'])
+                ->where('material_id', $materialData['material_id'])
+                ->first();
+
+            if (!$storeMaterial) {
+                return response([
+                    'message' => "El material ID {$materialData['material_id']} no existe en el almacén especificado",
+                ], 404);
+            }
+
+            // Actualizar los límites
+            $storeMaterial->minimum_limit = $materialData['limits']['minimum_limit'];
+            $storeMaterial->critical_limit = $materialData['limits']['critical_limit'];
+            $storeMaterial->save();
+        }
+
+        return response(['message' => 'Límites actualizados correctamente'], 200);
     }
 } 
