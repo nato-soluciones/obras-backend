@@ -826,25 +826,22 @@ class StoreMovementController extends Controller
                   ->orWhere('to_store_id', $storeMaterial->store_id);
         })
         ->get()
-        ->map(function ($movement) {
+        ->map(function ($movement) use ($storeMaterial) {
+            $materialData = $movement->movementMaterials->firstWhere('material_id', $storeMaterial->material_id);
             return [
-                'id' => $movement->id,
-                'created_at' => $movement->created_at,
-                'created_by' => $movement->createdBy,
-                'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
-                    return [
-                        'measurement_unit' => $movementMaterial->material->measurementUnit,
-                        'quantity' => $movementMaterial->quantity
-                    ];
-                }),
-                'type' => [
-                    'id' => $movement->type->id,
-                    'name' => $movement->type->name,
-                ],
-                'concept' => [
-                    'id' => $movement->concept->id,
-                    'name' => $movement->concept->name,
-                ],
+            'id' => $movement->id,
+            'created_at' => $movement->created_at,
+            'created_by' => $movement->createdBy,        
+            'measurement_unit' => $materialData->material->measurementUnit,
+            'quantity' => $materialData->quantity,
+            'type' => [
+                'id' => $movement->type->id,
+                'name' => $movement->type->name,
+            ],
+            'concept' => [
+                'id' => $movement->concept->id,
+                'name' => $movement->concept->name,
+            ],
             ];
         });
 
