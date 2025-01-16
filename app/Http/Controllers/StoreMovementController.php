@@ -499,15 +499,12 @@ class StoreMovementController extends Controller
 
             // Skip manager validation for SUPERADMIN
             if (!$user->hasRole('SUPERADMIN')) {
-                $isFromStoreManager = UserStore::where('user_id', $userId)
-                    ->where('store_id', $movement->from_store_id)
-                    ->exists();
             
                 $isToStoreManager = UserStore::where('user_id', $userId)
                     ->where('store_id', $movement->to_store_id)
                     ->exists();
 
-                if (!$isFromStoreManager && !$isToStoreManager) {
+                if (!$isToStoreManager) {
                     return response([
                         'message' => 'No tienes permisos para aceptar esta transferencia. Solo el encargado del almacén destino puede aceptarla.'
                     ], 403);
@@ -593,15 +590,12 @@ class StoreMovementController extends Controller
 
             // Skip manager validation for SUPERADMIN
             if (!$user->hasRole('SUPERADMIN')) {
-                $isFromStoreManager = UserStore::where('user_id', $userId)
-                    ->where('store_id', $movement->from_store_id)
-                    ->exists();
             
                 $isToStoreManager = UserStore::where('user_id', $userId)
                     ->where('store_id', $movement->to_store_id)
                     ->exists();
 
-                if (!$isFromStoreManager && !$isToStoreManager) {
+                if (!$isToStoreManager) {
                     return response([
                         'message' => 'No tienes permisos para rechazar esta transferencia. Solo el encargado del almacén destino puede rechazarla.'
                     ], 403);
@@ -682,11 +676,7 @@ class StoreMovementController extends Controller
                     ->where('store_id', $movement->from_store_id)
                     ->exists();
             
-                $isToStoreManager = UserStore::where('user_id', $userId)
-                    ->where('store_id', $movement->to_store_id)
-                    ->exists();
-
-                if (!$isFromStoreManager && !$isToStoreManager) {
+                if (!$isFromStoreManager) {
                     return response([
                         'message' => 'No tienes permisos para cancelar esta transferencia. Solo el encargado del almacén origen puede cancelarla.'
                     ], 403);
