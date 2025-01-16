@@ -15,6 +15,8 @@ Route::prefix('store_movements')->middleware('auth:sanctum')->controller(StoreMo
   Route::post('/{id}/accept', 'acceptTransfer')->middleware('permission:stockMovement_approve');
   Route::post('/{id}/reject', 'rejectTransfer')->middleware('permission:stockMovement_approve');
   Route::post('/{id}/cancel', 'cancelTransfer')->middleware('permission:stockMovement_approve');
+  Route::post('/{id}/reject_with_adjustment', 'rejectTransferWithAdjustment')
+      ->middleware('permission:stockMovement_approve');
 });
 
 Route::prefix('/store_movement_concepts')->middleware('auth:sanctum')->controller(StoreMovementConceptController::class)->group(function () {

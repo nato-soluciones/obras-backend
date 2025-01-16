@@ -847,4 +847,191 @@ class StoreMovementController extends Controller
 
         return response($movements, 200);
     }
+
+    /**
+     * Reject a transfer with quantity adjustments
+     */
+    public function rejectTransferWithAdjustment(Request $request, string $id): Response
+    {
+        $request->validate([
+            'materials' => 'required|array',
+            'materials.*.material_id' => 'required|exists:materials,id',
+            'materials.*.received_quantity' => 'required|numeric|min:0',
+            'store_movement_concept_id' => 'required|exists:store_movement_concepts,id'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $userId = auth()->id();
+            $user = auth()->user();
+            
+            $movement = StoreMovement::with(['movementMaterials.material', 'type'])
+                ->findOrFail($id);
+
+            if ($movement->type->name !== 'Transferencia') {
+                return response([
+                    'message' => 'El movimiento no es una transferencia'
+                ], 400);
+            }
+
+            // Skip manager validation for SUPERADMIN
+            if (!$user->hasRole('SUPERADMIN')) {
+                $isToStoreManager = UserStore::where('user_id', $userId)
+                    ->where('store_id', $movement->to_store_id)
+                    ->exists();
+
+                if (!$isToStoreManager) {
+                    return response([
+                        'message' => 'No tienes permisos para rechazar esta transferencia. Solo el encargado del almacén destino puede rechazarla.'
+                    ], 403);
+                }
+            }
+
+            // Get statuses
+            $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->firstOrFail();
+            $rejectedStatus = StoreMovementStatus::where('name', 'Rechazado')->firstOrFail();
+            $acceptedStatus = StoreMovementStatus::where('name', 'Aprobado')->firstOrFail();
+
+            // Check if pending
+            if ($movement->store_movement_status_id !== $pendingStatus->id) {
+                return response([
+                    'message' => 'La transferencia no está en estado pendiente'
+                ], 400);
+            }
+
+            // First accept the transfer to add original quantities
+            foreach ($movement->movementMaterials as $movementMaterial) {
+                $toStoreMaterial = StoreMaterial::firstOrCreate(
+                    [
+                        'store_id' => $movement->to_store_id,
+                        'material_id' => $movementMaterial->material_id
+                    ],
+                    [
+                        'quantity' => 0,
+                        'minimum_limit' => 0,
+                        'critical_limit' => 0
+                    ]
+                );
+
+                $toStoreMaterial->quantity += $movementMaterial->quantity;
+                $toStoreMaterial->save();
+            }
+
+            // Then create adjustment movements for differences
+            $inputType = StoreMovementType::where('name', 'Ingreso')->firstOrFail();
+            $outputType = StoreMovementType::where('name', 'Salida')->firstOrFail();
+
+            $adjustmentInputs = [];
+            $adjustmentOutputs = [];
+
+            foreach ($request->materials as $materialData) {
+                $originalMaterial = $movement->movementMaterials
+                    ->where('material_id', $materialData['material_id'])
+                    ->first();
+
+                if (!$originalMaterial) {
+                    throw new \Exception("Material ID {$materialData['material_id']} no estaba en la transferencia original");
+                }
+
+                $difference = $materialData['received_quantity'] - $originalMaterial->quantity;
+
+                if ($difference < 0) {
+                    // Create output for missing quantity
+                    $adjustmentOutputs[] = [
+                        'material_id' => $materialData['material_id'],
+                        'quantity' => abs($difference)
+                    ];
+                } elseif ($difference > 0) {
+                    // Create input for extra quantity
+                    $adjustmentInputs[] = [
+                        'material_id' => $materialData['material_id'],
+                        'quantity' => $difference
+                    ];
+                }
+            }
+
+            // Create output movement if needed
+            if (!empty($adjustmentOutputs)) {
+                $outputMovement = StoreMovement::create([
+                    'created_by_id' => $userId,
+                    'from_store_id' => $movement->to_store_id,
+                    'to_store_id' => $movement->to_store_id,
+                    'store_movement_type_id' => $outputType->id,
+                    'store_movement_concept_id' => $request->store_movement_concept_id,
+                    'store_movement_status_id' => $acceptedStatus->id
+                ]);
+
+                foreach ($adjustmentOutputs as $output) {
+                    $outputMovement->movementMaterials()->create($output);
+                    
+                    $storeMaterial = StoreMaterial::where('store_id', $movement->to_store_id)
+                        ->where('material_id', $output['material_id'])
+                        ->first();
+                    
+                    $storeMaterial->quantity -= $output['quantity'];
+                    $storeMaterial->save();
+                }
+            }
+
+            // Create input movement if needed
+            if (!empty($adjustmentInputs)) {
+                $inputMovement = StoreMovement::create([
+                    'created_by_id' => $userId,
+                    'from_store_id' => $movement->to_store_id,
+                    'to_store_id' => $movement->to_store_id,
+                    'store_movement_type_id' => $inputType->id,
+                    'store_movement_concept_id' => $request->store_movement_concept_id,
+                    'store_movement_status_id' => $acceptedStatus->id
+                ]);
+
+                foreach ($adjustmentInputs as $input) {
+                    $inputMovement->movementMaterials()->create($input);
+                    
+                    $storeMaterial = StoreMaterial::where('store_id', $movement->to_store_id)
+                        ->where('material_id', $input['material_id'])
+                        ->first();
+                    
+                    $storeMaterial->quantity += $input['quantity'];
+                    $storeMaterial->save();
+                }
+            }
+
+            // Update original movement status
+            $movement->store_movement_status_id = $rejectedStatus->id;
+            $movement->updated_by_id = $userId;
+            $movement->save();
+
+            DB::commit();
+            
+            $response = [
+                'message' => 'Transferencia rechazada con ajustes',
+                'original_movement' => $movement->load([
+                    'movementMaterials.material.measurementUnit',
+                    'status',
+                    'type',
+                    'concept',
+                    'fromStore',
+                    'toStore',
+                    'createdBy',
+                    'updatedBy'
+                ])
+            ];
+
+            if (!empty($adjustmentOutputs)) {
+                $response['output_movement'] = $outputMovement->load('movementMaterials.material');
+            }
+            if (!empty($adjustmentInputs)) {
+                $response['input_movement'] = $inputMovement->load('movementMaterials.material');
+            }
+
+            return response($response, 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => 'Error al procesar el rechazo con ajustes de la transferencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
