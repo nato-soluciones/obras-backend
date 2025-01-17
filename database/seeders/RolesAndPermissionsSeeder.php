@@ -1012,6 +1012,33 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Agregar Plan de cobros",
             ],
         ];
+        $reminders_permission = [
+            [
+                "name" => "reminders_list",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorios",
+            ],
+            [
+                "name" => "reminders_insert",
+                "guard_name" => "api",
+                "description" => "Agregar recordatorio",
+            ],
+            [
+                "name" => "reminders_update",
+                "guard_name" => "api",
+                "description" => "Actualizar Recordatorio",
+            ],
+            [
+                "name" => "reminders_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Recordatorio",
+            ],
+            [
+                "name" => "reminders_display",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorio",
+            ]
+        ];
         $obra_plan_charge_details_permission = [
             [
                 "name" => "obraPlanChargeDetails_list",

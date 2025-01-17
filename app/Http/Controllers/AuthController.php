@@ -29,7 +29,7 @@ class AuthController extends Controller
         $accessToken = $this->authService->login($credentials);
 
         return $accessToken
-            ? response($accessToken)
+            ? response($accessToken, 200)
             : response(['message' => 'El usuario o la contraseña son incorrectos.'], 401);
     }
 

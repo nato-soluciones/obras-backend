@@ -129,7 +129,12 @@ Route::prefix('notifications')->middleware('auth:sanctum')->controller(Notificat
 });
 
 Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderController::class)->group(function () {
-    Route::get('/latest', 'indexLatest');
+    Route::get('/today', 'indexToday');
+    Route::get('/', 'index')->middleware('permission:reminders_list');
+    Route::post('/', 'store')->middleware('permission:reminders_insert');
+    Route::put('/{reminderId}/resolve', 'toggleResolved')->middleware('permission:reminders_resolve');
+    Route::put('/{reminderId}', 'update')->middleware('permission:reminders_update');
+    Route::delete('/{reminderId}', 'destroy')->middleware('permission:reminders_delete');
 });
 
 Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
