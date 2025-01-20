@@ -588,8 +588,14 @@ class StoreMovementController extends Controller
             $userId = auth()->id();
             $user = auth()->user();
             
-            $movement = StoreMovement::with(['movementMaterials.material', 'type'])
-                ->findOrFail($id);
+            // Buscar el movimiento antes del try-catch principal
+            $movement = StoreMovement::with(['movementMaterials.material', 'type'])->find($id);
+            
+            if (!$movement) {
+                return response([
+                    'message' => 'Transferencia no encontrada'
+                ], 404);
+            }
 
             if ($movement->type->name !== 'Transferencia') {
                 return response([
@@ -676,8 +682,14 @@ class StoreMovementController extends Controller
             $userId = auth()->id();
             $user = auth()->user();
             
-            $movement = StoreMovement::with(['movementMaterials.material', 'type'])
-                ->findOrFail($id);
+            // Buscar el movimiento antes del try-catch principal
+            $movement = StoreMovement::with(['movementMaterials.material', 'type'])->find($id);
+            
+            if (!$movement) {
+                return response([
+                    'message' => 'Transferencia no encontrada'
+                ], 404);
+            }
 
             if ($movement->type->name !== 'Transferencia') {
                 return response([
@@ -878,8 +890,14 @@ class StoreMovementController extends Controller
             $userId = auth()->id();
             $user = auth()->user();
             
-            $movement = StoreMovement::with(['movementMaterials.material', 'type'])
-                ->findOrFail($id);
+            // Buscar el movimiento antes del try-catch principal
+            $movement = StoreMovement::with(['movementMaterials.material', 'type'])->find($id);
+            
+            if (!$movement) {
+                return response([
+                    'message' => 'Transferencia no encontrada'
+                ], 404);
+            }
 
             if ($movement->type->name !== 'Transferencia') {
                 return response([
