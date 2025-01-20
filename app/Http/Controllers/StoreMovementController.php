@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\UserStore;
 use App\Models\Store;
+use App\Models\StoreMovementReason;
 
 class StoreMovementController extends Controller
 {
@@ -41,7 +42,8 @@ class StoreMovementController extends Controller
             'fromStore',
             'toStore',
             'createdBy',
-            'updatedBy'
+            'updatedBy',
+            'reason'
         ])->get()->map(function ($movement) {
             return [
                 'id' => $movement->id,
@@ -71,6 +73,7 @@ class StoreMovementController extends Controller
                     'id' => $movement->concept->id,
                     'name' => $movement->concept->name,
                 ],
+                'reason' => $movement->reason
             ];
         });
 
@@ -431,6 +434,7 @@ class StoreMovementController extends Controller
         $movement = StoreMovement::with([
             'movementMaterials.material.measurementUnit',
             'status',
+            'reason',
             'type',
             'concept',
             'fromStore',
@@ -473,6 +477,7 @@ class StoreMovementController extends Controller
                 'id' => $movement->concept->id,
                 'name' => $movement->concept->name,
             ],
+            'reason' => $movement->reason,
         ];
 
         return response($formatted, 200);
@@ -572,8 +577,12 @@ class StoreMovementController extends Controller
     /**
      * Reject a pending transfer movement
      */
-    public function rejectTransfer(string $id): Response
+    public function rejectTransfer(Request $request, string $id): Response
     {
+        $request->validate([
+            'store_movement_reason_id' => 'required|exists:store_movement_reasons,id'
+        ]);
+
         DB::beginTransaction();
         try {
             $userId = auth()->id();
@@ -627,6 +636,7 @@ class StoreMovementController extends Controller
 
             // Update movement status and track who rejected it
             $movement->store_movement_status_id = $rejectedStatus->id;
+            $movement->store_movement_reason_id = $request->store_movement_reason_id;
             $movement->updated_by_id = $userId;
             $movement->save();
 
@@ -639,7 +649,8 @@ class StoreMovementController extends Controller
                 'fromStore',
                 'toStore',
                 'createdBy',
-                'updatedBy'
+                'updatedBy',
+                'reason'
             ]), 200);
 
         } catch (\Exception $e) {
@@ -654,8 +665,12 @@ class StoreMovementController extends Controller
     /**
      * Cancel a pending transfer movement
      */
-    public function cancelTransfer(string $id): Response
+    public function cancelTransfer(Request $request, string $id): Response
     {
+        $request->validate([
+            'store_movement_reason_id' => 'required|exists:store_movement_reasons,id'
+        ]);
+
         DB::beginTransaction();
         try {
             $userId = auth()->id();
@@ -708,6 +723,7 @@ class StoreMovementController extends Controller
 
             // Update movement status and who canceled it
             $movement->store_movement_status_id = $canceledStatus->id;
+            $movement->store_movement_reason_id = $request->store_movement_reason_id;
             $movement->updated_by_id = $userId;
             $movement->save();
 
@@ -720,7 +736,8 @@ class StoreMovementController extends Controller
                 'fromStore',
                 'toStore',
                 'createdBy',
-                'updatedBy'
+                'updatedBy',
+                'reason'
             ]), 200);
 
         } catch (\Exception $e) {
@@ -741,7 +758,9 @@ class StoreMovementController extends Controller
             'concept',
             'fromStore',
             'toStore',
-            'createdBy'
+            'createdBy',
+            'updatedBy',
+            'reason'
         ])
         ->where(function($query) use ($storeId) {
             $query->where('from_store_id', $storeId)
@@ -783,6 +802,7 @@ class StoreMovementController extends Controller
                         'id' => $movement->concept->id,
                         'name' => $movement->concept->name,
                     ],
+                    'reason' => $movement->reason
                 ];
             });
 
@@ -806,7 +826,9 @@ class StoreMovementController extends Controller
             'concept',
             'fromStore',
             'toStore',
-            'createdBy'
+            'createdBy',
+            'updatedBy',
+            'reason'
         ])
         ->whereHas('movementMaterials', function($query) use ($storeMaterial) {
             $query->where('material_id', $storeMaterial->material_id);
@@ -832,6 +854,7 @@ class StoreMovementController extends Controller
                 'id' => $movement->concept->id,
                 'name' => $movement->concept->name,
             ],
+            'reason' => $movement->reason
             ];
         });
 
@@ -847,7 +870,7 @@ class StoreMovementController extends Controller
             'materials' => 'required|array',
             'materials.*.material_id' => 'required|exists:materials,id',
             'materials.*.received_quantity' => 'required|numeric|min:0',
-            'store_movement_concept_id' => 'required|exists:store_movement_concepts,id'
+            'store_movement_reason_id' => 'required|exists:store_movement_reasons,id'
         ]);
 
         DB::beginTransaction();
@@ -947,7 +970,8 @@ class StoreMovementController extends Controller
                     'from_store_id' => $movement->to_store_id,
                     'to_store_id' => $movement->to_store_id,
                     'store_movement_type_id' => $outputType->id,
-                    'store_movement_concept_id' => $request->store_movement_concept_id,
+                    // Assigning original transfer concept by default
+                    'store_movement_concept_id' => $movement->store_movement_concept_id,
                     'store_movement_status_id' => $acceptedStatus->id
                 ]);
 
@@ -970,7 +994,8 @@ class StoreMovementController extends Controller
                     'from_store_id' => $movement->to_store_id,
                     'to_store_id' => $movement->to_store_id,
                     'store_movement_type_id' => $inputType->id,
-                    'store_movement_concept_id' => $request->store_movement_concept_id,
+                    // Assigning original transfer concept by default
+                    'store_movement_concept_id' => $movement->store_movement_concept_id,
                     'store_movement_status_id' => $acceptedStatus->id
                 ]);
 
@@ -988,6 +1013,7 @@ class StoreMovementController extends Controller
 
             // Update original movement status
             $movement->store_movement_status_id = $rejectedStatus->id;
+            $movement->store_movement_reason_id = $request->store_movement_reason_id;
             $movement->updated_by_id = $userId;
             $movement->save();
 
@@ -1000,6 +1026,7 @@ class StoreMovementController extends Controller
                     'status',
                     'type',
                     'concept',
+                    'reason',
                     'fromStore',
                     'toStore',
                     'createdBy',
