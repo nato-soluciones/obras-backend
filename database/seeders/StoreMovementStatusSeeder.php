@@ -23,6 +23,10 @@ class StoreMovementStatusSeeder extends Seeder
                 'description' => 'Movimiento aprobado por persona encargada',
             ],
             [
+                'name' => 'Rechazado',
+                'description' => 'Movimiento rechazado por persona encargada',
+            ],
+            [
                 'name' => 'Cancelado',
                 'description' => 'Movimiento cancelado',
             ],
