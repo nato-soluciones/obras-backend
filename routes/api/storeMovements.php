@@ -4,6 +4,7 @@ use App\Http\Controllers\StoreMovementConceptController;
 use App\Http\Controllers\StoreMovementController;
 use App\Http\Controllers\StoreMovementStatusController;
 use App\Http\Controllers\StoreMovementTypeController;
+use App\Http\Controllers\StoreMovementReasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('store_movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
@@ -40,4 +41,9 @@ Route::prefix('stores/{storeId}/movements')->middleware('auth:sanctum')->control
 
 Route::prefix('material_store/{materialStoreId}/movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
   Route::get('/', 'indexByMaterialStore')->middleware('permission:stockMovement_material_store_history_list');
+});
+
+Route::prefix('/store_movement_reasons')->middleware('auth:sanctum')->controller(StoreMovementReasonController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:stockMovement_list');
+    Route::get('/{id}', 'show')->middleware('permission:stockMovement_display');
 });
