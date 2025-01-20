@@ -19,6 +19,7 @@ class StoreMovement extends Model
         'store_movement_type_id',
         'store_movement_status_id',
         'store_movement_concept_id',
+        'store_movement_reason_id',
         'updated_at',
         'updated_by_id'
     ];
@@ -94,5 +95,10 @@ class StoreMovement extends Model
     public function movementMaterials(): HasMany
     {
         return $this->hasMany(StoreMovementMaterial::class);
+    }
+
+    public function reason(): BelongsTo
+    {
+        return $this->belongsTo(StoreMovementReason::class, 'store_movement_reason_id');
     }
 }
