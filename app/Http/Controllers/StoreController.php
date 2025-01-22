@@ -13,6 +13,7 @@ use App\Models\UserStore;
 use App\Enums\MaterialLimitStatus;
 use App\Http\Services\AppSettingService;
 use App\Models\StoreMaterial;
+use App\Models\StoreMovementStatus;
 
 class StoreController extends Controller
 {
@@ -36,12 +37,36 @@ class StoreController extends Controller
         $stores = Store::with(['materialsStore.material', 'userStores.user'])->get();
 
         $formatted = $stores->map(function ($store) {
+            // Buscar el último movimiento para este store
+            $lastMovement = StoreMovement::where(function($query) use ($store) {
+                $query->where('from_store_id', $store->id)
+                      ->orWhere('to_store_id', $store->id);
+            })
+            ->latest('created_at')
+            ->first();
+
+            // Verificar si tiene transferencias pendientes
+            $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->first();
+            $hasPendingTransfer = StoreMovement::where(function($query) use ($store) {
+                $query->where('from_store_id', $store->id)
+                      ->orWhere('to_store_id', $store->id);
+            })
+            ->where('store_movement_type_id', function($query) {
+                $query->select('id')
+                      ->from('store_movement_types')
+                      ->where('name', 'Transferencia');
+            })
+            ->where('store_movement_status_id', $pendingStatus->id)
+            ->exists();
+
             return [
                 'id' => $store->id,
                 'name' => $store->name,
                 'address' => $store->address,
                 'description' => $store->description,
                 'manager' => $store->userStores->first()?->user,
+                'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null,
+                'hasPendingTransfer' => $hasPendingTransfer,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
                     $limitStatus = $this->calculateLimitStatus($materialStore);
                     
