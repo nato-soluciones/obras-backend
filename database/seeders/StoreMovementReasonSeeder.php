@@ -45,7 +45,7 @@ class StoreMovementReasonSeeder extends Seeder
         ];
 
         foreach ($reasons as $reason) {
-            StoreMovementReason::create($reason);
+            StoreMovementReason::firstOrCreate($reason);
         }
     }
 } 

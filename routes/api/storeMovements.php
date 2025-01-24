@@ -11,8 +11,8 @@ Route::prefix('store_movements')->middleware('auth:sanctum')->controller(StoreMo
   Route::get('/', 'index')->middleware('permission:stockMovement_list');
   Route::get('/{id}', 'show')->middleware('permission:stockMovement_display');
   Route::post('/', 'store')->middleware('permission:stockMovement_create ');
-  Route::post('/input', 'storeInput')->middleware('permission:stockMovement_input_create ');
-  Route::post('/output', 'storeOutput')->middleware('permission:stockMovement_output_create ');
+  Route::post('/input', 'storeInput')->middleware('permission:stockMovement_createInput');
+  Route::post('/output', 'storeOutput')->middleware('permission:stockMovement_createOutput');
   Route::post('/{id}/accept', 'acceptTransfer')->middleware('permission:stockMovement_approve');
   Route::post('/{id}/reject', 'rejectTransfer')->middleware('permission:stockMovement_approve');
   Route::post('/{id}/cancel', 'cancelTransfer')->middleware('permission:stockMovement_approve');
