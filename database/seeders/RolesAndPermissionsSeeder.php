@@ -134,7 +134,12 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "navbar_companies",
                 "guard_name" => "api",
                 "description" => "Menú Empresas",
-            ]
+            ],
+            [
+                "name" => "navbar_stock",
+                "guard_name" => "api",
+                "description" => "Menú Stocks",
+            ],
         ];
         $obraMenu_permissions = [
             [
@@ -1012,6 +1017,33 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Agregar Plan de cobros",
             ],
         ];
+        $reminders_permission = [
+            [
+                "name" => "reminders_list",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorios",
+            ],
+            [
+                "name" => "reminders_insert",
+                "guard_name" => "api",
+                "description" => "Agregar recordatorio",
+            ],
+            [
+                "name" => "reminders_update",
+                "guard_name" => "api",
+                "description" => "Actualizar Recordatorio",
+            ],
+            [
+                "name" => "reminders_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Recordatorio",
+            ],
+            [
+                "name" => "reminders_display",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorio",
+            ]
+        ];
         $obra_plan_charge_details_permission = [
             [
                 "name" => "obraPlanChargeDetails_list",
@@ -1033,6 +1065,159 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Ver detalle del plan de cobros",
             ]
+        ];
+        $stock_store_permission = [
+            [
+                "name" => "stockStore_list",
+                "guard_name" => "api",
+                "description" => "Ver Almacenes",
+            ],
+            [
+                "name" => "stockStore_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Almacén",
+            ],
+            [
+                "name" => "stockStore_update",
+                "guard_name" => "api",
+                "description" => "Editar Almacén",
+            ],
+            [
+                "name" => "stockStore_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Almacén",
+            ],
+            [
+                "name" => "stockStore_display",
+                "guard_name" => "api",
+                "description" => "Ver Almacén",
+            ],
+        ];
+        $stock_material_permission = [
+            [
+                "name" => "stockMaterial_list",
+                "guard_name" => "api",
+                "description" => "Ver Materiales",
+            ],
+            [
+                "name" => "stockMaterial_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Material",
+            ],
+            [
+                "name" => "stockMaterial_update",
+                "guard_name" => "api",
+                "description" => "Editar Material",
+            ],
+            [
+                "name" => "stockMaterial_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Material",
+            ],
+            [
+                "name" => "stockMaterial_display",
+                "guard_name" => "api",
+                "description" => "Ver Material",
+            ],
+        ];
+        $stock_store_material_permission = [
+            [
+                "name" => "stockStoreMaterial_list",
+                "guard_name" => "api",
+                "description" => "Ver Materiales de Almacenes",
+            ],
+            [
+                "name" => "stockStoreMaterial_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Material a Almacén",
+            ],
+            [
+                "name" => "stockStoreMaterial_update",
+                "guard_name" => "api",
+                "description" => "Editar Material de Almacén",
+            ],
+            [
+                "name" => "stockStoreMaterial_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Material de Almacén",
+            ],
+            [
+                "name" => "stockStoreMaterial_display",
+                "guard_name" => "api",
+                "description" => "Ver Material de un Almacén",
+            ],
+        ];
+        $stock_movement_permission = [
+            [
+                "name" => "stockMovement_createInput",
+                "guard_name" => "api",
+                "description" => "Agregar ingreso de materiales a almacén",
+            ],
+            [
+                "name" => "stockMovement_list",
+                "guard_name" => "api",
+                "description" => "Ver Movimientos",
+            ],
+            [
+                "name" => "stockMovement_display",
+                "guard_name" => "api",
+                "description" => "Ver Movimiento",
+            ],
+            [
+                "name" => "stockMovement_createOutput",
+                "guard_name" => "api",
+                "description" => "Agregar egreso de materiales a almacén",
+            ],
+            [
+                "name" => "stockMovement_create",
+                "guard_name" => "api",
+                "description" => "Agregar transacción entre almacenes",
+            ],
+            [
+                "name" => "stockMovement_approve",
+                "guard_name" => "api",
+                "description" => "Aprobar o rechazar transacción entre almacenes",
+            ],
+            [
+                "name" => "stockMovement_store_history_list",
+                "guard_name" => "api",
+                "description" => "Ver movimientos de almacén",
+            ],
+            [
+                "name" => "stockMovementConcept_list",
+                "guard_name" => "api",
+                "description" => "Ver conceptos de movimientos",
+            ],
+            [
+                "name" => "stockMovementConcept_display",
+                "guard_name" => "api",
+                "description" => "Ver concepto de movimiento",
+            ],
+            [
+                "name" => "stockMovementType_list",
+                "guard_name" => "api",
+                "description" => "Ver tipos de movimiento",
+            ],
+            [
+                "name" => "stockMovementType_display",
+                "guard_name" => "api",
+                "description" => "Ver tipo de movimiento",
+            ],
+            [
+                "name" => "stockMovementStatus_list",
+                "guard_name" => "api",
+                "description" => "Ver estados de movimientos",
+            ],
+            [
+                "name" => "stockMovementStatus_display",
+                "guard_name" => "api",
+                "description" => "Ver estado de movimiento",
+            ],
+            [
+                "name" => "stockMovement_material_store_history_list",
+                "guard_name" => "api",
+                "description" => "Ver historial de movimientos de material en almacén",
+            ],
         ];
 
         $permissions = array_merge(
@@ -1068,9 +1253,14 @@ class RolesAndPermissionsSeeder extends Seeder
             $exchangeRates_permissions,
             $notes_permission,
             $fleets_permission,
+            $reminders_permission,
             $company_costs_permission,
             $obra_plan_charges_permission,
-            $obra_plan_charge_details_permission
+            $obra_plan_charge_details_permission,
+            $stock_store_permission,
+            $stock_material_permission,
+            $stock_store_material_permission,
+            $stock_movement_permission
         );
 
         foreach ($permissions as $permission) {

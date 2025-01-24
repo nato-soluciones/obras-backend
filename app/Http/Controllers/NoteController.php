@@ -19,7 +19,10 @@ class NoteController extends Controller
     public function index(): Response
     {
         // return all notes created by the authenticated user
-        $notes = Note::where('created_by', auth()->user()->id)->get();
+        $notes = Note::where('created_by', auth()->user()->id)
+            ->orderBy('is_pinned', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
         return response($notes, 200);
     }
 
@@ -27,6 +30,7 @@ class NoteController extends Controller
     {
         $notes = Note::where('created_by', auth()->user()->id)
             ->select('id', 'title', 'content')
+            ->orderBy('is_pinned', 'desc')
             ->orderBy('created_at', 'desc')
             ->limit(1)
             ->get();

@@ -19,6 +19,7 @@ class Note extends Model
         'title',
         'content',
         'expire_at',
+        'is_pinned',
         'created_by',
     ];
 
