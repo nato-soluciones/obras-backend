@@ -144,12 +144,6 @@ Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderContr
     Route::delete('/{reminderId}', 'destroy')->middleware('permission:reminders_delete');
 });
 
-/* Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
-}); */
-
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function () {
     Route::get('/', 'index');
 });
