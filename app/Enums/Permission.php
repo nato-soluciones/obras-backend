@@ -27,6 +27,7 @@ class Permission
     'obraContractors' => 'Obra Proveedores',
     'obraDocuments' => 'Obra Documentos',
     'obraIncomes' => 'Obra Ingresos',
+    'obraMenu' => 'Menu de Obra',
     'obraMaterials' => 'Obra Acopio',
     'obraOutcomes' => 'Obra Egresos',
     'obraPlanChargeDetails' => 'Obra Plan de Cobro Cuotas',
@@ -42,7 +43,6 @@ class Permission
     'toolLocation' => 'Ubicaciones Herramientas',
     'tools' => 'Herramientas',
     'users' => 'Usuarios',
-
   ];
 
   public static $actions = [
@@ -60,5 +60,19 @@ class Permission
     'listEvents' => 'Listar eventos',
     'review' => 'Revisar',
     'update' => 'Modificar',
+  ];
+
+  public static $obraMenu = [
+    'overview' => 'Vista general',
+    'stages' => 'Avance de obra',
+    'dailyLogs' => 'Diario de obra',
+    'materials' => 'Acopio',
+    'incomes' => 'Ingresos',
+    'planCharge' => 'Plan de cobros',
+    'outcomes' => 'Egresos',
+    'additionals' => 'Adicionales',
+    'providers' => 'Proveedores',
+    'documents' => 'Documentos',
+    'settings' => 'Configuraciones',
   ];
 }

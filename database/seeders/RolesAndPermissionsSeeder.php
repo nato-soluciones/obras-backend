@@ -141,6 +141,63 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Stocks",
             ],
         ];
+        $obraMenu_permissions = [
+            [
+                "name" => "obraMenu_overview",
+                "guard_name" => "api",
+                "description" => "Visión General",
+            ],
+            [
+                "name" => "obraMenu_stages",
+                "guard_name" => "api",
+                "description" => "Avance de Obra",
+            ],
+            [
+                "name" => "obraMenu_dailyLogs",
+                "guard_name" => "api",
+                "description" => "Diario de Obra",
+            ],
+            [
+                "name" => "obraMenu_materials",
+                "guard_name" => "api",
+                "description" => "Acopio",
+            ],
+            [
+                "name" => "obraMenu_incomes",
+                "guard_name" => "api",
+                "description" => "Ingresos",
+            ],
+            [
+                "name" => "obraMenu_planCharge",
+                "guard_name" => "api",
+                "description" => "Plan de Cobro",
+            ],
+            [
+                "name" => "obraMenu_outcomes",
+                "guard_name" => "api",
+                "description" => "Egresos",
+            ],
+            [
+                "name" => "obraMenu_additionals",
+                "guard_name" => "api",
+                "description" => "Adicionales",
+            ],
+            [
+                "name" => "obraMenu_providers",
+                "guard_name" => "api",
+                "description" => "Proveedores",
+            ],
+            [
+                "name" => "obraMenu_documents",
+                "guard_name" => "api",
+                "description" => "Documentos",
+            ],
+            [
+                "name" => "obraMenu_settings",
+                "guard_name" => "api",
+                "description" => "Configuraciones",
+            ],
+        ];
         $obras_permission = [
             [
                 "name" => "obras_list",
@@ -960,6 +1017,33 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Agregar Plan de cobros",
             ],
         ];
+        $reminders_permission = [
+            [
+                "name" => "reminders_list",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorios",
+            ],
+            [
+                "name" => "reminders_insert",
+                "guard_name" => "api",
+                "description" => "Agregar recordatorio",
+            ],
+            [
+                "name" => "reminders_update",
+                "guard_name" => "api",
+                "description" => "Actualizar Recordatorio",
+            ],
+            [
+                "name" => "reminders_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Recordatorio",
+            ],
+            [
+                "name" => "reminders_display",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorio",
+            ]
+        ];
         $obra_plan_charge_details_permission = [
             [
                 "name" => "obraPlanChargeDetails_list",
@@ -1138,6 +1222,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $permissions = array_merge(
             $navbar_permissions,
+            $obraMenu_permissions,
             $obras_permission,
             $obras_dailyLog_permission,
             $obras_stages_permission,
