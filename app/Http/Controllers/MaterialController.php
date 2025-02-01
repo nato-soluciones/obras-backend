@@ -114,6 +114,8 @@ class MaterialController extends Controller
     {
         $material = Material::with(['measurementUnit', 'storeMaterials.store'])->findOrFail($id);
 
+        $totalStock = $material->storeMaterials->sum('quantity');
+
         $storesWithStock = $material->storeMaterials->map(function ($storeMaterial) {
             return [
                 'store_id' => $storeMaterial->store?->id,
@@ -129,6 +131,7 @@ class MaterialController extends Controller
                 'id' => $material->id,
                 'name' => $material->name,
                 'description' => $material->description,
+                'total_stock' => $totalStock,
                 'measurement_unit' => [
                     'id' => $material->measurementUnit?->id,
                     'name' => $material->measurementUnit?->name,
