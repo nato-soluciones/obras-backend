@@ -32,7 +32,7 @@ class MaterialController extends Controller
                     'unit' => $material->measurementUnit->name,
                     'unit_abbreviation' => $material->measurementUnit->abbreviation,
                     'stock' => $totalStock,
-                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null
+                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null
                 ];
             });
 

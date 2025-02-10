@@ -68,7 +68,7 @@ class StoreController extends Controller
                 'address' => $store->address,
                 'description' => $store->description,
                 'manager' => $store->userStores->first()?->user,
-                'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null,
+                'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null,
                 'hasPendingTransfer' => $hasPendingTransfer,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
                     $limitStatus = $this->calculateLimitStatus($materialStore);
@@ -264,7 +264,7 @@ class StoreController extends Controller
                     'address' => $store->address,
                     'description' => $store->description,
                     'manager' => $store->userStores->first()?->user,
-                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null
+                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null
                 ];
             });
 
