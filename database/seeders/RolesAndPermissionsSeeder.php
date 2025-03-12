@@ -136,9 +136,66 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Empresas",
             ],
             [
-                "name" => "navbar_stock ",
+                "name" => "navbar_stock",
                 "guard_name" => "api",
                 "description" => "Menú Stocks",
+            ],
+        ];
+        $obraMenu_permissions = [
+            [
+                "name" => "obraMenu_overview",
+                "guard_name" => "api",
+                "description" => "Visión General",
+            ],
+            [
+                "name" => "obraMenu_stages",
+                "guard_name" => "api",
+                "description" => "Avance de Obra",
+            ],
+            [
+                "name" => "obraMenu_dailyLogs",
+                "guard_name" => "api",
+                "description" => "Diario de Obra",
+            ],
+            [
+                "name" => "obraMenu_materials",
+                "guard_name" => "api",
+                "description" => "Acopio",
+            ],
+            [
+                "name" => "obraMenu_incomes",
+                "guard_name" => "api",
+                "description" => "Ingresos",
+            ],
+            [
+                "name" => "obraMenu_planCharge",
+                "guard_name" => "api",
+                "description" => "Plan de Cobro",
+            ],
+            [
+                "name" => "obraMenu_outcomes",
+                "guard_name" => "api",
+                "description" => "Egresos",
+            ],
+            [
+                "name" => "obraMenu_additionals",
+                "guard_name" => "api",
+                "description" => "Adicionales",
+            ],
+            [
+                "name" => "obraMenu_providers",
+                "guard_name" => "api",
+                "description" => "Proveedores",
+            ],
+            [
+                "name" => "obraMenu_documents",
+                "guard_name" => "api",
+                "description" => "Documentos",
+            ],
+            [
+                "name" => "obraMenu_settings",
+                "guard_name" => "api",
+                "description" => "Configuraciones",
             ],
         ];
         $obras_permission = [
@@ -960,6 +1017,33 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Agregar Plan de cobros",
             ],
         ];
+        $reminders_permission = [
+            [
+                "name" => "reminders_list",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorios",
+            ],
+            [
+                "name" => "reminders_insert",
+                "guard_name" => "api",
+                "description" => "Agregar recordatorio",
+            ],
+            [
+                "name" => "reminders_update",
+                "guard_name" => "api",
+                "description" => "Actualizar Recordatorio",
+            ],
+            [
+                "name" => "reminders_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Recordatorio",
+            ],
+            [
+                "name" => "reminders_display",
+                "guard_name" => "api",
+                "description" => "Ver Recordatorio",
+            ]
+        ];
         $obra_plan_charge_details_permission = [
             [
                 "name" => "obraPlanChargeDetails_list",
@@ -991,22 +1075,22 @@ class RolesAndPermissionsSeeder extends Seeder
             [
                 "name" => "stockStore_insert",
                 "guard_name" => "api",
-                "description" => "Agregar Almacen",
+                "description" => "Agregar Almacén",
             ],
             [
                 "name" => "stockStore_update",
                 "guard_name" => "api",
-                "description" => "Editar Almacen",
+                "description" => "Editar Almacén",
             ],
             [
                 "name" => "stockStore_delete",
                 "guard_name" => "api",
-                "description" => "Eliminar Almacen",
+                "description" => "Eliminar Almacén",
             ],
             [
                 "name" => "stockStore_display",
                 "guard_name" => "api",
-                "description" => "Ver Almacen",
+                "description" => "Ver Almacén",
             ],
         ];
         $stock_material_permission = [
@@ -1045,29 +1129,29 @@ class RolesAndPermissionsSeeder extends Seeder
             [
                 "name" => "stockStoreMaterial_insert",
                 "guard_name" => "api",
-                "description" => "Agregar Material a Almacen",
+                "description" => "Agregar Material a Almacén",
             ],
             [
                 "name" => "stockStoreMaterial_update",
                 "guard_name" => "api",
-                "description" => "Editar Material de Almacen",
+                "description" => "Editar Material de Almacén",
             ],
             [
                 "name" => "stockStoreMaterial_delete",
                 "guard_name" => "api",
-                "description" => "Eliminar Material de Almacen",
+                "description" => "Eliminar Material de Almacén",
             ],
             [
                 "name" => "stockStoreMaterial_display",
                 "guard_name" => "api",
-                "description" => "Ver Material de un Almacen",
+                "description" => "Ver Material de un Almacén",
             ],
         ];
         $stock_movement_permission = [
             [
-                "name" => "stockMovement_input_create",
+                "name" => "stockMovement_createInput",
                 "guard_name" => "api",
-                "description" => "Agregar ingreso de materiales a almacen",
+                "description" => "Agregar ingreso de materiales a almacén",
             ],
             [
                 "name" => "stockMovement_list",
@@ -1080,24 +1164,24 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Movimiento",
             ],
             [
-                "name" => "stockMovement_output_create",
+                "name" => "stockMovement_createOutput",
                 "guard_name" => "api",
-                "description" => "Agregar egreso de materiales a almacen",
+                "description" => "Agregar egreso de materiales a almacén",
             ],
             [
                 "name" => "stockMovement_create",
                 "guard_name" => "api",
-                "description" => "Agregar transaccion entre almacenes",
+                "description" => "Agregar transacción entre almacenes",
             ],
             [
                 "name" => "stockMovement_approve",
                 "guard_name" => "api",
-                "description" => "Aprobar o rechazar transaccion entre almacenes",
+                "description" => "Aprobar o rechazar transacción entre almacenes",
             ],
             [
                 "name" => "stockMovement_store_history_list",
                 "guard_name" => "api",
-                "description" => "Ver movimientos de almacen",
+                "description" => "Ver movimientos de almacén",
             ],
             [
                 "name" => "stockMovementConcept_list",
@@ -1132,12 +1216,13 @@ class RolesAndPermissionsSeeder extends Seeder
             [
                 "name" => "stockMovement_material_store_history_list",
                 "guard_name" => "api",
-                "description" => "Ver historial de movimientos de material en almacen",
+                "description" => "Ver historial de movimientos de material en almacén",
             ],
         ];
 
         $permissions = array_merge(
             $navbar_permissions,
+            $obraMenu_permissions,
             $obras_permission,
             $obras_dailyLog_permission,
             $obras_stages_permission,
@@ -1168,6 +1253,7 @@ class RolesAndPermissionsSeeder extends Seeder
             $exchangeRates_permissions,
             $notes_permission,
             $fleets_permission,
+            $reminders_permission,
             $company_costs_permission,
             $obra_plan_charges_permission,
             $obra_plan_charge_details_permission,

@@ -19,6 +19,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MaterialStoreController;
 use App\Http\Controllers\UserStoreController;
+use App\Http\Controllers\ReminderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,7 @@ Route::prefix('initial_settings')->middleware('auth:sanctum')->controller(Initia
 // Notes endpoints
 Route::prefix('notes')->middleware('auth:sanctum')->controller(NoteController::class)->group(function () {
     Route::get('/', 'index')->middleware('permission:notes_list');
+    Route::get('/latest', 'indexLatest');
     Route::get('/{id}', 'show')->middleware('permission:notes_display');
     Route::post('/', 'store')->middleware('permission:notes_insert');
     Route::post('/{id}', 'update')->middleware('permission:notes_update');
@@ -124,6 +126,7 @@ Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::clas
 
 Route::prefix('notifications')->middleware('auth:sanctum')->controller(NotificationController::class)->group(function () {
     Route::get('/', 'index');
+    Route::get('/latest', 'indexLatest');
     Route::get('/newCount', 'notificationNewCount');
     Route::get('/{id}', 'show');
     Route::post('/mark_all_as_read', 'markAllAsRead');
@@ -131,11 +134,15 @@ Route::prefix('notifications')->middleware('auth:sanctum')->controller(Notificat
     Route::delete('/{id}', 'destroy');
 });
 
-/* Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
-}); */
+
+Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderController::class)->group(function () {
+    Route::get('/today', 'indexToday');
+    Route::get('/', 'index')->middleware('permission:reminders_list');
+    Route::post('/', 'store')->middleware('permission:reminders_insert');
+    Route::put('/{reminderId}/resolve', 'toggleResolved')->middleware('permission:reminders_resolve');
+    Route::put('/{reminderId}', 'update')->middleware('permission:reminders_update');
+    Route::delete('/{reminderId}', 'destroy')->middleware('permission:reminders_delete');
+});
 
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function () {
     Route::get('/', 'index');
