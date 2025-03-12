@@ -29,6 +29,7 @@ class MaterialController extends Controller
                 return [
                     'id' => $material->id,
                     'name' => $material->name,
+                    'description' => $material->description,
                     'unit' => $material->measurementUnit->name,
                     'unit_abbreviation' => $material->measurementUnit->abbreviation,
                     'stock' => $totalStock,
