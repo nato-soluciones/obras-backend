@@ -10,4 +10,5 @@ Route::prefix('stores')->middleware('auth:sanctum')->controller(StoreController:
   Route::post('/', 'store')->middleware('permission:stockStore_insert');
   Route::put('/{id}', 'update')->middleware('permission:stockStore_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:stockStore_delete');
+  Route::get('/{id}/limits', 'getLimits')->middleware('permission:stockStore_display');
 });

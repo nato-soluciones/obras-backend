@@ -270,4 +270,38 @@ class StoreController extends Controller
 
         return response($stores, 200);
     }
+
+    public function getLimits(string $id): Response
+    {
+        $store = Store::with(['materialsStore.material.measurementUnit'])->find($id);
+
+        if (!$store) {
+            return response([
+                'message' => 'Almacén no encontrado'
+            ], 404);
+        }
+
+        $limits = $store->materialsStore->map(function ($materialStore) {
+            return [
+                'material_store_id' => $materialStore->id,
+                'material' => [
+                    'id' => $materialStore->material->id,
+                    'name' => $materialStore->material->name,
+                    'description' => $materialStore->material->description,
+                    'unit' => $materialStore->material->measurementUnit->abbreviation
+                ],
+                'limits' => [
+                    'minimum_limit' => $materialStore->minimum_limit,
+                    'critical_limit' => $materialStore->critical_limit
+                ],
+                'current_quantity' => $materialStore->quantity
+            ];
+        });
+
+        return response([
+            'store_id' => $store->id,
+            'store_name' => $store->name,
+            'materials' => $limits
+        ], 200);
+    }
 }
