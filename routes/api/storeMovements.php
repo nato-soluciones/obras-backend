@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('store_movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:storeMovement_list');
   Route::get('/{id}', 'show')->middleware('permission:storeMovement_display');
+  Route::post('/validate', 'validateTransfer')->middleware('permission:storeMovement_create');
   Route::post('/', 'store')->middleware('permission:storeMovement_create ');
   Route::post('/input', 'storeInput')->middleware('permission:storeMovement_create');
   Route::post('/output', 'storeOutput')->middleware('permission:storeMovement_create');
