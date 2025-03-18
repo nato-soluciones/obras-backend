@@ -755,9 +755,7 @@ class StoreMovementController extends Controller
      */
     public function cancelTransfer(Request $request, string $id): Response
     {
-        $request->validate([
-            'store_movement_reason_id' => 'required|exists:store_movement_reasons,id'
-        ]);
+        
 
         DB::beginTransaction();
         try {
@@ -850,8 +848,8 @@ class StoreMovementController extends Controller
             'status',
             'type',
             'concept',
-            'fromStore',
-            'toStore',
+            'fromStore.userStores.user',
+            'toStore.userStores.user',
             'createdBy',
             'updatedBy',
             'reason'
@@ -870,12 +868,26 @@ class StoreMovementController extends Controller
 
         $movements = $query->get()
             ->map(function ($movement) {
+                // Get manager for from_store
+                $fromStoreManager = $movement->fromStore->userStores->first()?->user;
+                
+                // Get manager for to_store
+                $toStoreManager = $movement->toStore->userStores->first()?->user;
+                
+                // Create from_store with manager
+                $fromStore = $movement->fromStore->toArray();
+                $fromStore['manager'] = $fromStoreManager;
+                
+                // Create to_store with manager
+                $toStore = $movement->toStore->toArray();
+                $toStore['manager'] = $toStoreManager;
+                
                 return [
                     'id' => $movement->id,
                     'created_at' => $movement->created_at,
                     'created_by' => $movement->createdBy,
-                    'from_store' => $movement->fromStore,
-                    'to_store' => $movement->toStore,
+                    'from_store' => $fromStore,
+                    'to_store' => $toStore,
                     'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
                         return [
                             'id' => $movementMaterial->material->id,
