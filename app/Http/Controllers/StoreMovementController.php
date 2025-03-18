@@ -673,9 +673,7 @@ class StoreMovementController extends Controller
      */
     public function cancelTransfer(Request $request, string $id): Response
     {
-        $request->validate([
-            'store_movement_reason_id' => 'required|exists:store_movement_reasons,id'
-        ]);
+        
 
         DB::beginTransaction();
         try {
