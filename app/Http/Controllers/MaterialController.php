@@ -29,9 +29,11 @@ class MaterialController extends Controller
                 return [
                     'id' => $material->id,
                     'name' => $material->name,
+                    'description' => $material->description,
                     'unit' => $material->measurementUnit->name,
+                    'unit_abbreviation' => $material->measurementUnit->abbreviation,
                     'stock' => $totalStock,
-                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null
+                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null
                 ];
             });
 
@@ -111,21 +113,35 @@ class MaterialController extends Controller
 
     public function getStoresByMaterial(int $id): Response
     {
-        $material = Material::with('measurementUnit')->findOrFail($id);
+        $material = Material::with(['measurementUnit', 'storeMaterials.store'])->findOrFail($id);
 
-        $storesWithStock = $material->storeMaterials()->with('store')->get()->map(function ($storeMaterial) {
+        $totalStock = $material->storeMaterials->sum('quantity');
+
+        $storesWithStock = $material->storeMaterials->map(function ($storeMaterial) {
             return [
-                'store_id' => $storeMaterial->store_id,
-                'store_name' => $storeMaterial->store->name,
+                'store_id' => $storeMaterial->store?->id,
+                'store_name' => $storeMaterial->store?->name,
                 'quantity' => $storeMaterial->quantity,
                 'minimum_limit' => $storeMaterial->minimum_limit,
                 'critical_limit' => $storeMaterial->critical_limit,
             ];
         });
 
-        return response([
-            'material' => $material,
-            'stores' => $storesWithStock,
-        ], 200);
+        $formattedResponse = [
+            'material' => [
+                'id' => $material->id,
+                'name' => $material->name,
+                'description' => $material->description,
+                'total_stock' => $totalStock,
+                'measurement_unit' => [
+                    'id' => $material->measurementUnit?->id,
+                    'name' => $material->measurementUnit?->name,
+                    'abbreviation' => $material->measurementUnit?->abbreviation
+                ]
+            ],
+            'stores' => $storesWithStock
+        ];
+
+        return response($formattedResponse, 200);
     }
 }
