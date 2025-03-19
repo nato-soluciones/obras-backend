@@ -34,7 +34,10 @@ class StoreController extends Controller
      */
     public function indexWithMaterials(): Response
     {
-        $stores = Store::with(['materialsStore.material', 'userStores.user'])->get();
+        $stores = Store::with([
+            'materialsStore.material.measurementUnit', 
+            'userStores.user'
+        ])->get();
 
         $formatted = $stores->map(function ($store) {
             // Buscar el último movimiento para este store
@@ -65,7 +68,7 @@ class StoreController extends Controller
                 'address' => $store->address,
                 'description' => $store->description,
                 'manager' => $store->userStores->first()?->user,
-                'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null,
+                'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null,
                 'hasPendingTransfer' => $hasPendingTransfer,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
                     $limitStatus = $this->calculateLimitStatus($materialStore);
@@ -75,6 +78,7 @@ class StoreController extends Controller
                         'material_id' => $materialStore->material_id,
                         'name' => $materialStore->material->name,
                         'description' => $materialStore->material->description,
+                        'unit' => $materialStore->material->measurementUnit->abbreviation,
                         'quantity' => $materialStore->quantity,
                         'minimum_limit' => $materialStore->minimum_limit,
                         'critical_limit' => $materialStore->critical_limit,
@@ -147,7 +151,10 @@ class StoreController extends Controller
      */
     public function show(string $id): Response
     {
-        $store = Store::with(['materialsStore.material', 'userStores.user'])->find($id);
+        $store = Store::with([
+                'materialsStore.material.measurementUnit',
+                'userStores.user']
+             )->find($id);
 
         if (!$store) {
             return response([
@@ -165,6 +172,7 @@ class StoreController extends Controller
                 return [
                     'material_id' => $materialStore->material_id,
                     'material_name' => $materialStore->material->name,
+                    'unit' => $materialStore->material->measurementUnit->abbreviation,
                     'description' => $materialStore->material->description,
                     'quantity' => $materialStore->quantity,
                     'minimum_limit' => $materialStore->minimum_limit,
@@ -256,10 +264,44 @@ class StoreController extends Controller
                     'address' => $store->address,
                     'description' => $store->description,
                     'manager' => $store->userStores->first()?->user,
-                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d-m-Y') : null
+                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null
                 ];
             });
 
         return response($stores, 200);
+    }
+
+    public function getLimits(string $id): Response
+    {
+        $store = Store::with(['materialsStore.material.measurementUnit'])->find($id);
+
+        if (!$store) {
+            return response([
+                'message' => 'Almacén no encontrado'
+            ], 404);
+        }
+
+        $limits = $store->materialsStore->map(function ($materialStore) {
+            return [
+                'material_store_id' => $materialStore->id,
+                'material' => [
+                    'id' => $materialStore->material->id,
+                    'name' => $materialStore->material->name,
+                    'description' => $materialStore->material->description,
+                    'unit' => $materialStore->material->measurementUnit->abbreviation
+                ],
+                'limits' => [
+                    'minimum_limit' => $materialStore->minimum_limit,
+                    'critical_limit' => $materialStore->critical_limit
+                ],
+                'current_quantity' => $materialStore->quantity
+            ];
+        });
+
+        return response([
+            'store_id' => $store->id,
+            'store_name' => $store->name,
+            'materials' => $limits
+        ], 200);
     }
 }

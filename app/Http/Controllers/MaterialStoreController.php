@@ -49,8 +49,8 @@ class MaterialStoreController extends Controller
             'materials' => 'required|array',
             'materials.*.material_id' => 'required|exists:materials,id',
             'materials.*.limits' => 'required|array',
-            'materials.*.limits.minimum_limit' => 'required|numeric',
-            'materials.*.limits.critical_limit' => 'required|numeric',
+            'materials.*.limits.minimum_limit' => 'required|numeric|min:0',
+            'materials.*.limits.critical_limit' => 'required|numeric|min:0',
         ]);
 
         foreach ($validatedData['materials'] as $materialData) {
@@ -60,17 +60,24 @@ class MaterialStoreController extends Controller
                 ->first();
 
             if (!$storeMaterial) {
-                return response([
-                    'message' => "El material ID {$materialData['material_id']} no existe en el almacén especificado",
-                ], 404);
+                // Si no existe la relación, crearla con stock inicial 0
+                $storeMaterial = StoreMaterial::create([
+                    'store_id' => $validatedData['store_id'],
+                    'material_id' => $materialData['material_id'],
+                    'quantity' => 0,
+                    'minimum_limit' => $materialData['limits']['minimum_limit'],
+                    'critical_limit' => $materialData['limits']['critical_limit']
+                ]);
+            } else {
+                // Si existe, actualizar los límites
+                $storeMaterial->minimum_limit = $materialData['limits']['minimum_limit'];
+                $storeMaterial->critical_limit = $materialData['limits']['critical_limit'];
+                $storeMaterial->save();
             }
-
-            // Actualizar los límites
-            $storeMaterial->minimum_limit = $materialData['limits']['minimum_limit'];
-            $storeMaterial->critical_limit = $materialData['limits']['critical_limit'];
-            $storeMaterial->save();
         }
 
-        return response(['message' => 'Límites actualizados correctamente'], 200);
+        return response([
+            'message' => 'Límites actualizados correctamente'
+        ], 200);
     }
 } 
