@@ -136,7 +136,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Menú Empresas",
             ],
             [
-                "name" => "navbar_stock",
+                "name" => "navbar_stocks",
                 "guard_name" => "api",
                 "description" => "Menú Stocks",
             ],
@@ -1159,7 +1159,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Movimiento",
             ],
             [
-                "name" => "storeMovement_create",
+                "name" => "storeMovement_insert",
                 "guard_name" => "api",
                 "description" => "Agregar transacción entre almacenes",
             ],
@@ -1167,26 +1167,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "name" => "storeMovement_approve",
                 "guard_name" => "api",
                 "description" => "Aprobar o rechazar transacción entre almacenes",
-            ],
-            [
-                "name" => "storeMovementConcept_list",
-                "guard_name" => "api",
-                "description" => "Ver conceptos de movimientos",
-            ],
-            [
-                "name" => "storeMovementConcept_display",
-                "guard_name" => "api",
-                "description" => "Ver concepto de movimiento",
-            ],
-            [
-                "name" => "storeMovementType_list",
-                "guard_name" => "api",
-                "description" => "Ver tipos de movimiento",
-            ],
-            [
-                "name" => "storeMovementType_display",
-                "guard_name" => "api",
-                "description" => "Ver tipo de movimiento",
             ],
             [
                 "name" => "storeMovementStatus_list",
