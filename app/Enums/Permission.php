@@ -43,6 +43,7 @@ class Permission
     'providerCurrentAccounts' => 'Proveedor CC',
     'stocks' => 'Stocks',
     'store' => 'Almacenes',
+    'storeMaterial' => 'Materiales en Almacenes',
     'storeMovement' => 'Movimientos de Almacenes',
     'toolLocation' => 'Ubicaciones Herramientas',
     'tools' => 'Herramientas',
@@ -56,6 +57,7 @@ class Permission
     'copy' => 'Copiar',
     'delete' => 'Eliminar',
     'display' => 'Ver',
+    'displayActions' => 'Ver acciones pendientes',
     'export' => 'Exportar',
     'facturanteRedirect' => 'Redirigir a Facturante',
     'insert' => 'Agregar',
@@ -64,6 +66,7 @@ class Permission
     'listEvents' => 'Listar eventos',
     'review' => 'Revisar',
     'update' => 'Modificar',
+    'updateStockLimits' => 'Modificar límites de stock',
   ];
 
   public static $obraMenu = [

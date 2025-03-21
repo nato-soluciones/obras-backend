@@ -1120,31 +1120,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Material",
             ],
         ];
-        $material_store_permission = [
+        $store_material_permission = [
             [
-                "name" => "materialStore_list",
+                "name" => "storeMaterial_updateStockLimits",
                 "guard_name" => "api",
-                "description" => "Ver Materiales de Almacenes",
-            ],
-            [
-                "name" => "materialStore_insert",
-                "guard_name" => "api",
-                "description" => "Agregar Material a Almacén",
-            ],
-            [
-                "name" => "materialStore_update",
-                "guard_name" => "api",
-                "description" => "Editar Material de Almacén",
-            ],
-            [
-                "name" => "materialStore_delete",
-                "guard_name" => "api",
-                "description" => "Eliminar Material de Almacén",
-            ],
-            [
-                "name" => "materialStore_display",
-                "guard_name" => "api",
-                "description" => "Ver Material de un Almacén",
+                "description" => "Actualiza el limite de stock de los materiales de Almacenes",
             ],
         ];
         $store_movement_permission = [
@@ -1154,9 +1134,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Movimientos",
             ],
             [
-                "name" => "storeMovement_display",
+                "name" => "storeMovement_displayActions",
                 "guard_name" => "api",
-                "description" => "Ver Movimiento",
+                "description" => "Ver acciones pendientes",
             ],
             [
                 "name" => "storeMovement_insert",
@@ -1217,9 +1197,9 @@ class RolesAndPermissionsSeeder extends Seeder
             $company_costs_permission,
             $obra_plan_charges_permission,
             $obra_plan_charge_details_permission,
-            $store_permission,
             $material_permission,
-            $material_store_permission,
+            $store_permission,
+            $store_material_permission,
             $store_movement_permission
         );
 

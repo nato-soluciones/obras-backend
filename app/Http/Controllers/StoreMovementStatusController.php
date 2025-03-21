@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\StoreMovementStatus;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class StoreMovementStatusController extends Controller

@@ -18,6 +18,7 @@ use App\Models\Store;
 use App\Models\StoreMovementReason;
 use App\Http\Requests\Movement\ValidateTransferRequest;
 use App\Http\Requests\Movement\ValidateOutputRequest;
+use Illuminate\Support\Facades\Log;
 
 class StoreMovementController extends Controller
 {
