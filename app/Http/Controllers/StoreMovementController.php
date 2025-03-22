@@ -919,11 +919,10 @@ class StoreMovementController extends Controller
 
     public function indexByMaterialStore(string $storeId, string $materialId, Request $request): Response
     {
-        // $storeMaterial = StoreMaterial::find($storeMaterialId);
         $storeMaterial = StoreMaterial::where('store_id', $storeId)
-        ->where('material_id', $materialId)
-        ->first();
-    
+            ->where('material_id', $materialId)
+            ->first();
+
         if (!$storeMaterial) {
             return response([
                 'message' => 'El material especificado no existe en el almacén',
@@ -948,24 +947,36 @@ class StoreMovementController extends Controller
             $query->where('from_store_id', $storeMaterial->store_id)
                   ->orWhere('to_store_id', $storeMaterial->store_id);
         })
+        ->whereHas('status', function ($query) {
+            $query->where('name', 'Aprobado');
+        })
+        ->orderBy('created_at', 'desc')
         ->get()
         ->map(function ($movement) use ($storeMaterial) {
             $materialData = $movement->movementMaterials->firstWhere('material_id', $storeMaterial->material_id);
+            
+            $transferDirection = null;
+            if ($movement->type->name === 'Transferencia') {
+                $transferDirection = $movement->to_store_id === $storeMaterial->store_id ? 'entrante' : 'saliente';
+            }
+
             return [
-            'id' => $movement->id,
-            'created_at' => $movement->created_at,
-            'created_by' => $movement->createdBy,        
-            'measurement_unit' => $materialData->material->measurementUnit,
-            'quantity' => $materialData->quantity,
-            'type' => [
-                'id' => $movement->type->id,
-                'name' => $movement->type->name,
-            ],
-            'concept' => [
-                'id' => $movement->concept->id,
-                'name' => $movement->concept->name,
-            ],
-            'reason' => $movement->reason
+                'id' => $movement->id,
+                'created_at' => $movement->created_at,
+                'created_by' => $movement->createdBy,        
+                'measurement_unit' => $materialData->material->measurementUnit,
+                'quantity' => $materialData->quantity,
+                'type' => [
+                    'id' => $movement->type->id,
+                    'name' => $movement->type->name,
+                ],
+                'concept' => [
+                    'id' => $movement->concept->id,
+                    'name' => $movement->concept->name,
+                ],
+                'reason' => $movement->reason,
+                'status' => $movement->status,
+                'transfer_direction' => $transferDirection
             ];
         });
 
