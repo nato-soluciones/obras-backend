@@ -917,10 +917,13 @@ class StoreMovementController extends Controller
         return response($movements, 200);
     }
 
-    public function indexByMaterialStore(string $storeMaterialId, Request $request): Response
+    public function indexByMaterialStore(string $storeId, string $materialId, Request $request): Response
     {
-        $storeMaterial = StoreMaterial::find($storeMaterialId);
-
+        // $storeMaterial = StoreMaterial::find($storeMaterialId);
+        $storeMaterial = StoreMaterial::where('store_id', $storeId)
+        ->where('material_id', $materialId)
+        ->first();
+    
         if (!$storeMaterial) {
             return response([
                 'message' => 'El material especificado no existe en el almacén',

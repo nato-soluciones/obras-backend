@@ -34,7 +34,7 @@ Route::prefix('stores/{storeId}/movements')->middleware('auth:sanctum')->control
   Route::get('/', 'indexByStore')->middleware('permission:storeMovement_list');
 });
 
-Route::prefix('material_store/{materialStoreId}/movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
+Route::prefix('stores/{storeId}/material/{materialId}/movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
   Route::get('/', 'indexByMaterialStore');
 });
 
