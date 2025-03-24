@@ -1148,16 +1148,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Aprobar o rechazar transacción entre almacenes",
             ],
-            [
-                "name" => "storeMovementStatus_list",
-                "guard_name" => "api",
-                "description" => "Ver estados de movimientos",
-            ],
-            [
-                "name" => "storeMovementStatus_display",
-                "guard_name" => "api",
-                "description" => "Ver estado de movimiento",
-            ],
         ];
 
         $permissions = array_merge(
