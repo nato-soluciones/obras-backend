@@ -24,12 +24,6 @@ Route::prefix('store_movements')->middleware('auth:sanctum')->controller(StoreMo
       ->middleware('permission:storeMovement_approve');
 });
 
-
-Route::prefix('/store_movement_statuses')->middleware('auth:sanctum')->controller(StoreMovementStatusController::class)->group(function () {
-  Route::get('/', 'index')->middleware('permission:storeMovementStatus_list');
-  Route::get('/{id}', 'show')->middleware('permission:storeMovementStatus_display');
-});
-
 Route::prefix('stores/{storeId}/movements')->middleware('auth:sanctum')->controller(StoreMovementController::class)->group(function () {
   Route::get('/', 'indexByStore')->middleware('permission:storeMovement_list');
 });
