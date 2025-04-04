@@ -16,6 +16,7 @@ class MaterialController extends Controller
     public function index(): Response
     {
         $materials = Material::with(['measurementUnit', 'storeMaterials'])
+            ->orderBy('name', 'asc')
             ->get()
             ->map(function ($material) {
                 // Calcular stock total sumando todos los store_materials

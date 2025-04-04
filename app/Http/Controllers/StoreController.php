@@ -17,10 +17,10 @@ use App\Models\StoreMovementStatus;
 
 class StoreController extends Controller
 {
-    
+
     private AppSettingService $appSettingService;
-    private float $almostPercentage; 
-    
+    private float $almostPercentage;
+
     public function __construct(AppSettingService $appSettingService)
     {
         $this->appSettingService = $appSettingService;
@@ -35,32 +35,34 @@ class StoreController extends Controller
     public function indexWithMaterials(): Response
     {
         $stores = Store::with([
-            'materialsStore.material.measurementUnit', 
+            'materialsStore.material.measurementUnit',
             'userStores.user'
-        ])->get();
+        ])
+            ->orderBy('name', 'asc')
+            ->get();
 
         $formatted = $stores->map(function ($store) {
             // Buscar el último movimiento para este store
-            $lastMovement = StoreMovement::where(function($query) use ($store) {
+            $lastMovement = StoreMovement::where(function ($query) use ($store) {
                 $query->where('from_store_id', $store->id)
-                      ->orWhere('to_store_id', $store->id);
+                    ->orWhere('to_store_id', $store->id);
             })
-            ->latest('created_at')
-            ->first();
+                ->latest('created_at')
+                ->first();
 
             // Verificar si tiene transferencias pendientes
             $pendingStatus = StoreMovementStatus::where('name', 'Pendiente')->first();
-            $hasPendingTransfer = StoreMovement::where(function($query) use ($store) {
+            $hasPendingTransfer = StoreMovement::where(function ($query) use ($store) {
                 $query->where('from_store_id', $store->id)
-                      ->orWhere('to_store_id', $store->id);
+                    ->orWhere('to_store_id', $store->id);
             })
-            ->where('store_movement_type_id', function($query) {
-                $query->select('id')
-                      ->from('store_movement_types')
-                      ->where('name', 'Transferencia');
-            })
-            ->where('store_movement_status_id', $pendingStatus->id)
-            ->exists();
+                ->where('store_movement_type_id', function ($query) {
+                    $query->select('id')
+                        ->from('store_movement_types')
+                        ->where('name', 'Transferencia');
+                })
+                ->where('store_movement_status_id', $pendingStatus->id)
+                ->exists();
 
             return [
                 'id' => $store->id,
@@ -72,7 +74,7 @@ class StoreController extends Controller
                 'hasPendingTransfer' => $hasPendingTransfer,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
                     $limitStatus = $this->calculateLimitStatus($materialStore);
-                    
+
                     return [
                         'material_store_id' => $materialStore->id,
                         'material_id' => $materialStore->material_id,
@@ -96,27 +98,27 @@ class StoreController extends Controller
         $quantity = $materialStore->quantity;
         $criticalLimit = $materialStore->critical_limit;
         $minimumLimit = $materialStore->minimum_limit;
-        
+
         // calculating ranges for almost_critical and almost_minimum
         $criticalRange = ($minimumLimit - $criticalLimit) * $this->almostPercentage;
         $minimumRange = $minimumLimit * $this->almostPercentage;
-        
+
         if ($quantity <= $criticalLimit) {
             return MaterialLimitStatus::CRITICAL;
         }
-        
+
         if ($quantity <= $criticalLimit + $criticalRange) {
             return MaterialLimitStatus::ALMOST_CRITICAL;
         }
-        
+
         if ($quantity <= $minimumLimit) {
             return MaterialLimitStatus::MINIMUM;
         }
-        
+
         if ($quantity <= $minimumLimit + $minimumRange) {
             return MaterialLimitStatus::ALMOST_MINIMUM;
         }
-        
+
         return MaterialLimitStatus::NORMAL;
     }
 
@@ -128,7 +130,7 @@ class StoreController extends Controller
         DB::beginTransaction();
         try {
             $store = Store::create($request->only(['name', 'address', 'description']));
-            
+
             // Create the manager relationship
             UserStore::create([
                 'user_id' => $request->manager_id,
@@ -151,10 +153,12 @@ class StoreController extends Controller
      */
     public function show(string $id): Response
     {
-        $store = Store::with([
+        $store = Store::with(
+            [
                 'materialsStore.material.measurementUnit',
-                'userStores.user']
-             )->find($id);
+                'userStores.user'
+            ]
+        )->find($id);
 
         if (!$store) {
             return response([
@@ -187,9 +191,7 @@ class StoreController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -205,7 +207,7 @@ class StoreController extends Controller
             if ($request->has('manager_id')) {
                 // Remove existing manager relationships
                 UserStore::where('store_id', $store->id)->delete();
-                
+
                 // Create new manager relationship
                 UserStore::create([
                     'user_id' => $request->manager_id,
@@ -251,12 +253,12 @@ class StoreController extends Controller
             ->get()
             ->map(function ($store) {
                 // Buscar el último movimiento para este store
-                $lastMovement = StoreMovement::where(function($query) use ($store) {
+                $lastMovement = StoreMovement::where(function ($query) use ($store) {
                     $query->where('from_store_id', $store->id)
-                          ->orWhere('to_store_id', $store->id);
+                        ->orWhere('to_store_id', $store->id);
                 })
-                ->latest('created_at')
-                ->first();
+                    ->latest('created_at')
+                    ->first();
 
                 return [
                     'id' => $store->id,
