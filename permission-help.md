@@ -83,5 +83,6 @@ Asignar permisos a los roles
 
 -   
 # APIs
-- **Entity_check**: El servicio entity_check?entity=xxxx, devuelve los permisos que tiene el usuario para la entidad pasada, ej: si se pasa fleets, verificará todos permisos que comiencen con "fleets_", como podría ser "fleets_display".
+- **Entity_check**: El servicio entity_check?entity=xxxx, devuelve los permisos que tiene el usuario para la entidad pasada, 
+    ej: si se pasa fleets, verificará todos permisos que comiencen con "fleets_", como podría ser "fleets_display" y devuelve las acciones, en este caso display.
 

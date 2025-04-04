@@ -20,6 +20,7 @@ class Permission
     'indexIPC' => 'Indice IPC',
     'manufacturing' => 'Productos',
     'manufacturingDocuments' => 'Documentos de Productos',
+    'material' => 'Materiales',
     'myTasks' => 'Mis tareas',
     'navbar' => 'Menú lateral',
     'notes' => 'Notas',
@@ -40,6 +41,10 @@ class Permission
     'obraStageSubStageTasks' => 'Tareas en avance de obra',
     'providerCurrentAccountMovements' => 'Proveedor CC Movimientos',
     'providerCurrentAccounts' => 'Proveedor CC',
+    'stocks' => 'Stocks',
+    'store' => 'Almacenes',
+    'storeMaterial' => 'Materiales en Almacenes',
+    'storeMovement' => 'Movimientos de Almacenes',
     'toolLocation' => 'Ubicaciones Herramientas',
     'tools' => 'Herramientas',
     'users' => 'Usuarios',
@@ -52,6 +57,7 @@ class Permission
     'copy' => 'Copiar',
     'delete' => 'Eliminar',
     'display' => 'Ver',
+    'displayActions' => 'Ver acciones pendientes',
     'export' => 'Exportar',
     'facturanteRedirect' => 'Redirigir a Facturante',
     'insert' => 'Agregar',
@@ -60,6 +66,7 @@ class Permission
     'listEvents' => 'Listar eventos',
     'review' => 'Revisar',
     'update' => 'Modificar',
+    'updateStockLimits' => 'Modificar límites de stock',
   ];
 
   public static $obraMenu = [

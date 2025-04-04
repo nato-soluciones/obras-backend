@@ -16,6 +16,9 @@ use Illuminate\Http\Request;
 use App\Models\UserStore;
 use App\Models\Store;
 use App\Models\StoreMovementReason;
+use App\Http\Requests\Movement\ValidateTransferRequest;
+use App\Http\Requests\Movement\ValidateOutputRequest;
+use Illuminate\Support\Facades\Log;
 
 class StoreMovementController extends Controller
 {
@@ -78,6 +81,87 @@ class StoreMovementController extends Controller
         });
 
         return response($movements, 200);
+    }
+
+    /**
+     * Validate a transfer before creating it
+     */
+    public function validateTransfer(ValidateTransferRequest $request): Response
+    {
+        $fromStoreId = $request->from_store_id;
+        $materials = $request->materials;
+
+        $fromStoreMaterials = StoreMaterial::where('store_id', $fromStoreId)
+            ->whereIn('material_id', array_column($materials, 'material_id'))
+            ->with('material')
+            ->get()
+            ->keyBy('material_id');
+
+        $limitsExceeded = [];
+        $criticalExceeded = false;
+        $blockOnCritical = $this->isCriticalLimitBlock;
+
+        foreach ($materials as $material) {
+            $materialId = $material['material_id'];
+            $requestedQuantity = $material['quantity'];
+            
+            // Skip if material not found in store
+            if (!isset($fromStoreMaterials[$materialId])) {
+                return response([
+                    'success' => false,
+                    'message' => 'Material no encontrado en el almacén de origen',
+                    'data' => [
+                        'material_id' => $materialId
+                    ]
+                ], 400);
+            }
+            
+            $storeMaterial = $fromStoreMaterials[$materialId];
+            $currentStock = $storeMaterial->quantity;
+            $newStock = $currentStock - $requestedQuantity;
+            $minLimit = $storeMaterial->minimum_limit;
+            $critLimit = $storeMaterial->critical_limit;
+
+            // Check if there's enough stock
+            if ($newStock < 0) {
+                return response([
+                    'success' => false,
+                    'message' => 'No hay suficiente stock del material en el almacén de origen',
+                    'data' => [
+                        'material_id' => $materialId,
+                        'material_name' => $storeMaterial->material->name,
+                        'available_quantity' => $currentStock,
+                        'requested_quantity' => $requestedQuantity
+                    ]
+                ], 400);
+            }
+
+            if ($newStock < $minLimit) {
+                $limitType = ($newStock < $critLimit) ? 'critical' : 'minimum';
+                
+                $limitsExceeded[] = [
+                    'material_id' => $materialId,
+                    'material_name' => $storeMaterial->material->name,
+                    'current_stock' => $currentStock,
+                    'new_stock' => $newStock,
+                    'minimum_limit' => $minLimit,
+                    'critical_limit' => $critLimit,
+                    'type' => $limitType,
+                ];
+                
+                if ($limitType === 'critical') {
+                    $criticalExceeded = true;
+                }
+            }
+        }
+
+        return response([
+            'success' => true,
+            'exceeded' => !empty($limitsExceeded),
+            'materials' => $limitsExceeded,
+            'block_transfer' => $criticalExceeded && $blockOnCritical,
+            'critical_exceeded' => $criticalExceeded
+        ], 200);
     }
 
     /**
@@ -673,9 +757,7 @@ class StoreMovementController extends Controller
      */
     public function cancelTransfer(Request $request, string $id): Response
     {
-        $request->validate([
-            'store_movement_reason_id' => 'required|exists:store_movement_reasons,id'
-        ]);
+        
 
         DB::beginTransaction();
         try {
@@ -768,8 +850,8 @@ class StoreMovementController extends Controller
             'status',
             'type',
             'concept',
-            'fromStore',
-            'toStore',
+            'fromStore.userStores.user',
+            'toStore.userStores.user',
             'createdBy',
             'updatedBy',
             'reason'
@@ -788,12 +870,26 @@ class StoreMovementController extends Controller
 
         $movements = $query->get()
             ->map(function ($movement) {
+                // Get manager for from_store
+                $fromStoreManager = $movement->fromStore->userStores->first()?->user;
+                
+                // Get manager for to_store
+                $toStoreManager = $movement->toStore->userStores->first()?->user;
+                
+                // Create from_store with manager
+                $fromStore = $movement->fromStore->toArray();
+                $fromStore['manager'] = $fromStoreManager;
+                
+                // Create to_store with manager
+                $toStore = $movement->toStore->toArray();
+                $toStore['manager'] = $toStoreManager;
+                
                 return [
                     'id' => $movement->id,
                     'created_at' => $movement->created_at,
                     'created_by' => $movement->createdBy,
-                    'from_store' => $movement->fromStore,
-                    'to_store' => $movement->toStore,
+                    'from_store' => $fromStore,
+                    'to_store' => $toStore,
                     'materials' => $movement->movementMaterials->map(function ($movementMaterial) {
                         return [
                             'id' => $movementMaterial->material->id,
@@ -821,9 +917,11 @@ class StoreMovementController extends Controller
         return response($movements, 200);
     }
 
-    public function indexByMaterialStore(string $storeMaterialId, Request $request): Response
+    public function indexByMaterialStore(string $storeId, string $materialId, Request $request): Response
     {
-        $storeMaterial = StoreMaterial::find($storeMaterialId);
+        $storeMaterial = StoreMaterial::where('store_id', $storeId)
+            ->where('material_id', $materialId)
+            ->first();
 
         if (!$storeMaterial) {
             return response([
@@ -849,24 +947,36 @@ class StoreMovementController extends Controller
             $query->where('from_store_id', $storeMaterial->store_id)
                   ->orWhere('to_store_id', $storeMaterial->store_id);
         })
+        ->whereHas('status', function ($query) {
+            $query->where('name', 'Aprobado');
+        })
+        ->orderBy('created_at', 'desc')
         ->get()
         ->map(function ($movement) use ($storeMaterial) {
             $materialData = $movement->movementMaterials->firstWhere('material_id', $storeMaterial->material_id);
+            
+            $transferDirection = null;
+            if ($movement->type->name === 'Transferencia') {
+                $transferDirection = $movement->to_store_id === $storeMaterial->store_id ? 'entrante' : 'saliente';
+            }
+
             return [
-            'id' => $movement->id,
-            'created_at' => $movement->created_at,
-            'created_by' => $movement->createdBy,        
-            'measurement_unit' => $materialData->material->measurementUnit,
-            'quantity' => $materialData->quantity,
-            'type' => [
-                'id' => $movement->type->id,
-                'name' => $movement->type->name,
-            ],
-            'concept' => [
-                'id' => $movement->concept->id,
-                'name' => $movement->concept->name,
-            ],
-            'reason' => $movement->reason
+                'id' => $movement->id,
+                'created_at' => $movement->created_at,
+                'created_by' => $movement->createdBy,        
+                'measurement_unit' => $materialData->material->measurementUnit,
+                'quantity' => $materialData->quantity,
+                'type' => [
+                    'id' => $movement->type->id,
+                    'name' => $movement->type->name,
+                ],
+                'concept' => [
+                    'id' => $movement->concept->id,
+                    'name' => $movement->concept->name,
+                ],
+                'reason' => $movement->reason,
+                'status' => $movement->status,
+                'transfer_direction' => $transferDirection
             ];
         });
 
@@ -1068,5 +1178,86 @@ class StoreMovementController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Validate an output before creating it
+     */
+    public function validateOutput(ValidateOutputRequest $request): Response
+    {
+        $storeId = $request->store_id;
+        $materials = $request->materials;
+
+        $storeMaterials = StoreMaterial::where('store_id', $storeId)
+            ->whereIn('material_id', array_column($materials, 'material_id'))
+            ->with('material')
+            ->get()
+            ->keyBy('material_id');
+
+        $limitsExceeded = [];
+        $criticalExceeded = false;
+        $blockOnCritical = $this->isCriticalLimitBlock;
+
+        foreach ($materials as $material) {
+            $materialId = $material['material_id'];
+            $requestedQuantity = $material['quantity'];
+            
+            // Skip if material not found in store
+            if (!isset($storeMaterials[$materialId])) {
+                return response([
+                    'success' => false,
+                    'message' => 'Material no encontrado en el almacén',
+                    'data' => [
+                        'material_id' => $materialId
+                    ]
+                ], 400);
+            }
+            
+            $storeMaterial = $storeMaterials[$materialId];
+            $currentStock = $storeMaterial->quantity;
+            $newStock = $currentStock - $requestedQuantity;
+            $minLimit = $storeMaterial->minimum_limit;
+            $critLimit = $storeMaterial->critical_limit;
+
+            // Check if there's enough stock
+            if ($newStock < 0) {
+                return response([
+                    'success' => false,
+                    'message' => 'No hay suficiente stock del material en el almacén',
+                    'data' => [
+                        'material_id' => $materialId,
+                        'material_name' => $storeMaterial->material->name,
+                        'available_quantity' => $currentStock,
+                        'requested_quantity' => $requestedQuantity
+                    ]
+                ], 400);
+            }
+
+            if ($newStock < $minLimit) {
+                $limitType = ($newStock < $critLimit) ? 'critical' : 'minimum';
+                
+                $limitsExceeded[] = [
+                    'material_id' => $materialId,
+                    'material_name' => $storeMaterial->material->name,
+                    'current_stock' => $currentStock,
+                    'new_stock' => $newStock,
+                    'minimum_limit' => $minLimit,
+                    'critical_limit' => $critLimit,
+                    'type' => $limitType,
+                ];
+                
+                if ($limitType === 'critical') {
+                    $criticalExceeded = true;
+                }
+            }
+        }
+
+        return response([
+            'success' => true,
+            'exceeded' => !empty($limitsExceeded),
+            'materials' => $limitsExceeded,
+            'block_transfer' => $criticalExceeded && $blockOnCritical,
+            'critical_exceeded' => $criticalExceeded
+        ], 200);
     }
 }

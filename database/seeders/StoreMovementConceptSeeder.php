@@ -20,9 +20,24 @@ class StoreMovementConceptSeeder extends Seeder
                 'description' => 'Se abastece stock de almacén con materiales nuevos',
             ],
             [
+                'movement_type_id' => 2,
+                'name' => 'Acopio de materiales',
+                'description' => 'Se almacenan y organizan los materiales de construcción en el sitio de la obra antes de su uso',
+            ],
+            [
                 'movement_type_id' => 3,
                 'name' => 'Devolución',
                 'description' => 'Material devuelto al proveedor',
+            ],
+            [
+                'movement_type_id' => 3,
+                'name' => 'Consumo',
+                'description' => 'Reducción de inventario debido al uso de materiales',
+            ],
+            [
+                'movement_type_id' => 3,
+                'name' => 'Transferencia',
+                'description' => 'Desplazamiento de materiales',
             ],
             [
                 'movement_type_id' => 1,
