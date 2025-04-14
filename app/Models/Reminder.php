@@ -10,6 +10,9 @@ class Reminder extends Model
         'text',
         'datetime',
         'user_id',
+        'priority',
+        'is_resolved',
+        'date_resolved',
         'created_by',
     ];
 }

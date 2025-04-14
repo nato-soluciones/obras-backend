@@ -17,6 +17,8 @@ use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\InitialSettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MaterialStoreController;
+use App\Http\Controllers\UserStoreController;
 use App\Http\Controllers\ReminderController;
 
 /*
@@ -38,6 +40,10 @@ include_once __DIR__ . '/api/obras.php';
 include_once __DIR__ . '/api/fleets.php';
 include_once __DIR__ . '/api/permissions.php';
 include_once __DIR__ . '/api/companies.php';
+include_once __DIR__ . '/api/stores.php';
+include_once __DIR__ . '/api/materials.php';
+include_once __DIR__ . '/api/storeMovements.php';
+include_once __DIR__ . '/api/userStores.php';
 
 Route::prefix('initial_settings')->middleware('auth:sanctum')->controller(InitialSettingController::class)->group(function () {
     Route::get('/', 'index');
@@ -128,14 +134,14 @@ Route::prefix('notifications')->middleware('auth:sanctum')->controller(Notificat
     Route::delete('/{id}', 'destroy');
 });
 
-Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderController::class)->group(function () {
-    Route::get('/latest', 'indexLatest');
-});
 
-Route::prefix('materials')->middleware('auth:sanctum')->controller(MaterialController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::get('/{id}', 'show');
-    Route::post('/', 'store');
+Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderController::class)->group(function () {
+    Route::get('/today', 'indexToday');
+    Route::get('/', 'index')->middleware('permission:reminders_list');
+    Route::post('/', 'store')->middleware('permission:reminders_insert');
+    Route::put('/{reminderId}/resolve', 'toggleResolved')->middleware('permission:reminders_resolve');
+    Route::put('/{reminderId}', 'update')->middleware('permission:reminders_update');
+    Route::delete('/{reminderId}', 'destroy')->middleware('permission:reminders_delete');
 });
 
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function () {
