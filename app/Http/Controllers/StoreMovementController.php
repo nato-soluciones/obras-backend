@@ -18,6 +18,7 @@ use App\Models\Store;
 use App\Models\StoreMovementReason;
 use App\Http\Requests\Movement\ValidateTransferRequest;
 use App\Http\Requests\Movement\ValidateOutputRequest;
+use App\Models\Material;
 use Illuminate\Support\Facades\Log;
 
 class StoreMovementController extends Controller
@@ -107,11 +108,14 @@ class StoreMovementController extends Controller
             
             // Skip if material not found in store
             if (!isset($fromStoreMaterials[$materialId])) {
+                $materialNotFound = Material::findOrFail($materialId);
+
                 return response([
                     'success' => false,
-                    'message' => 'Material no encontrado en el almacén de origen',
+                    'message' => 'Material no encontrado en el almacén de origen: ' . $materialNotFound->name,
                     'data' => [
-                        'material_id' => $materialId
+                        'material_id' => $materialId,
+                        'material_name' => $materialNotFound->name
                     ]
                 ], 400);
             }
