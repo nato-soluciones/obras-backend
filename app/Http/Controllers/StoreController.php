@@ -103,7 +103,7 @@ class StoreController extends Controller
         $criticalRange = ($minimumLimit - $criticalLimit) * $this->almostPercentage;
         $minimumRange = $minimumLimit * $this->almostPercentage;
 
-        if ($quantity <= $criticalLimit) {
+        if ($quantity < $criticalLimit) {
             return MaterialLimitStatus::CRITICAL;
         }
 
@@ -111,7 +111,7 @@ class StoreController extends Controller
             return MaterialLimitStatus::ALMOST_CRITICAL;
         }
 
-        if ($quantity <= $minimumLimit) {
+        if ($quantity < $minimumLimit) {
             return MaterialLimitStatus::MINIMUM;
         }
 
