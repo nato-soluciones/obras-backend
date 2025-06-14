@@ -61,6 +61,10 @@ class StoreMovementController extends Controller
                     return [
                         'id' => $movementMaterial->material->id,
                         'name' => $movementMaterial->material->name,
+                        'code' => $movementMaterial->material->code,
+                        'dimensions' => $movementMaterial->material->dimensions,
+                        'quantity_per_package' => $movementMaterial->material->quantity_per_package,
+                        'color' => $movementMaterial->material->color,
                         'measurement_unit' => $movementMaterial->material->measurementUnit,
                         'quantity' => $movementMaterial->quantity
                     ];
@@ -134,6 +138,10 @@ class StoreMovementController extends Controller
                     'data' => [
                         'material_id' => $materialId,
                         'material_name' => $storeMaterial->material->name,
+                        'code' => $storeMaterial->material->code,
+                        'dimensions' => $storeMaterial->material->dimensions,
+                        'quantity_per_package' => $storeMaterial->material->quantity_per_package,
+                        'color' => $storeMaterial->material->color,
                         'available_quantity' => $currentStock,
                         'requested_quantity' => $requestedQuantity
                     ]
@@ -146,6 +154,10 @@ class StoreMovementController extends Controller
                 $limitsExceeded[] = [
                     'material_id' => $materialId,
                     'material_name' => $storeMaterial->material->name,
+                    'code' => $storeMaterial->material->code,
+                    'dimensions' => $storeMaterial->material->dimensions,
+                    'quantity_per_package' => $storeMaterial->material->quantity_per_package,
+                    'color' => $storeMaterial->material->color,
                     'current_stock' => $currentStock,
                     'new_stock' => $newStock,
                     'minimum_limit' => $minLimit,
@@ -898,6 +910,10 @@ class StoreMovementController extends Controller
                         return [
                             'id' => $movementMaterial->material->id,
                             'name' => $movementMaterial->material->name,
+                            'code' => $movementMaterial->material->code,
+                            'dimensions' => $movementMaterial->material->dimensions,
+                            'quantity_per_package' => $movementMaterial->material->quantity_per_package,
+                            'color' => $movementMaterial->material->color,
                             'measurement_unit' => $movementMaterial->material->measurementUnit,
                             'quantity' => $movementMaterial->quantity
                         ];

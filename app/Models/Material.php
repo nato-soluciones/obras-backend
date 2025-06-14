@@ -11,6 +11,10 @@ class Material extends Model
 
     protected $fillable = [
         'name',
+        'code',
+        'dimensions',
+        'quantity_per_package',
+        'color',
         'description',
         'measurement_unit_id',
     ];
