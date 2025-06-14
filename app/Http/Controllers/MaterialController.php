@@ -30,6 +30,10 @@ class MaterialController extends Controller
                 return [
                     'id' => $material->id,
                     'name' => $material->name,
+                    'code' => $material->code,
+                    'dimensions' => $material->dimensions,
+                    'quantity_per_package' => $material->quantity_per_package,
+                    'color' => $material->color,
                     'description' => $material->description,
                     'unit' => $material->measurementUnit->name,
                     'unit_abbreviation' => $material->measurementUnit->abbreviation,
@@ -50,12 +54,14 @@ class MaterialController extends Controller
     public function store(Request $request): Response
     {
         $name = strtolower($request->input('name'));
+        $code = $request->input('code');
+        $color = $request->input('color');
 
-        // Verificar si ya existe un material con el mismo nombre (sin importar mayúsculas/minúsculas)
-        $exists = Material::whereRaw('LOWER(name) = ?', [$name])->exists();
+        // Verificar si ya existe un material con el mismo nombre, codigo y color, (sin importar mayúsculas/minúsculas)
+        $exists = Material::whereRaw('LOWER(name) = ?', [$name])->where('code', $code)->where('color', $color)->exists();
 
         if ($exists) {
-            return response(['message' => 'Ya existe un material con este nombre'], 201);
+            return response(['message' => 'Ya existe un material con este nombre, codigo y color'], 201);
         }
         $material = Material::create($request->all());
         return response($material, 201);
@@ -74,6 +80,10 @@ class MaterialController extends Controller
         $formatted = [
             'id' => $material->id,
             'name' => $material->name,
+            'code' => $material->code,
+            'dimensions' => $material->dimensions,
+            'quantity_per_package' => $material->quantity_per_package,
+            'color' => $material->color,
             'description' => $material->description,
             'measurement_unit' => $material->measurementUnit
         ];
@@ -132,6 +142,10 @@ class MaterialController extends Controller
             'material' => [
                 'id' => $material->id,
                 'name' => $material->name,
+                'code' => $material->code,
+                'dimensions' => $material->dimensions,
+                'quantity_per_package' => $material->quantity_per_package,
+                'color' => $material->color,
                 'description' => $material->description,
                 'total_stock' => $totalStock,
                 'measurement_unit' => [
