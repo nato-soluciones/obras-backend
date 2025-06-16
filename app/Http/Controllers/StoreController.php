@@ -79,6 +79,7 @@ class StoreController extends Controller
                         'material_store_id' => $materialStore->id,
                         'material_id' => $materialStore->material_id,
                         'name' => $materialStore->material->name,
+                        'category' => $materialStore->material->category,
                         'code' => $materialStore->material->code,
                         'dimensions' => $materialStore->material->dimensions,
                         'quantity_per_package' => $materialStore->material->quantity_per_package,

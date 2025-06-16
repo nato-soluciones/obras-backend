@@ -17,6 +17,7 @@ class Material extends Model
         'color',
         'description',
         'measurement_unit_id',
+        'category_id',
     ];
 
     // protected $hidden = [
@@ -38,5 +39,10 @@ class Material extends Model
     public function movements()
     {
         return $this->hasMany(StoreMovement::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(MaterialCategory::class);
     }
 }
