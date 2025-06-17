@@ -1,46 +1,88 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Material;
 
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Material\MaterialCollectionResource;
 use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 use App\Models\StoreMovementMaterial;
+use App\Services\Material\MaterialService;
 
 class MaterialController extends Controller
 {
+
+    public function __construct(
+        private MaterialService $materialService,
+    ) {}
+        
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    // public function index(Request $request)
+    // {
+    //     try {
+    //         $filters = $request->only(['dateFrom', 'dateTo', 'status','type', 'orderBy', 'direction', 'search']);
+    //         $trips = $this->tripService->getListTrips($filters);
+    //         return response()->json([
+    //             'data' => TripCollectionResource::collection($trips)->response()->getData(true)['data'],
+    //             'current_page' => $trips->currentPage(),
+    //             'last_page' => $trips->lastPage(),
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         Log::error($e->getMessage());
+    //         return response()->json(['message' => 'Error al obtener los viajes'], 500);
+    //     }
+    // }
+    public function index(Request $request)
     {
-        $materials = Material::with(['measurementUnit', 'storeMaterials'])
-            ->orderBy('name', 'asc')
-            ->get()
-            ->map(function ($material) {
-                // Calcular stock total sumando todos los store_materials
-                $totalStock = $material->storeMaterials->sum('quantity');
+        try{
+            $filters = $request->only(['categoryId', 'color', 'orderBy', 'direction', 'search']);
+            $materials = $this->materialService->getListMaterials($filters);
 
-                // Buscar el último movimiento que involucre este material
-                $lastMovement = StoreMovementMaterial::where('material_id', $material->id)
-                    ->latest('created_at')
-                    ->first();
+            // return response()->json([
+            //     'data' => MaterialCollectionResource::collection($materials)->response()->getData(true)['data'],
+            //     'current_page' => $materials->currentPage(),
+            //     'last_page' => $materials->lastPage(),
+            // ]);
+            return response()->json(
+                MaterialCollectionResource::collection($materials),
+            );
 
-                return [
-                    'id' => $material->id,
-                    'name' => $material->name,
-                    'code' => $material->code,
-                    'dimensions' => $material->dimensions,
-                    'quantity_per_package' => $material->quantity_per_package,
-                    'color' => $material->color,
-                    'description' => $material->description,
-                    'unit' => $material->measurementUnit->name,
-                    'unit_abbreviation' => $material->measurementUnit->abbreviation,
-                    'stock' => $totalStock,
-                    'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null
-                ];
-            });
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error al obtener los materiales'], 500);
+        }
+        // $materials = Material::with(['measurementUnit', 'storeMaterials'])
+        //     ->orderBy('name', 'asc')
+        //     ->get()
+        //     ->map(function ($material) {
+        //         // Calcular stock total sumando todos los store_materials
+        //         $totalStock = $material->storeMaterials->sum('quantity');
+
+        //         // Buscar el último movimiento que involucre este material
+        //         $lastMovement = StoreMovementMaterial::where('material_id', $material->id)
+        //             ->latest('created_at')
+        //             ->first();
+
+        //         return [
+        //             'id' => $material->id,
+        //             'name' => $material->name,
+        //             'code' => $material->code,
+        //             'category' => $material->category,
+        //             'dimensions' => $material->dimensions,
+        //             'quantity_per_package' => $material->quantity_per_package,
+        //             'color' => $material->color,
+        //             'description' => $material->description,
+        //             'unit' => $material->measurementUnit->name,
+        //             'unit_abbreviation' => $material->measurementUnit->abbreviation,
+        //             'stock' => $totalStock,
+        //             'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null
+        //         ];
+        //     });
 
         return response($materials, 200);
     }
@@ -81,6 +123,7 @@ class MaterialController extends Controller
             'id' => $material->id,
             'name' => $material->name,
             'code' => $material->code,
+            'category' => $material->category,
             'dimensions' => $material->dimensions,
             'quantity_per_package' => $material->quantity_per_package,
             'color' => $material->color,
@@ -143,6 +186,7 @@ class MaterialController extends Controller
                 'id' => $material->id,
                 'name' => $material->name,
                 'code' => $material->code,
+                'category' => $material->category,
                 'dimensions' => $material->dimensions,
                 'quantity_per_package' => $material->quantity_per_package,
                 'color' => $material->color,
