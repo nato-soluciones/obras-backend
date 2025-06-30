@@ -90,7 +90,7 @@ class ObraDailyLogController extends Controller
     {
         $obraDailyLog = ObraDailyLog::find($dailyLogId);
         if (!$obraDailyLog) {
-            return response()->json(['error' => 'Registro no encontrado'], 404);
+            return response(['error' => 'Registro no encontrado'], 404);
         }
 
         $requestData = $request->all();

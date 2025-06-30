@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\MeasurementUnit;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MeasurementUnitsSeeder extends Seeder
@@ -20,6 +19,10 @@ class MeasurementUnitsSeeder extends Seeder
             ['name' => 'Kilogramo', 'abbreviation' => 'kg', 'min_fraction' => 0.001, 'group' => 'kg'],
             ['name' => 'Tonelada', 'abbreviation' => 't', 'min_fraction' => 1.000, 'group' => 'kg'],
             ['name' => 'Metro cuadrado', 'abbreviation' => 'm2', 'min_fraction' => 1.000, 'group' => 'm2'],
+            ['name' => 'Par', 'abbreviation' => 'par', 'min_fraction' => 1.000, 'group' => 'par'],
+            ['name' => 'Juego', 'abbreviation' => 'juego', 'min_fraction' => 1.000, 'group' => 'juego'],
+            ['name' => 'Bolsa', 'abbreviation' => 'bolsa', 'min_fraction' => 1.000, 'group' => 'bolsa'],
+            ['name' => 'Rollo', 'abbreviation' => 'rollo', 'min_fraction' => 1.000, 'group' => 'rollo'],
         ];
 
         foreach ($units as $unit) {

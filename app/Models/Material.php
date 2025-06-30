@@ -11,8 +11,13 @@ class Material extends Model
 
     protected $fillable = [
         'name',
+        'code',
+        'dimensions',
+        'quantity_per_package',
+        'color',
         'description',
         'measurement_unit_id',
+        'category_id',
     ];
 
     // protected $hidden = [
@@ -34,5 +39,10 @@ class Material extends Model
     public function movements()
     {
         return $this->hasMany(StoreMovement::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(MaterialCategory::class);
     }
 }
