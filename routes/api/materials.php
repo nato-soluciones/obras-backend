@@ -6,9 +6,9 @@ use App\Http\Controllers\MaterialStoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('materials')->middleware('auth:sanctum')->group(function () {
-  Route::get('/categories', [MaterialCategoryController::class, 'index'])->middleware('permission:material_category_list');
-  Route::post('/categories', [MaterialCategoryController::class, 'store'])->middleware('permission:material_category_insert');
-  Route::delete('/categories/{id}', [MaterialCategoryController::class, 'destroy'])->middleware('permission:material_category_delete');
+  Route::get('/categories', [MaterialCategoryController::class, 'index']);
+  Route::post('/categories', [MaterialCategoryController::class, 'store']);
+  Route::delete('/categories/{id}', [MaterialCategoryController::class, 'destroy']);
 
   Route::get('/', [MaterialController::class, 'index'])->middleware('permission:material_list');
   Route::get('/{id}', [MaterialController::class, 'show'])->middleware('permission:material_display');
