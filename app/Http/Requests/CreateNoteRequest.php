@@ -14,15 +14,10 @@ class CreateNoteRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     * Docs: https://laravel.com/docs/10.x/validation#available-validation-rules
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
-     */
     public function rules(): array
     {
         return [
-            'date' => 'required|date',
+            'expire_at' => 'required|date',
             'color' => 'required|string|max:255',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
