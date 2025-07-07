@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 // Users endpoints
 Route::prefix('users')->middleware('auth:sanctum')->controller(UserController::class)->group(function () {
   Route::get('/', 'index')->middleware('permission:users_list');
+  Route::get('/listCombo', 'listCombo');
   Route::get('/permissions_check', 'permissionsCheck');
   Route::get('/entity_check', 'entityCheck');
   Route::get('/{id}/settings', 'settings');//->middleware('permission:users_display');

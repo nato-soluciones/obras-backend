@@ -140,6 +140,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Menú Stocks",
             ],
+            [
+                "name" => "navbar_calendar",
+                "guard_name" => "api",
+                "description" => "Menú Calendario",
+            ],
         ];
         $obraMenu_permissions = [
             [
@@ -956,6 +961,33 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Ver Nota",
             ],
         ];
+        $calendar_permission = [
+            [
+                "name" => "calendar_list",
+                "guard_name" => "api",
+                "description" => "Ver Calendario",
+            ],
+            [
+                "name" => "calendar_insert",
+                "guard_name" => "api",
+                "description" => "Agregar Evento",
+            ],
+            [
+                "name" => "calendar_update",
+                "guard_name" => "api",
+                "description" => "Modificar Evento",
+            ],
+            [
+                "name" => "calendar_delete",
+                "guard_name" => "api",
+                "description" => "Eliminar Evento",
+            ],
+            [
+                "name" => "calendar_display",
+                "guard_name" => "api",
+                "description" => "Ver Evento",
+            ],
+        ];
         $fleets_permission = [
             [
                 "name" => "fleets_list",
@@ -1182,6 +1214,7 @@ class RolesAndPermissionsSeeder extends Seeder
             $contacts_permission,
             $exchangeRates_permissions,
             $notes_permission,
+            $calendar_permission,
             $fleets_permission,
             $reminders_permission,
             $company_costs_permission,

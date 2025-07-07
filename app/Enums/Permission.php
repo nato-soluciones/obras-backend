@@ -6,7 +6,7 @@ class Permission
 {
   public static $entities = [
     'budgets' => 'Presupuestos',
-    'calendars' => 'Calendario',
+    'calendar' => 'Calendario',
     'clientCurrentAccountMovements' => 'Cliente CC Movimientos',
     'clientCurrentAccounts' => 'Cliente CC',
     'clients' => 'Clientes',
