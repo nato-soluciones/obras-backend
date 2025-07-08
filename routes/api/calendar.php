@@ -14,6 +14,9 @@ Route::group(['prefix' => 'calendar', 'middleware' => 'auth:sanctum'], function 
     Route::put('events/{event}', [CalendarEventController::class, 'update'])->middleware('permission:calendar_update');
     Route::delete('events/{event}', [CalendarEventController::class, 'destroy'])->middleware('permission:calendar_delete');
     
+    // Event search
+    Route::get('search', [CalendarEventController::class, 'search'])->middleware('permission:calendar_list');
+    
     // Participant status update
     Route::put('events/{event}/participants/{participant}/status', [CalendarEventController::class, 'updateParticipantStatus'])->middleware('permission:calendar_list');
     

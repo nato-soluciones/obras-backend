@@ -15,33 +15,33 @@ class CalendarEventCategorySeeder extends Seeder
     {
         $categories = [
             [
-                'name' => 'Entrevista',
-                'color' => '#3B82F6', // Azul
+                'name' => 'Reunión',
+                'color' => '#3B82F6',
                 'is_system' => true,
             ],
             [
-                'name' => 'Reunión de Obra',
-                'color' => '#EF4444', // Rojo
+                'name' => 'Cita',
+                'color' => '#10B981',
                 'is_system' => true,
             ],
             [
-                'name' => 'Inspección',
-                'color' => '#F59E0B', // Amarillo/Naranja
+                'name' => 'Evento',
+                'color' => '#F59E0B',
                 'is_system' => true,
             ],
             [
-                'name' => 'Consulta Técnica',
-                'color' => '#10B981', // Verde
+                'name' => 'Recordatorio',
+                'color' => '#EF4444',
                 'is_system' => true,
             ],
             [
-                'name' => 'Presentación',
-                'color' => '#8B5CF6', // Púrpura
+                'name' => 'Personal',
+                'color' => '#8B5CF6',
                 'is_system' => true,
             ],
             [
-                'name' => 'Seguimiento',
-                'color' => '#F97316', // Naranja
+                'name' => 'Trabajo',
+                'color' => '#06B6D4',
                 'is_system' => true,
             ],
         ];

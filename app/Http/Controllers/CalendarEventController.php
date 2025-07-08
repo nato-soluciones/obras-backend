@@ -256,4 +256,57 @@ class CalendarEventController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Search calendar events by title with pagination
+     */
+    public function search(Request $request): JsonResponse
+    {
+        // Validar parámetros de búsqueda
+        $request->validate([
+            'q' => 'required|string|min:2|max:100',
+            'page' => 'sometimes|integer|min:1',
+            'per_page' => 'sometimes|integer|min:1|max:50'
+        ]);
+
+        $query = $request->get('q');
+        $userId = $request->user()->id;
+        $perPage = $request->get('per_page', 15); // Default 15 elementos por página
+
+        try {
+            $events = CalendarEvent::with(['category', 'participants.user', 'user'])
+                ->where('title', 'LIKE', '%' . $query . '%')
+                ->where(function($q) use ($userId) {
+                    $q->where('user_id', $userId) // Es organizador
+                      ->orWhere('visibility', 'public') // Es evento público
+                      ->orWhereHas('participants', function($p) use ($userId) {
+                          $p->where('user_id', $userId); // Es participante
+                      });
+                })
+                ->orderBy('start_datetime', 'desc')
+                ->paginate($perPage);
+
+            return response()->json([
+                'success' => true,
+                'data' => CalendarEventResource::collection($events->items()),
+                'meta' => [
+                    'query' => $query,
+                    'current_page' => $events->currentPage(),
+                    'per_page' => $events->perPage(),
+                    'total' => $events->total(),
+                    'last_page' => $events->lastPage(),
+                    'from' => $events->firstItem(),
+                    'to' => $events->lastItem(),
+                    'has_more_pages' => $events->hasMorePages()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al buscar eventos.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
