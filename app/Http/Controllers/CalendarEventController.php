@@ -11,6 +11,7 @@ use App\Services\CalendarEventService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class CalendarEventController extends Controller
 {
@@ -34,8 +35,12 @@ class CalendarEventController extends Controller
         // Filtros de fecha
         if ($request->has('start') && $request->has('end')) {
             $startDate = Carbon::parse($request->start);
-            $endDate = Carbon::parse($request->end);
-            $query->betweenDates($startDate, $endDate);
+            $endDate = Carbon::parse($request->end);         
+
+            $query->where(function ($q) use ($startDate, $endDate) {
+                $q->where('start_datetime', '<=', $endDate)
+                    ->where('end_datetime', '>=', $startDate);
+            });
         }
 
         // Filtro por estado
@@ -43,32 +48,17 @@ class CalendarEventController extends Controller
             $query->status($request->status);
         }
 
-        // Vista específica (mes, semana, día)
-        if ($request->has('view') && $request->has('date')) {
-            $date = Carbon::parse($request->date);
-            switch ($request->view) {
-                case 'month':
-                    $query->betweenDates(
-                        $date->copy()->startOfMonth(),
-                        $date->copy()->endOfMonth()
-                    );
-                    break;
-                case 'week':
-                    $query->betweenDates(
-                        $date->copy()->startOfWeek(),
-                        $date->copy()->endOfWeek()
-                    );
-                    break;
-                case 'day':
-                    $query->betweenDates(
-                        $date->copy()->startOfDay(),
-                        $date->copy()->endOfDay()
-                    );
-                    break;
-            }
-        }
-
         $events = $query->orderBy('start_datetime')->get();
+
+        Log::info(
+            vsprintf(
+                str_replace('?', "'%s'", $query->toSql()),
+                collect($query->getBindings())->map(function ($binding) {
+                    // Si el binding es una fecha o string, lo rodea de comillas
+                    return is_numeric($binding) ? $binding : addslashes($binding);
+                })->toArray()
+            )
+        );
 
         return response()->json([
             'success' => true,
