@@ -34,6 +34,7 @@ use App\Http\Controllers\ReminderController;
 
 include_once __DIR__ . '/api/auxiliaries.php';
 include_once __DIR__ . '/api/budgets.php';
+include_once __DIR__ . '/api/chatbot.php';
 include_once __DIR__ . '/api/clients.php';
 include_once __DIR__ . '/api/contractors.php';
 include_once __DIR__ . '/api/obras.php';
