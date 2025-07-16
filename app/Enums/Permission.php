@@ -7,6 +7,7 @@ class Permission
   public static $entities = [
     'budgets' => 'Presupuestos',
     'calendar' => 'Calendario',
+    'chatbot' => 'Chatbot',
     'clientCurrentAccountMovements' => 'Cliente CC Movimientos',
     'clientCurrentAccounts' => 'Cliente CC',
     'clients' => 'Clientes',
@@ -67,6 +68,7 @@ class Permission
     'review' => 'Revisar',
     'update' => 'Modificar',
     'updateStockLimits' => 'Modificar límites de stock',
+    'use' => 'Usar',
   ];
 
   public static $obraMenu = [

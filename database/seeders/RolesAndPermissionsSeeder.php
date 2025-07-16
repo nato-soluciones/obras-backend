@@ -145,6 +145,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Menú Calendario",
             ],
+            [
+                "name" => "navbar_chatbot",
+                "guard_name" => "api",
+                "description" => "Chatbot",
+            ],
         ];
         $obraMenu_permissions = [
             [
@@ -1181,6 +1186,13 @@ class RolesAndPermissionsSeeder extends Seeder
                 "description" => "Aprobar o rechazar transacción entre almacenes",
             ],
         ];
+        $chatbot_permission = [
+            [
+                "name" => "chatbot_use",
+                "guard_name" => "api",
+                "description" => "Usar el chatbot",
+            ],
+        ];
 
         $permissions = array_merge(
             $navbar_permissions,
@@ -1223,7 +1235,8 @@ class RolesAndPermissionsSeeder extends Seeder
             $material_permission,
             $store_permission,
             $store_material_permission,
-            $store_movement_permission
+            $store_movement_permission,
+            $chatbot_permission
         );
 
         foreach ($permissions as $permission) {
