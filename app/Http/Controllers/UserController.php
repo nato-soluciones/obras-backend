@@ -152,4 +152,53 @@ class UserController extends Controller
             return response(['message' => 'Error al obtener los permisos.'], 500);
         }
     }
+
+    /**
+     * Get users list for combo/select components
+     */
+    public function listCombo()
+    {
+        $users = User::select('id', 'firstname', 'lastname')
+            ->whereHas('roles', function ($query) {
+                $query->where('name', '!=', 'SUPERADMIN');
+            })
+            ->orWhereDoesntHave('roles')
+            ->orderByRaw("CONCAT(COALESCE(firstname, ''), ' ', COALESCE(lastname, ''))")
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'full_name' => trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''))
+                ];
+            });
+
+        return response()->json($users);
+    }
+
+    /**
+     * Search users for calendar participants
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('q', '');
+        $limit = min($request->input('limit', 10), 50); // Max 50 results
+
+        if (strlen($query) < 2) {
+            return response()->json([
+                'success' => true,
+                'data' => []
+            ]);
+        }
+
+        $users = User::where('name', 'like', "%{$query}%")
+            ->orWhere('email', 'like', "%{$query}%")
+            ->select('id', 'name', 'email')
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $users
+        ]);
+    }
 }

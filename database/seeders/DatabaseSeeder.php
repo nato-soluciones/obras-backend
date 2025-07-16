@@ -25,5 +25,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StoreMovementStatusSeeder::class);
         $this->call(StoreMovementConceptSeeder::class);
         $this->call(StoreMovementReasonSeeder::class);
+        $this->call(CalendarEventCategorySeeder::class);
     }
 }
