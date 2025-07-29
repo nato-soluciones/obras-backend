@@ -265,7 +265,7 @@ class CalendarEventController extends Controller
 
         try {
             $events = CalendarEvent::with(['category', 'participants.user', 'user'])
-                ->where('title', 'LIKE', '%' . $query . '%')
+                ->where('title', 'ILIKE', '%' . $query . '%')
                 ->where(function($q) use ($userId) {
                     $q->where('user_id', $userId) // Es organizador
                       ->orWhere('visibility', 'public') // Es evento público
