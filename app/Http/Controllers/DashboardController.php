@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
         $budgetStats = Budget::selectRaw("
             COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending_budgets,
-            COUNT(CASE WHEN status = 'REVISION' THEN 1 END) as revision_budgets")
+            COUNT(CASE WHEN status = 'FINISHED' THEN 1 END) as finished_budgets")
             ->first();
 
         $IPCs = Ipc::orderByDesc('period')
@@ -79,7 +79,7 @@ class DashboardController extends Controller
             ],
             'budgets' => [
                 'pending' => $budgetStats->pending_budgets,
-                'revision' => $budgetStats->revision_budgets,
+                'finished' => $budgetStats->finished_budgets,
             ],
             'graphs' => [
                 'ipc' => $ipcData,
