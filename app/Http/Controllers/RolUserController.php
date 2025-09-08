@@ -18,7 +18,7 @@ class RolUserController extends Controller
         if (!auth()->user()->hasRole('SUPERADMIN')) {
             $userRoles = $userRoles->filter(function ($userRole) {
                 return $userRole->name !== 'SUPERADMIN';
-            });
+            })->values();
         }
 
         return response($userRoles);
