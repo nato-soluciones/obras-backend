@@ -127,7 +127,7 @@ class CalendarEventController extends Controller
         if (!$canEdit) {
             return response()->json([
                 'success' => false,
-                'message' => 'Solo el organizador puede editar este evento.'
+                'message' => 'Solo el organizador o administrador puede editar este evento.'
             ], 403);
         }
 
@@ -163,11 +163,12 @@ class CalendarEventController extends Controller
     {
         $user = request()->user();
 
-        // Solo el organizador puede eliminar el evento
-        if ($event->user_id !== $user->id) {
+        // Solo el organizador puede eliminar el evento o un administrador
+        $canEdit = $event->user_id === $user->id || $user->hasRole('OWNER') || $user->hasRole('SUPERADMIN');
+        if (!$canEdit) {
             return response()->json([
                 'success' => false,
-                'message' => 'Solo el organizador puede eliminar este evento.'
+                'message' => 'Solo el organizador o administrador puede eliminar este evento.'
             ], 403);
         }
 

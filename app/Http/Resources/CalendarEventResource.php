@@ -33,7 +33,7 @@ class CalendarEventResource extends JsonResource
             // Relaciones
             'organizer' => $this->whenLoaded('user', [
                 'id' => $this->user?->id,
-                'name' => $this->user?->name,
+                'name' => $this->user?->firstname . ' ' . $this->user?->lastname,
                 'email' => $this->user?->email,
             ]),
             
