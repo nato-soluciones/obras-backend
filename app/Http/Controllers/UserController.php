@@ -116,14 +116,29 @@ class UserController extends Controller
         return response($user, 200);
     }
 
-    public function password(UpdatePassUserRequest $request, int $id)
+    public function myPassword(UpdatePassUserRequest $request, int $id)
+    {
+        $userAuthId = Auth::id();
+
+        if ($userAuthId != $id) {
+            return response(['message' => 'No tienes permiso para cambiar la contraseña de otro usuario.'], 403);
+        }
+        $data = $request->all();
+        $data['password'] = Hash::make($data['password']);
+
+        $user = User::find($id);
+        $user->update($data);
+        return response()->json(
+            "Password actualizado correctamente.", 201);
+    }
+    public function changePassword(UpdatePassUserRequest $request, int $id)
     {
         $data = $request->all();
         $data['password'] = Hash::make($data['password']);
 
         $user = User::find($id);
         $user->update($data);
-        return response($user, 200);
+        return response("Password actualizado correctamente.", 201);
     }
 
     public function destroy(int $id)
