@@ -32,7 +32,8 @@ Route::prefix('users')->middleware('auth:sanctum')->controller(UserController::c
   Route::post('/', 'store')->middleware('permission:users_insert');
   Route::post('/{id}', 'update')->middleware('permission:users_update');
   Route::delete('/{id}', 'destroy')->middleware('permission:users_delete');
-  Route::post('/{id}/password', 'password');
+  Route::post('/{id}/my-password', 'myPassword');
+  Route::post('/{id}/change-password', 'changePassword');
 });
 
 // Roles de usuario
