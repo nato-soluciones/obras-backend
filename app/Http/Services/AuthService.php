@@ -26,11 +26,22 @@ class AuthService
     if (Auth::attempt($credentials)) {
       /** @var Illuminate\Foundation\Auth\User $user */
       $user = Auth::user();
+      $firstRole = $user->roles->first();
+      $roleName = $firstRole ? $firstRole->name : null;
+      $roleDescription = $firstRole ? $firstRole->description : null;
+
       $token = $user->createToken('Access Token')->plainTextToken;
 
       return [
         'access_token' => $token,
-        'user' => $user
+        'user' => [
+          'id' => $user->id,
+          'firstname' => $user->firstname,
+          'lastname' => $user->lastname,
+          'email' => $user->email,
+          'role_code' => $roleName,
+          'role_name' => $roleDescription,
+        ]
       ];
     }
 

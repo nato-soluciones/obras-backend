@@ -35,7 +35,7 @@ class CalendarEventController extends Controller
         // Filtros de fecha
         if ($request->has('start') && $request->has('end')) {
             $startDate = Carbon::parse($request->start);
-            $endDate = Carbon::parse($request->end);         
+            $endDate = Carbon::parse($request->end);
 
             $query->where(function ($q) use ($startDate, $endDate) {
                 $q->where('start_datetime', '<=', $endDate)
@@ -50,16 +50,6 @@ class CalendarEventController extends Controller
 
         $events = $query->orderBy('start_datetime')->get();
 
-        Log::info(
-            vsprintf(
-                str_replace('?', "'%s'", $query->toSql()),
-                collect($query->getBindings())->map(function ($binding) {
-                    // Si el binding es una fecha o string, lo rodea de comillas
-                    return is_numeric($binding) ? $binding : addslashes($binding);
-                })->toArray()
-            )
-        );
-
         return response()->json([
             'success' => true,
             'data' => CalendarEventResource::collection($events)
@@ -71,7 +61,7 @@ class CalendarEventController extends Controller
      */
     public function store(StoreCalendarEventRequest $request): JsonResponse
     {
-        $result = $this->calendarEventService->handleEventTransaction(function() use ($request) {
+        $result = $this->calendarEventService->handleEventTransaction(function () use ($request) {
             $eventData = $request->validated();
             $eventData['user_id'] = $request->user()->id;
 
@@ -88,9 +78,9 @@ class CalendarEventController extends Controller
             $hasConflict = $this->calendarEventService->checkEventConflicts($event);
 
             return $this->calendarEventService->formatSuccessResponse(
-                $event, 
-                'Evento creado exitosamente.', 
-                $hasConflict, 
+                $event,
+                'Evento creado exitosamente.',
+                $hasConflict,
                 201
             );
         }, 'Error al crear el evento.');
@@ -104,11 +94,13 @@ class CalendarEventController extends Controller
     public function show(CalendarEvent $event): JsonResponse
     {
         $user = request()->user();
-        
+
         // Verificar que el usuario tenga acceso al evento
-        if ($event->user_id !== $user->id && 
+        if (
+            $event->user_id !== $user->id &&
             !$event->participants()->where('user_id', $user->id)->exists() &&
-            $event->visibility !== 'public') {
+            $event->visibility !== 'public'
+        ) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para ver este evento.'
@@ -130,15 +122,16 @@ class CalendarEventController extends Controller
     {
         $user = $request->user();
 
-        // Solo el organizador puede editar el evento
-        if ($event->user_id !== $user->id) {
+        // Solo el organizador puede editar el evento o un administrador
+        $canEdit = $event->user_id === $user->id || $user->hasRole('OWNER') || $user->hasRole('SUPERADMIN');
+        if (!$canEdit) {
             return response()->json([
                 'success' => false,
-                'message' => 'Solo el organizador puede editar este evento.'
+                'message' => 'Solo el organizador o administrador puede editar este evento.'
             ], 403);
         }
 
-        $result = $this->calendarEventService->handleEventTransaction(function() use ($request, $event) {
+        $result = $this->calendarEventService->handleEventTransaction(function () use ($request, $event) {
             $eventData = $request->validated();
             $participants = $eventData['participants'] ?? null;
             unset($eventData['participants']);
@@ -154,8 +147,8 @@ class CalendarEventController extends Controller
             $hasConflict = $this->calendarEventService->checkEventConflictsOnUpdate($event, $eventData);
 
             return $this->calendarEventService->formatSuccessResponse(
-                $event, 
-                'Evento actualizado exitosamente.', 
+                $event,
+                'Evento actualizado exitosamente.',
                 $hasConflict
             );
         }, 'Error al actualizar el evento.');
@@ -170,11 +163,12 @@ class CalendarEventController extends Controller
     {
         $user = request()->user();
 
-        // Solo el organizador puede eliminar el evento
-        if ($event->user_id !== $user->id) {
+        // Solo el organizador puede eliminar el evento o un administrador
+        $canEdit = $event->user_id === $user->id || $user->hasRole('OWNER') || $user->hasRole('SUPERADMIN');
+        if (!$canEdit) {
             return response()->json([
                 'success' => false,
-                'message' => 'Solo el organizador puede eliminar este evento.'
+                'message' => 'Solo el organizador o administrador puede eliminar este evento.'
             ], 403);
         }
 
@@ -185,7 +179,6 @@ class CalendarEventController extends Controller
                 'success' => true,
                 'message' => 'Evento eliminado exitosamente.'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -237,7 +230,6 @@ class CalendarEventController extends Controller
                     'updated_at' => $participant->updated_at
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -266,12 +258,12 @@ class CalendarEventController extends Controller
         try {
             $events = CalendarEvent::with(['category', 'participants.user', 'user'])
                 ->where('title', 'ILIKE', '%' . $query . '%')
-                ->where(function($q) use ($userId) {
+                ->where(function ($q) use ($userId) {
                     $q->where('user_id', $userId) // Es organizador
-                      ->orWhere('visibility', 'public') // Es evento público
-                      ->orWhereHas('participants', function($p) use ($userId) {
-                          $p->where('user_id', $userId); // Es participante
-                      });
+                        ->orWhere('visibility', 'public') // Es evento público
+                        ->orWhereHas('participants', function ($p) use ($userId) {
+                            $p->where('user_id', $userId); // Es participante
+                        });
                 })
                 ->orderBy('start_datetime', 'desc')
                 ->paginate($perPage);
@@ -290,7 +282,6 @@ class CalendarEventController extends Controller
                     'has_more_pages' => $events->hasMorePages()
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
