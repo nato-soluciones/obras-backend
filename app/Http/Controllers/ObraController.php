@@ -25,7 +25,7 @@ class ObraController extends Controller
             // Extract and validate filters
             $search = $request->get('search');
             $status = $request->get('status');
-            $perPage = $request->get('perPage', 16);
+            $perPage = $request->get('perPage', 15);
 
             // Validate and sanitize orderBy column
             $allowedOrderColumns = ['name', 'start_date'];
@@ -55,7 +55,7 @@ class ObraController extends Controller
             $query->orderBy($orderBy, $direction);
 
             // Paginate results
-            $paginatedObras = $query->paginate(3);
+            $paginatedObras = $query->paginate($perPage);
 
             // Add active_stage to each obra
             $paginatedObras->getCollection()->transform(function ($obra) {
