@@ -59,11 +59,14 @@ class ReminderController extends Controller
         $reminders = Reminder::where('user_id', auth()->user()->id)
             ->whereBetween('datetime', [Carbon::now()->startOfDay(), Carbon::now()->endOfDay()])
             ->where('is_resolved', false)
-            ->select('id', 'text', 'datetime', 'priority')
+            ->with('creator')
             ->orderBy('datetime', 'desc')
             ->orderBy('id', 'desc')
             ->get();
-        return response($reminders, 200);
+
+        return response()->json(
+            ReminderResourceCollection::collection($reminders)
+        );
     }
 
     public function store(StoreReminderRequest $request)
@@ -124,8 +127,12 @@ class ReminderController extends Controller
         try {
             $reminder = Reminder::findOrFail($reminderId);
 
-            if ($reminder->user_id !== auth()->id() && $reminder->created_by !== auth()->id()) {
-                return response()->json(['message' => 'No tienes permisos para modificar este recordatorio'], 403);
+            if ($reminder->user_id !== auth()->id()) {
+                return response()->json([
+                    'errors' => [
+                        'general' => ['No tienes permisos para modificar este recordatorio']
+                    ]
+                ], 422);
             }
 
             $is_resolved = !$reminder->is_resolved;
@@ -144,9 +151,13 @@ class ReminderController extends Controller
         }
     }
 
-    public function createdByMe(Request $request)
+    public function createdForOthers(Request $request)
     {
-        $query = Reminder::createdByMe(auth()->id())->with(['user', 'creator']);
+        $userId = Auth::id();
+
+        $query = Reminder::createdByMe($userId)
+            ->where('user_id', '!=', $userId)
+            ->with(['user', 'creator']);
 
         if ($request->has('priority')) {
             $query->where('priority', $request->priority);

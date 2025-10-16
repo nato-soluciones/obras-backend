@@ -18,11 +18,11 @@ class ReminderResourceCollection extends JsonResource
             'date_resolved' => $this->date_resolved,
             'user' => [
                 'id' => $this->user->id ?? null,
-                'name' => $this->user->full_name ?? null,
+                'name' => $this->user->firstname. ' ' . $this->user->lastname ?? null,
             ],
             'creator' => [
                 'id' => $this->creator->id ?? null,
-                'name' => $this->creator->full_name ?? null,
+                'name' => $this->creator->firstname ?? null,
             ],
             'is_assigned_by_other' => $this->user_id !== $this->created_by,
         ];
