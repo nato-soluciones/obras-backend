@@ -150,6 +150,11 @@ class RolesAndPermissionsSeeder extends Seeder
                 "guard_name" => "api",
                 "description" => "Chatbot",
             ],
+            [
+                "name" => "navbar_reminders",
+                "guard_name" => "api",
+                "description" => "Recordatorios",
+            ],
         ];
         $obraMenu_permissions = [
             [
