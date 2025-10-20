@@ -89,4 +89,25 @@ class DashboardController extends Controller
 
         return response($data, 200);
     }
+
+    /**
+     * Get obras statistics for dashboard
+     *
+     * @return Response
+     */
+    public function obrasStats(): Response
+    {
+        $stats = Obra::selectRaw("
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'IN_PROGRESS' THEN 1 END) as in_progress,
+                COUNT(CASE WHEN status = 'FINALIZED' THEN 1 END) as finalized
+            ")
+            ->first();
+
+        return response([
+            'total' => $stats->total,
+            'in_progress' => $stats->in_progress,
+            'finalized' => $stats->finalized,
+        ], 200);
+    }
 }

@@ -16,7 +16,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\InitialSettingController;
 use App\Http\Controllers\MaterialController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MaterialStoreController;
 use App\Http\Controllers\UserStoreController;
 use App\Http\Controllers\ReminderController;
@@ -126,28 +125,39 @@ Route::prefix('ipc')->middleware('auth:sanctum')->controller(IpcController::clas
     Route::delete('/{id}', 'destroy')->middleware('permission:indexIPC_delete');
 });
 
-Route::prefix('notifications')->middleware('auth:sanctum')->controller(NotificationController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::get('/latest', 'indexLatest');
-    Route::get('/newCount', 'notificationNewCount');
-    Route::get('/{id}', 'show');
-    Route::post('/mark_all_as_read', 'markAllAsRead');
-    Route::post('/{id}/mark_as_read', 'markAsRead');
-    Route::delete('/{id}', 'destroy');
+Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:reminders_list');
+    Route::get('/today', 'indexToday');
+    Route::get('/created-for-others', 'createdForOthers')->middleware('permission:reminders_list');
+    Route::get('/overdue', 'overdue');
+    Route::post('/', 'store')->middleware('permission:reminders_insert');
+    Route::put('/{reminderId}', 'update')->middleware('permission:reminders_update');
+    Route::put('/{reminderId}/resolve', 'toggleResolved');
+    Route::delete('/{reminderId}', 'destroy')->middleware('permission:reminders_delete');
 });
 
+Route::prefix('notifications')->middleware('auth:sanctum')->controller(\App\Http\Controllers\Api\NotificationController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/stats', 'stats');
+    Route::put('/{id}/read', 'markAsRead');
+    Route::put('/mark-multiple-read', 'markMultipleAsRead');
+    Route::put('/mark-all-read', 'markAllAsRead');
+    Route::delete('/{id}', 'destroy');
+    Route::delete('/bulk', 'destroyMultiple');
+});
 
-Route::prefix('reminders')->middleware('auth:sanctum')->controller(ReminderController::class)->group(function () {
-    Route::get('/today', 'indexToday');
-    Route::get('/', 'index')->middleware('permission:reminders_list');
-    Route::post('/', 'store')->middleware('permission:reminders_insert');
-    Route::put('/{reminderId}/resolve', 'toggleResolved')->middleware('permission:reminders_resolve');
-    Route::put('/{reminderId}', 'update')->middleware('permission:reminders_update');
-    Route::delete('/{reminderId}', 'destroy')->middleware('permission:reminders_delete');
+Route::prefix('notification-settings')->middleware('auth:sanctum')->controller(\App\Http\Controllers\Api\UserNotificationSettingController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::put('/', 'update');
+    Route::put('/{type}', 'updateSingle');
+    Route::post('/reset', 'resetToDefaults');
+    Route::post('/enable-all', 'enableAll');
+    Route::post('/disable-all', 'disableAll');
 });
 
 Route::prefix('dashboard')->middleware('auth:sanctum')->controller(DashboardController::class)->group(function () {
     Route::get('/', 'index');
+    Route::get('/obras-stats', 'obrasStats');
 });
 
 

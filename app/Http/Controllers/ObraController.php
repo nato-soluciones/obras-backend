@@ -19,22 +19,69 @@ use Illuminate\Support\Facades\Log;
 
 class ObraController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $obras = Obra::with(['client' => function ($q) {
-            $q->select('id', 'person_type', 'firstname', 'lastname', 'business_name', 'deleted_at')->withTrashed();
-        }])->get();
+        try {
+            // Extract and validate filters
+            $search = $request->get('search');
+            $status = $request->get('status');
+            $perPage = $request->get('perPage', 15);
 
-        $obras->each(function ($obra) {
-            $activeStage = ObraStage::select('id', 'name', 'progress', 'end_date')
-                ->where('obra_id', $obra->id)
-                ->whereDate('start_date', '<=', date('Y-m-d'))
-                ->whereDate('end_date', '>=', date('Y-m-d'))
-                ->first();
+            // Validate and sanitize orderBy column
+            $allowedOrderColumns = ['name', 'start_date'];
+            $orderBy = $request->get('orderBy');
+            $orderBy = isset($orderBy) && in_array($orderBy, $allowedOrderColumns) ? $orderBy : 'start_date';
 
-            $obra->setAttribute('active_stage', $activeStage);
-        });
-        return response($obras, 200);
+            // Sanitize direction
+            $direction = $request->get('direction', 'desc');
+            $direction = in_array($direction, ['asc', 'desc']) ? $direction : 'desc';
+
+            // Build query
+            $query = Obra::with(['client' => function ($q) {
+                $q->select('id', 'person_type', 'firstname', 'lastname', 'business_name', 'deleted_at')->withTrashed();
+            }]);
+
+            // Apply search filter
+            if ($search) {
+                $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
+            }
+
+            // Apply status filter
+            if ($status) {
+                $query->where('status', $status);
+            }
+
+            // Apply ordering
+            $query->orderBy($orderBy, $direction);
+
+            // Paginate results
+            $paginatedObras = $query->paginate($perPage);
+
+            // Add active_stage to each obra
+            $paginatedObras->getCollection()->transform(function ($obra) {
+                $activeStage = ObraStage::select('id', 'name', 'progress', 'end_date')
+                    ->where('obra_id', $obra->id)
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
+                    ->first();
+
+                $obra->setAttribute('active_stage', $activeStage);
+                return $obra;
+            });
+
+            return response()->json([
+                'message' => 'Obras obtenidas exitosamente',
+                'data' => $paginatedObras->items(),
+                'current_page' => $paginatedObras->currentPage(),
+                'last_page' => $paginatedObras->lastPage(),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener obras: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Error al obtener las obras',
+            ], 500);
+        }
     }
 
     public function getGeneralViewTotals(int $obraId)
@@ -248,7 +295,7 @@ class ObraController extends Controller
         try {
             $obra = Obra::findOrFail($id);
             if ($obra->image) {
-                Storage::delete('public/uploads/obras/' . $obra->id. '/' . basename($obra->image));
+                Storage::delete('public/uploads/obras/' . $obra->id . '/' . basename($obra->image));
                 $obra->image = null;
                 $obra->save();
             }
