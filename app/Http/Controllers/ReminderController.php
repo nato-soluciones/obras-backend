@@ -190,6 +190,10 @@ class ReminderController extends Controller
             }
         }
 
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
         $reminders = $query->orderBy('datetime', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(15);
