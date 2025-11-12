@@ -886,19 +886,19 @@ class StoreMovementController extends Controller
 
         $movements = $query->get()
             ->map(function ($movement) {
-                // Get manager for from_store
-                $fromStoreManager = $movement->fromStore->userStores->first()?->user;
-                
-                // Get manager for to_store
-                $toStoreManager = $movement->toStore->userStores->first()?->user;
-                
-                // Create from_store with manager
+                // Get managers for from_store
+                $fromStoreManagers = $movement->fromStore->userStores->map(fn($userStore) => $userStore->user);
+
+                // Get managers for to_store
+                $toStoreManagers = $movement->toStore->userStores->map(fn($userStore) => $userStore->user);
+
+                // Create from_store with managers
                 $fromStore = $movement->fromStore->toArray();
-                $fromStore['manager'] = $fromStoreManager;
-                
-                // Create to_store with manager
+                $fromStore['managers'] = $fromStoreManagers;
+
+                // Create to_store with managers
                 $toStore = $movement->toStore->toArray();
-                $toStore['manager'] = $toStoreManager;
+                $toStore['managers'] = $toStoreManagers;
                 
                 return [
                     'id' => $movement->id,
