@@ -9,6 +9,7 @@ use App\Models\Reminder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -71,17 +72,35 @@ class ReminderController extends Controller
 
     public function store(StoreReminderRequest $request)
     {
+        DB::beginTransaction();
         try {
             $data = $request->validated();
+
+            // Extract user_ids from validated data
+            $userIds = $data['user_ids'];
+            unset($data['user_ids']);
+
+            // Add created_by to base data
             $data['created_by'] = Auth::id();
 
-            if (!isset($data['user_id'])) {
-                $data['user_id'] = Auth::id();
+            // Create a separate reminder for each user
+            $createdCount = 0;
+            foreach ($userIds as $assignedUserId) {
+                $reminderData = array_merge($data, ['user_id' => $assignedUserId]);
+                Reminder::create($reminderData);
+                $createdCount++;
             }
 
-            Reminder::create($data);
-            return response(['message' => 'Recordatorio creado correctamente'], 200);
+            DB::commit();
+
+            // Return appropriate message
+            $message = $createdCount === 1
+                ? 'Recordatorio creado correctamente'
+                : "Se crearon {$createdCount} recordatorios correctamente";
+
+            return response(['message' => $message], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error($e->getMessage());
             return response()->json(['message' => 'Error al crear el recordatorio'], 500);
         }
