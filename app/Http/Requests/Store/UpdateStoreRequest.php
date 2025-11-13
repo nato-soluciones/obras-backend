@@ -25,7 +25,8 @@ class UpdateStoreRequest extends FormRequest
             'name' => 'sometimes|required|string|max:255',
             'address' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string|max:255',
-            'manager_id' => 'sometimes|required|exists:users,id'
+            'manager_ids' => 'sometimes|required|array|min:1|max:5',
+            'manager_ids.*' => 'required|exists:users,id'
         ];
     }
 }

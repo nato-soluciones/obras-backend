@@ -25,7 +25,8 @@ class CreateStoreRequest extends FormRequest
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
-            'manager_id' => 'required|exists:users,id'
+            'manager_ids' => 'required|array|min:1|max:5',
+            'manager_ids.*' => 'required|exists:users,id'
         ];
     }
 }

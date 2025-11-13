@@ -24,7 +24,7 @@ class UpdateReminderRequest extends FormRequest
         return [
             'text' => 'sometimes|string|max:500',
             'datetime' => 'sometimes|date',
-            'user_id' => 'sometimes|exists:users,id',
+            // 'user_id' => 'sometimes|exists:users,id',
             'priority' => 'sometimes|in:baja,media,alta',
             'is_resolved' => 'sometimes|boolean',
         ];
@@ -38,7 +38,7 @@ class UpdateReminderRequest extends FormRequest
         return [
             'text.max' => 'El texto no puede superar los 500 caracteres.',
             'datetime.date' => 'Formato de fecha inválido.',
-            'user_id.exists' => 'El usuario especificado no existe.',
+            // 'user_id.exists' => 'El usuario especificado no existe.',
             'priority.in' => 'La prioridad debe ser: baja, media o alta.',
             'is_resolved.boolean' => 'El estado de resolución debe ser verdadero o falso.',
         ];
