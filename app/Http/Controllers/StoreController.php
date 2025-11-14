@@ -69,7 +69,7 @@ class StoreController extends Controller
                 'name' => $store->name,
                 'address' => $store->address,
                 'description' => $store->description,
-                'manager' => $store->userStores->first()?->user,
+                'managers' => $store->userStores->map(fn($userStore) => $userStore->user),
                 'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null,
                 'hasPendingTransfer' => $hasPendingTransfer,
                 'materials' => $store->materialsStore->map(function ($materialStore) {
@@ -136,11 +136,13 @@ class StoreController extends Controller
         try {
             $store = Store::create($request->only(['name', 'address', 'description']));
 
-            // Create the manager relationship
-            UserStore::create([
-                'user_id' => $request->manager_id,
-                'store_id' => $store->id
-            ]);
+            // Create the manager relationships
+            foreach ($request->manager_ids as $managerId) {
+                UserStore::create([
+                    'user_id' => $managerId,
+                    'store_id' => $store->id
+                ]);
+            }
 
             DB::commit();
             return response($store->load('userStores.user'), 201);
@@ -176,7 +178,7 @@ class StoreController extends Controller
             'name' => $store->name,
             'address' => $store->address,
             'description' => $store->description,
-            'manager' => $store->userStores->first()?->user,
+            'managers' => $store->userStores->map(fn($userStore) => $userStore->user),
             'materials' => $store->materialsStore->map(function ($materialStore) {
                 return [
                     'material_id' => $materialStore->material_id,
@@ -198,11 +200,6 @@ class StoreController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id) {}
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(UpdateStoreRequest $request, string $id): Response
@@ -212,16 +209,18 @@ class StoreController extends Controller
             $store = Store::findOrFail($id);
             $store->update($request->only(['name', 'address', 'description']));
 
-            // Update manager if provided
-            if ($request->has('manager_id')) {
+            // Update managers if provided
+            if ($request->has('manager_ids')) {
                 // Remove existing manager relationships
                 UserStore::where('store_id', $store->id)->delete();
 
-                // Create new manager relationship
-                UserStore::create([
-                    'user_id' => $request->manager_id,
-                    'store_id' => $store->id
-                ]);
+                // Create new manager relationships
+                foreach ($request->manager_ids as $managerId) {
+                    UserStore::create([
+                        'user_id' => $managerId,
+                        'store_id' => $store->id
+                    ]);
+                }
             }
 
             DB::commit();
@@ -274,7 +273,7 @@ class StoreController extends Controller
                     'name' => $store->name,
                     'address' => $store->address,
                     'description' => $store->description,
-                    'manager' => $store->userStores->first()?->user,
+                    'managers' => $store->userStores->map(fn($userStore) => $userStore->user),
                     'lastMovement' => $lastMovement ? $lastMovement->created_at->format('d/m/Y') : null
                 ];
             });

@@ -24,7 +24,8 @@ class StoreReminderRequest extends FormRequest
         return [
             'text' => 'required|string|max:500',
             'datetime' => 'required|date|after:now',
-            'user_id' => 'required|exists:users,id',
+            'user_ids' => 'required|array|min:1|max:50',
+            'user_ids.*' => 'required|exists:users,id|distinct',
             'priority' => 'sometimes|in:baja,media,alta',
         ];
     }
@@ -39,8 +40,12 @@ class StoreReminderRequest extends FormRequest
             'text.max' => 'El texto no puede superar los 500 caracteres.',
             'datetime.required' => 'La fecha y hora es obligatoria.',
             'datetime.after' => 'La fecha debe ser futura.',
-            'user_id.required' => 'Debe especificar a quién asignar el recordatorio.',
-            'user_id.exists' => 'El usuario especificado no existe.',
+            'user_ids.required' => 'Debe especificar al menos un destinatario.',
+            'user_ids.array' => 'Los destinatarios deben ser una lista.',
+            'user_ids.min' => 'Debe especificar al menos un destinatario.',
+            'user_ids.max' => 'No puede asignar el recordatorio a más de 50 usuarios.',
+            'user_ids.*.exists' => 'Uno o más usuarios especificados no existen.',
+            'user_ids.*.distinct' => 'Los destinatarios deben ser únicos.',
             'priority.in' => 'La prioridad debe ser: baja, media o alta.',
         ];
     }
