@@ -49,6 +49,7 @@ class Permission
     'toolLocation' => 'Ubicaciones Herramientas',
     'tools' => 'Herramientas',
     'users' => 'Usuarios',
+    'reminders' => 'Recordatorios',
   ];
 
   public static $actions = [

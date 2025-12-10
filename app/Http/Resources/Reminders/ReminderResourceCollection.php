@@ -22,7 +22,7 @@ class ReminderResourceCollection extends JsonResource
             ],
             'creator' => [
                 'id' => $this->creator->id ?? null,
-                'name' => $this->creator->firstname ?? null,
+                'name' => $this->creator->firstname. ' ' . $this->creator->lastname ?? null,
             ],
             'is_assigned_by_other' => $this->user_id !== $this->created_by,
         ];
