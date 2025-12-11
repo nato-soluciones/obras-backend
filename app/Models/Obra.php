@@ -28,6 +28,7 @@ class Obra extends Model
         'total_cost',
         'image',
         'name',
+        'description',
         'address',
         'phone',
         'start_date',
