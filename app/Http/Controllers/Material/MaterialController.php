@@ -42,6 +42,12 @@ class MaterialController extends Controller
         return response($materials, 200);
     }
 
+    public function listCombo()
+    {
+        $materials = $this->materialService->getComboMaterials();
+        return response()->json($materials);
+    }
+
     /**
      * Create a manufacturer category
      *

@@ -2,7 +2,6 @@
 
 namespace App\Services\Material;
 
-use App\Models\Material;
 use App\Repositories\Material\MaterialRepository;
 
 class MaterialService
@@ -33,5 +32,21 @@ class MaterialService
         );
 
         return $materials;
+    }
+
+
+    public function getComboMaterials()
+    {
+        $materials = $this->materialRepository->all(['id', 'name', 'code', 'color', 'measurement_unit_id']);
+
+        return $materials->map(function ($material) {
+            return [
+                'id' => $material->id,
+                'name' => $material->name,
+                'code' => $material->code,
+                'color' => $material->color,
+                'unit_abbreviation' => $material->measurementUnit?->abbreviation
+            ];
+        });
     }
 }
