@@ -25,7 +25,9 @@ class MaterialRepository
                 $color = strtolower($color);
                 $query->whereRaw("LOWER(color) LIKE ?", ["%{$color}%"]);
             })
-            ->when($orderBy, function ($query) use ($orderBy, $direction) {
+            ->when(
+                $orderBy,
+                function ($query) use ($orderBy, $direction) {
                     $query->orderBy($orderBy, $direction);
                 },
                 function ($query) {
@@ -35,5 +37,13 @@ class MaterialRepository
             ->paginate($perPage);
 
         return $materials;
+    }
+
+
+    public function all($columns = ['*'])
+    {
+        return Material::with([
+            'measurementUnit'
+        ])->get($columns);
     }
 }
